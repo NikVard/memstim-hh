@@ -13,19 +13,57 @@ import subprocess
 
 # Default parameters
 _data = {
-    "seed"              : 42,         # Reproducibility
+    "seed"                  : 42,       # Reproducibility
 
     # additive noise terms
+    "noise": {
+        "py": {
+            "sigma"         : 0
+        },
+        "inh": {
+            "sigma"         : 0
+        }
+    },
+
+    # cells
+    "celltypes": {
+        "py": {
+            "A"             : 29000,
+            "gl"            : 0.01,
+            "El"            : -70,
+            "gK"            : 5,
+            "EK"            : -100,
+            "gNa"           : 50,
+            "ENa"           : 50,
+            "gM"            : 90,
+            "EM"            : -100,
+            "gCa"           : 0.1,
+            "ECa"           : 120,
+            "gCAN"          : 0.0005,
+            "ECAN"          : -20
+        },
+        "inh": {
+            "A"             : 14000,
+            "gl"            : 0.1,
+            "El"            : -90,
+            "gK"            : 9,
+            "EK"            : -65,
+            "gNa"           : 35,
+            "ENa"           : 55
+        }
+    },
 
     # simulation parameters
 
     # stimulation parameters
 
     # git stuff
-    "timestamp"         : None,
-    "git_branch"        : None,
-    "git_hash"          : None,
-    "git_short_hash"    : None,
+    "git":{
+        "timestamp"         : None,
+        "git_branch"        : None,
+        "git_hash"          : None,
+        "git_short_hash"    : None
+    }
 }
 
 def is_git_repo():
