@@ -1,0 +1,10 @@
+###### The code was written and tested using the following packages: ######
+###### For more information on the structure of the requirements.txt file, go to https://note.nkmk.me/en/python-pip-install-requirements/ #####
+
+numba == 0.54.0
+numpy == 1.20.3
+matplotlib == 3.4.3
+tqdm == 4.62.3
+Brian2 == 2.4.2
+Cython == 0.29.24
+joblib == 1.0.1

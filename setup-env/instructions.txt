@@ -1,0 +1,4 @@
+We will be using conda to setup a new virtual environment and then proceed to install the requirements using pip. The main reason for doing this is because Brian2 is not available currently (2021) as a conda package.
+
+To setup your environment, follow these steps:
+asdf
