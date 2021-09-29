@@ -58,12 +58,10 @@ _data = {
     # stimulation parameters
 
     # git stuff
-    "git":{
-        "timestamp"         : None,
-        "git_branch"        : None,
-        "git_hash"          : None,
-        "git_short_hash"    : None
-    }
+    "timestamp"         : None,
+    "git_branch"        : None,
+    "git_hash"          : None,
+    "git_short_hash"    : None
 }
 
 def is_git_repo():
@@ -113,7 +111,7 @@ def save(filename, data=None):
     data["timestamp"] = time.ctime()
     data["git_branch"] = get_git_revision_branch()
     data["git_hash"] = get_git_revision_hash()
-    _data["git_short_hash"] = get_git_revision_short_hash()
+    data["git_short_hash"] = get_git_revision_short_hash()
     with open(filename, "w") as outfile:
         json.dump(data, outfile, indent=4, sort_keys=False)
 
@@ -151,7 +149,7 @@ if __name__  == "__main__":
     print('Saving file "{0}"'.format(filename))
     save(filename, _data)
 
-    print('..::Parameters::..')
+    print('..:: Unit Testing ::..')
     print('----------------------------------')
     data = load(filename)
     dump(data)

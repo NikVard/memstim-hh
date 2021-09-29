@@ -1,0 +1,41 @@
+{
+    "seed": 42,
+    "noise": {
+        "py": {
+            "sigma": 0
+        },
+        "inh": {
+            "sigma": 0
+        }
+    },
+    "celltypes": {
+        "py": {
+            "A": 29000,
+            "gl": 0.01,
+            "El": -70,
+            "gK": 5,
+            "EK": -100,
+            "gNa": 50,
+            "ENa": 50,
+            "gM": 90,
+            "EM": -100,
+            "gCa": 0.1,
+            "ECa": 120,
+            "gCAN": 0.0005,
+            "ECAN": -20
+        },
+        "inh": {
+            "A": 14000,
+            "gl": 0.1,
+            "El": -90,
+            "gK": 9,
+            "EK": -65,
+            "gNa": 35,
+            "ENa": 55
+        }
+    },
+    "git_short_hash": "3be189f",
+    "timestamp": "Wed Sep 29 18:20:28 2021",
+    "git_branch": "master",
+    "git_hash": "3be189f1d14f3a2f4fd839370dc2dd02ea53a997"
+}
