@@ -15,7 +15,7 @@ Implementation Notes
 """ Excitatory Neuron Types """
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
-py_CAN_eqs_stim = '''
+py_CAN_eqs = '''
     dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
     I_CAN = ((gCAN) * (size)) * mCAN ** 2 * (v - (-20 * mV)) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
@@ -200,4 +200,10 @@ inh_eqs = '''
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2
+'''
+
+# Spike and reset
+reset_eqs = '''
+    glu = glu - 0
+    Cl = Cl + 0.2
 '''

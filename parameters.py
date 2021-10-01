@@ -25,37 +25,60 @@ _data = {
         }
     },
 
-    # cells
-    "celltypes": {
-        "py": {
-            "A"             : 29000,
-            "gl"            : 0.01,
-            "El"            : -70,
-            "gK"            : 5,
-            "EK"            : -100,
-            "gNa"           : 50,
-            "ENa"           : 50,
-            "gM"            : 90,
-            "EM"            : -100,
-            "gCa"           : 0.1,
-            "ECa"           : 120,
-            "gCAN"          : 0.0005,
-            "ECAN"          : -20
+    # areas, tables 3.1-3.3, pages 45-48, Aussel
+    "areas": {
+        "EC"    : {
+            "E" : {
+                "N" : 10e3,
+                "type" : "PyCAN"
+            },
+            "I" : {
+                "N" : 1e3,
+                "type" : "Inh"
+            }
         },
-        "inh": {
-            "A"             : 14000,
-            "gl"            : 0.1,
-            "El"            : -90,
-            "gK"            : 9,
-            "EK"            : -65,
-            "gNa"           : 35,
-            "ENa"           : 55
-        }
+        "DG"    : {
+            "E" : {
+                "N" : 10e3,
+                "type" : "Py"
+            },
+            "I" : {
+                "N" : 0.1e3,
+                "type" : "Inh"
+            }
+        },
+        "CA3"   : {
+            "E" : {
+                "N" : 1e3,
+                "type" : "Py"
+            },
+                "I" : {
+                "N" : 0.1e3,
+                "type" : "Inh"
+            }
+        },
+        "CA1"   : {
+            "E" : {
+                "N" : 10e3,
+                "type" : "Py"
+            },
+            "I" : {
+                "N" : 1e3,
+                "type" : "Inh"
+            }
+        },
     },
 
-    # simulation parameters
+    # connectivity, table 3.5, page 49, Aussel
+    "connectivity" : {},
 
     # stimulation parameters
+    "stimulation" : {},
+
+    # simulation parameters
+    "simulation" : {
+        "duration" : 2e3 # ms
+    },
 
     # git stuff
     "timestamp"         : None,
@@ -139,8 +162,8 @@ if __name__  == "__main__":
     parser = argparse.ArgumentParser(
         description='Generate parameters file using JSON format')
     parser.add_argument('parameters_file',
-                        default="default",
-                        type=str, nargs="?",
+                        default='default',
+                        type=str, nargs='?',
                         help='Parameters file (json format)')
     args = parser.parse_args()
 
