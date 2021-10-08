@@ -18,10 +18,10 @@ _data = {
     # additive noise terms
     "noise": {
         "py": {
-            "sigma"         : 0
+            "sigma"         : 0.
         },
         "inh": {
-            "sigma"         : 0
+            "sigma"         : 0.
         }
     },
 
@@ -50,7 +50,7 @@ _data = {
         "CA3"   : {
             "E" : {
                 "N" : 1e3,
-                "type" : "Py"
+                "type" : "PyCAN"
             },
                 "I" : {
                 "N" : 0.1e3,
@@ -60,24 +60,41 @@ _data = {
         "CA1"   : {
             "E" : {
                 "N" : 10e3,
-                "type" : "Py"
+                "type" : "PyCAN"
             },
             "I" : {
                 "N" : 1e3,
                 "type" : "Inh"
             }
-        },
+        }
     },
 
-    # connectivity, table 3.5, page 49, Aussel
-    "connectivity" : {},
+    # connectivity parameters
+    "connectivity" : {
+        "intra" : { # intra-area conn. probabilities per area |
+            "EC" : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
+            "DG" : [[0., 0.06], [0.14, 0.]],
+            "CA3" : [[0.56, 0.75], [0.75, 0.]],
+            "CA1" : [[0., 0.28], [0.3, 0.7]]
+        },
+        "inter" : { # inter-area conn. probabilities
+            "p_tri" : 0.45, # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
+            "p_mono" : 0.2 # mono: [EC->CA3, EC->CA1]
+        }
+    },
+
+    # synapses
+    "synapses" : {
+        "gmax_e" : 600., # pSiemens
+        "gmax_i" : 60.
+    },
 
     # stimulation parameters
     "stimulation" : {},
 
     # simulation parameters
     "simulation" : {
-        "duration" : 2e3 # ms
+        "duration" : 1e3 # ms
     },
 
     # git stuff

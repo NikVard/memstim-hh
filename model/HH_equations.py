@@ -17,6 +17,7 @@ Implementation Notes
 # Pyramidal CAN
 py_CAN_eqs = '''
     dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
+    Vm = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
     I_CAN = ((gCAN) * (size)) * mCAN ** 2 * (v - (-20 * mV)) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
         mCANInf = alpha2 / (alpha2 + (0.0002 * ms ** -1)) : 1
@@ -66,30 +67,31 @@ py_CAN_eqs = '''
     dglu/dt = (1-glu)/(3*second):1
 
 
-    noise = sigma_noise_exc*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(timestep) : volt/second (constant over dt)
+    noise = sigma_noise_exc*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(tstep) : volt/second (constant over dt)
 
 
-    x_soma : metre
-    y_soma : metre
-    z_soma : metre
-    x_dendrite : metre
-    y_dendrite : metre
-    z_dendrite : metre
-    x_inh : metre
-    y_inh : metre
-    z_inh : metre
-    dir_x : 1
-    dir_y : 1
-    dir_z : 1
-    r : 1
-    I_stim = inputs_stim(t) : amp
-    size : metre**2
+    x_soma:metre
+    y_soma:metre
+    z_soma:metre
+    x_dendrite:metre
+    y_dendrite:metre
+    z_dendrite:metre
+    x_inh:metre
+    y_inh:metre
+    z_inh:metre
+    dir_x:1
+    dir_y:1
+    dir_z:1
+    r:1
+    I_stim = inputs_stim(t):amp
+    size:metre ** 2
 '''
 
 
 #Pyramidal non CAN :
 py_eqs = '''
     dv/dt = ( - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
+    Vm= ( - I_M - I_leak - I_K - I_Na - I_Ca) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
     I_M = ((gM) * (size)) * p * (v - Ek) : amp
         dp/dt = (pInf - p) / pTau : 1
         pInf = 1. / (1 + exp(- (v + (35 * mV)) / (10 * mV))) : 1
@@ -134,31 +136,32 @@ py_eqs = '''
     dglu/dt = (1-glu)/(3*second):1
 
 
-    noise = sigma_noise_exc*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(timestep) : volt/second (constant over dt)
+    noise = sigma_noise_exc*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(tstep) : volt/second (constant over dt)
 
 
-    x_soma : metre
-    y_soma : metre
-    z_soma : metre
-    x_dendrite : metre
-    y_dendrite : metre
-    z_dendrite : metre
-    x_inh : metre
-    y_inh : metre
-    z_inh : metre
-    dir_x : 1
-    dir_y : 1
-    dir_z : 1
-    r : 1
-    I_stim = inputs_stim(t) : amp
-    size : metre**2
+    x_soma:metre
+    y_soma:metre
+    z_soma:metre
+    x_dendrite:metre
+    y_dendrite:metre
+    z_dendrite:metre
+    x_inh:metre
+    y_inh:metre
+    z_inh:metre
+    dir_x:1
+    dir_y:1
+    dir_z:1
+    r:1
+    I_stim = inputs_stim(t):amp
+    size:metre ** 2
 '''
+
 
 """ Inhibitory Neuron Types """
 """ ------------------------------------------------------------------------ """
 inh_eqs = '''
     dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
-    Vm = (- I_leak - I_K - I_Na) / ((1 * ufarad * cm ** -2) * (size))*timestep : volt
+    Vm = (- I_leak - I_K - I_Na) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
     I_leak = ((0.1e-3 * siemens * cm ** -2) * (size)) * (v - (-65 * mV)) : amp
     I_K = ((9e-3 * siemens * cm ** -2) * (size)) * (n ** 4) * (v - (-90 * mV)) : amp
         dn/dt = (n_inf - n) / tau_n : 1
@@ -191,19 +194,20 @@ inh_eqs = '''
         dhi/dt = -hi/(10*ms) : siemens
 
 
-    noise = sigma_noise_inh*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(timestep) : volt/second (constant over dt)
+    noise = sigma_noise_inh*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(tstep) : volt/second (constant over dt)
 
 
-    x_soma : metre
-    y_soma : metre
-    z_soma : metre
-    r : 1
-    I_stim = inputs_stim(t) : amp
-    size : metre**2
+    x_soma:metre
+    y_soma:metre
+    z_soma:metre
+    r:1
+    I_stim = inputs_stim(t):amp
+    size:metre ** 2
 '''
 
+
 # Spike and reset
-reset_eqs = '''
-    glu = glu - 0
-    Cl = Cl + 0.2
+reset_eqs='''
+    glu = glu-0
+    Cl = Cl+0.2
 '''
