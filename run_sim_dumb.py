@@ -3,6 +3,8 @@
 
 from brian2 import *
 
+import time
+
 import argparse
 import parameters
 
@@ -40,6 +42,7 @@ N_EC = [data['areas']['EC']['E']['N'], data['areas']['EC']['I']['N']]
 N_DG = [data['areas']['DG']['E']['N'], data['areas']['DG']['I']['N']]
 N_CA3 = [data['areas']['CA3']['E']['N'], data['areas']['CA3']['I']['N']]
 N_CA1 = [data['areas']['CA1']['E']['N'], data['areas']['CA1']['I']['N']]
+N_all = [N_EC, N_DG, N_CA3, N_CA1]
 
 # Intra-conn. probabilities | [[E-E, E-I], [I-E, I-I]]
 global p_EC_all, p_DG_all, p_CA3_all, p_CA1_all
@@ -59,7 +62,7 @@ duration = data['simulation']['duration']*ms
 
 # Make the neuron groups
 # -------------------------------------------------------------_#
-print('   >  Making the neuron groups...')
+print('\n >  Making the neuron groups...')
 
 G_all = [[[] for pops in range(2)] for areas in range(4)]
 
@@ -81,6 +84,7 @@ G_I = NeuronGroup(N=N_EC[1],
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
+print('EC: done')
 
 G_all[0][0].append(G_E)
 G_all[0][1].append(G_I)
@@ -104,6 +108,7 @@ G_I = NeuronGroup(N=N_DG[1],
     method=integ_method,
     name='DG_inh')
 G_I.size = cell_size_inh
+print('DG: done')
 
 G_all[1][0].append(G_E)
 G_all[1][1].append(G_I)
@@ -127,6 +132,7 @@ G_I = NeuronGroup(N=N_CA3[1],
     method=integ_method,
     name='CA3_inh')
 G_I.size = cell_size_inh
+print('CA3: done')
 
 G_all[2][0].append(G_E)
 G_all[2][1].append(G_I)
@@ -150,6 +156,7 @@ G_I = NeuronGroup(N=N_CA1[1],
     method=integ_method,
     name='CA1_inh')
 G_I.size = cell_size_inh
+print('CA1: done')
 
 G_all[3][0].append(G_E)
 G_all[3][1].append(G_I)
@@ -165,37 +172,9 @@ for ngroup in G_flat:
 print('\n >  Making the synapses...')
 
 # gains
-'''
-gains_all = [[1 for i in range(2)] for j in range(4)]
-gains_all[0][:1] = [1/G]
-gains_all[1] = [G for ii in range(2)]
-gains_all[2][:1] = [1/G]
-gains_all[3][1:] = [G]
-'''
-gains_all =  [[1/G, 1], [G, G], [1/G, 1], [1, G]]
+gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
 
 # intra
-'''# EC intra
-p_EC_e = [0, 0.37]
-p_EC_i = [0.54, 0]
-p_EC_all = [p_EC_e, p_EC_i]
-
-# GD intra
-p_DG_e = [0, 0.06]
-p_DG_i = [0.14, 0]
-p_DG_all = [p_DG_e, p_DG_i]
-
-# CA3 intra
-p_CA3_e = [0.56, 0.75]
-p_CA3_i = [0.75, 0]
-p_CA3_all = [p_CA3_e, p_CA3_i]
-
-# CA1 intra
-p_CA1_e = [0, 0.28]
-p_CA1_i = [0.3, 0.7]
-p_CA1_all = [p_CA1_e, p_CA1_i]
-'''
-
 print('     * intra-region')
 
 syn_EC_all = setup.connect_intra(G_all[0][0], G_all[0][1], p_EC_all, gains_all[0])
@@ -233,13 +212,22 @@ print('CA3-to-CA1: done')
 
 syn_CA1_EC_all = setup.connect_inter(G_all[3][0], G_all[0][0], G_all[0][1], p_inter_all[3][0], gains_all[3])
 print('CA1-to-EC: done')
+syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, syn_CA3_CA1_all, syn_CA1_EC_all]
 
 
 # Stimulation and other inputs
 # -------------------------------------------------------------_#
 print('\n >  Inputs and Stimulation...')
+dt_stim = 1*ms
+I_stim = 1*namp
+tv = linspace(0, duration/second, int(duration/(dt_stim))+1)
+xstim = I_stim * logical_and(tv>0.1, tv<0.11)
+inputs_stim = TimedArray(xstim, dt=dt_stim)
 
-
+G_all[0][0][0].r = 1 # stim aplpied @ EC-py_CAN
+'''for group in [G_all[jj][0][0] for jj in range(4)]:
+    group.r = 0
+'''
 # Add the monitors (spikes/rates)
 # -------------------------------------------------------------_#
 print('\n >  Monitors...')
@@ -247,29 +235,86 @@ state_mon_all = []
 spike_mon_all = []
 rate_mon_all = []
 
+state_mon_E_all = [[StateMonitor(G_py, 'v', record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
+state_mon_I_all = [[StateMonitor(G_inh, 'v', record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+
+spike_mon_E_all = [[SpikeMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
+spike_mon_I_all = [[SpikeMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+
+rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
+rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+
+'''
 for group in G_flat:
     state_mon_all.append(StateMonitor(group, 'v', record=True))
     spike_mon_all.append(SpikeMonitor(group))
     rate_mon_all.append(PopulationRateMonitor(group))
 
+'''
 
 # Create the Network
 # -------------------------------------------------------------_#
 print('\n >  Connecting the network...')
 net = Network()
-net.add(G_flat)
-net.add(state_mon_all)
-net.add(spike_mon_all)
-net.add(rate_mon_all)
+net.add(G_all) # add groups
+
+for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
+    if syn_intra_curr!=0:
+        net.add(syn_intra_curr)
+
+for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
+    if syn_inter_curr!=0:
+        net.add(syn_inter_curr)
+
+net.add(state_mon_E_all) # monitors
+net.add(state_mon_I_all)
+net.add(spike_mon_E_all)
+net.add(spike_mon_I_all)
+net.add(rate_mon_E_all)
+net.add(rate_mon_I_all)
 
 
 # run simulation
 # -------------------------------------------------------------_#
 global tstep
 tstep = defaultclock.dt
-inputs_stim = TimedArray([0*mA], dt=0.1*ms)
 
 
 print('\n >  Starting simulation...')
-net.run(duration, report='text', report_period=60*second)
+start = time.time()
+net.run(duration, report='text', report_period=60*second, profile=True)
+end = time.time()
 print('Simulation ended')
+print('Simulation ran for '+str((end-start)/60)+' minutes')
+
+
+# dumb plot, not a function yet
+# -------------------------------------------------------------_#
+zones = ['EC', 'DG', 'CA3', 'CA1']
+types = ['exc', 'inh']
+
+raster_fig = figure()
+for ii in range(4):
+    subplot(4,2,ii*2+1)
+    title('raster '+zones[ii]+' exc')
+    plot(spike_mon_E_all[ii][0].t/msecond, spike_mon_E_all[ii][0].i, '.b',
+                markersize=.5,alpha=0.5)
+    xlim(0, duration/msecond)
+    ylim(0, N_all[ii][0])
+    xlabel('Time (ms)')
+    ylabel('Neuron index')
+
+    subplot(4,2,ii*2+2)
+    title('raster '+zones[ii]+' inh')
+    plot(spike_mon_I_all[ii][0].t/msecond, spike_mon_I_all[ii][0].i, '.r',
+                markersize=.5,alpha=0.5)
+    xlim(0, duration/msecond)
+    ylim(0, N_all[ii][1])
+    xlabel('Time (ms)')
+    ylabel('Neuron index')
+
+tight_layout()
+show()
+
+
+profiling_summary(net=net, show=10)  # show the top 10 objects that took the longest

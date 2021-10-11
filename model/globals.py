@@ -22,7 +22,7 @@ cell_size_py = 29e3*umetre**2   # single cell type
 cell_size_inh = 14e3*umetre**2
 
 sigma_noise_inh = 1.*uvolt
-sigma_noise_exc = 10.*uvolt
+sigma_noise_exc = 100.*uvolt
 
 tstep = defaultclock.dt
 

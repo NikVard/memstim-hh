@@ -1,3 +1,7 @@
+# -------------------------------------------
+# Miscellaneous helper functions
+# -------------------------------------------
+
 def make_flat(old_list):
     ''' Takes as argument a list of lists and flattens it (i.e. returns a 1D list with all the elements) '''
     new_list = []
