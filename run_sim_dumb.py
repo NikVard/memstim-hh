@@ -15,6 +15,76 @@ from model import setup
 from src.annex_funcs import make_flat
 
 
+
+# Testing Grounds
+# ------------------------------------------------------------------------------
+# Kuramoto oscillators
+from model.kuramoto_equations import *
+
+start_scope()
+duration1 = 5*second
+
+# Inputs setup
+dt_stim = 1*ms
+I0 = 10*amp
+tv = linspace(0, duration1/second, int(duration1/(dt_stim))+1)
+xstim = 1. * logical_and(tv>3, tv<3.1)
+pulse_train = TimedArray(xstim*amp**-1, dt=dt_stim)
+
+
+# Oscillators
+N = 50
+f0 = 4 # center freq [Hz]
+sigma = 0.5 # normal std
+G_kur = NeuronGroup(N, kuramoto_eqs_stim, threshold='True', method='euler', name='Kuramoto_oscillators')
+G_kur.Theta = '2*pi*rand()' # uniform in [0,2π]
+G_kur.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
+G_kur.kN = 10
+G_kur.I_stim = I0
+
+S = Synapses(G_kur, G_kur, on_pre = '''ThetaPreInput_post = Theta_pre''', method='euler')
+S.connect(condition='i!=j')
+
+trace = StateMonitor(G_kur, ['Theta'], record=True)
+
+
+
+net_kur = Network()
+net_kur.add(G_kur)
+net_kur.add(S)
+net_kur.add(trace)
+net_kur.run(duration1)
+
+
+samples = len(trace.Theta[0])
+r = np.zeros(samples, dtype='complex')
+for s in range(samples):
+    r[s] = 1/N * np.sum(np.exp(1j*trace.Theta[:,s])) # order parameter r(t)
+
+
+'''for ii in range(N):
+    plot(trace.t/second, trace.Theta[ii]%(2*pi))
+'''
+
+fig, axs = subplots(2,1)
+axs[0].plot(trace.t/second, mean(sin(trace.Theta), axis=0))
+axs[0].plot(trace.t/second, sin(imag(r)), '--')
+axs[1].plot(trace.t/second, abs(r))
+axs[0].set_ylabel("Ensemble Theta Rhythm")
+axs[1].set_ylabel("Kuramoto Order Parameter")
+axs[1].set_xlabel("Time [s]")
+axs[0].set_ylim([-1,1])
+axs[1].set_ylim([0,1])
+axs[0].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+axs[1].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+
+show()
+
+exit()
+# ------------------------------------------------------------------------------
+
+
+
 # Configuration
 # -------------------------------------------------------------_#
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
@@ -228,6 +298,7 @@ G_all[0][0][0].r = 1 # stim aplpied @ EC-py_CAN
 '''for group in [G_all[jj][0][0] for jj in range(4)]:
     group.r = 0
 '''
+
 # Add the monitors (spikes/rates)
 # -------------------------------------------------------------_#
 print('\n >  Monitors...')

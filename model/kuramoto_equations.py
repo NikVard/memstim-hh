@@ -12,13 +12,26 @@ Implementation Notes
 """
 
 kuramoto_eqs = '''
-    dTheta/dt = ((omega + ((kN) * PIF)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
     Vm = sin(Theta)*mV : volt
     ThetaPreInput : 1
     omega : 1
     kN : 1
 '''
+
+
+kuramoto_eqs_stim = '''
+    dTheta/dt = ((omega + (kN * PIF) - I_stim*X*sin(Theta)) * second**-1) : 1
+    PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
+    Vm = sin(Theta)*mV : volt
+    ThetaPreInput : 1
+    omega : 1
+    kN : 1
+    I_stim : amp
+    X = pulse_train(t) : amp**-1
+'''
+
 
 
 ''' Keep for later
