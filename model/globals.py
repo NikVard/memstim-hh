@@ -50,3 +50,11 @@ p_tri = None # def: 0.45 # trisynaptic pathway connectivity
 # topology settings
 #topo  = 'real' # realistic topology
 #topo_file = '' # imported image file name
+
+
+
+# Kuramoto oscillator parameters
+N_Kur = None
+f0 = 4 # Hz
+sigma = 0.5 # std of Gaussian for phase/ang.vel. initialization
+kN = 0 # synchronization parameter (k/N factor)
