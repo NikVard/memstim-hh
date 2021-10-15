@@ -32,6 +32,16 @@ kuramoto_eqs_stim = '''
     X = pulse_train(t) : amp**-1
 '''
 
+kuramoto_eqs_stim_test = '''
+    dTheta/dt = ((omega + (kN * PIF) - I_stim*X*sin(Theta)) * second**-1) : 1
+    PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
+    Vm = sin(Theta)*mV : volt
+    ThetaPreInput : 1
+    omega : 1
+    kN : 1
+    I_stim : 1
+    X : 1 (linked)
+'''
 
 
 ''' Keep for later

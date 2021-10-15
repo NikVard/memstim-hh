@@ -69,6 +69,14 @@ _data = {
         }
     },
 
+    # Kuramoto oscillator parameters
+    "Kuramoto" : {
+        "N" : 50,
+        "f0" : 4.,
+        "sigma" : 0.5,  # normal std
+        "kN" : 5
+    },
+
     # connectivity parameters
     "connectivity" : {
         "intra" : { # intra-area conn. probabilities per area |

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from brian2 import *
+from tqdm import tqdm
 
 import time
 
@@ -10,12 +11,13 @@ import parameters
 
 from model.globals import *
 from model.HH_equations import *
+from model.kuramoto_equations import *
 from model import setup
 
 from src.annex_funcs import make_flat
 
 
-
+"""
 # Testing Grounds
 # ------------------------------------------------------------------------------
 # Kuramoto oscillators
@@ -23,6 +25,7 @@ from model.kuramoto_equations import *
 
 start_scope()
 duration1 = 5*second
+defaultclock.dt = 1*ms
 
 # Inputs setup
 dt_stim = 1*ms
@@ -33,43 +36,64 @@ pulse_train = TimedArray(xstim*amp**-1, dt=dt_stim)
 
 
 # Oscillators
-N = 50
+seed(42)
+N = [10, 30, 50, 100]
+N_max = max(N)
+N_min = min(N)
 f0 = 4 # center freq [Hz]
 sigma = 0.5 # normal std
-G_kur = NeuronGroup(N, kuramoto_eqs_stim, threshold='True', method='euler', name='Kuramoto_oscillators')
-G_kur.Theta = '2*pi*rand()' # uniform in [0,2π]
-G_kur.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
-G_kur.kN = 10
-G_kur.I_stim = I0
+Theta_0 = 2*pi*rand(N_min) # uniform U~[0,2π]
+omega_0 = 2*pi*(f0+sigma*randn(N_min)) # normal N~(f0,σ)
 
-S = Synapses(G_kur, G_kur, on_pre = '''ThetaPreInput_post = Theta_pre''', method='euler')
-S.connect(condition='i!=j')
-
-trace = StateMonitor(G_kur, ['Theta'], record=True)
-
-
-
+G_kur_all = []
+S_kur_all = []
+M_kur_all = []
 net_kur = Network()
-net_kur.add(G_kur)
-net_kur.add(S)
-net_kur.add(trace)
-net_kur.run(duration1)
+for onum in N:
+    # groups
+    G = NeuronGroup(onum, kuramoto_eqs_stim, threshold='True', method='euler', name='Kuramoto_N_%d' % onum)
+    #G.Theta = Theta_0[::int(N_max/onum)]
+    #G.omega = omega_0[::int(N_max/onum)]
+    #G.Theta = 0
+    #G.omega = 2*pi*f0
+    G.Theta = repeat(Theta_0, onum/N_min)
+    G.omega = repeat(omega_0, onum/N_min)
+    G.kN = 10
+    G.I_stim = I0
 
+    # synapses
+    S = Synapses(G, G, on_pre = '''ThetaPreInput_post = Theta_pre''', method='euler')
+    S.connect(condition='i!=j')
 
-samples = len(trace.Theta[0])
-r = np.zeros(samples, dtype='complex')
-for s in range(samples):
-    r[s] = 1/N * np.sum(np.exp(1j*trace.Theta[:,s])) # order parameter r(t)
+    # monitors
+    M = StateMonitor(G, ['Theta'], record=True)
 
+    # add the above to the network
+    net_kur.add(G)
+    net_kur.add(S)
+    net_kur.add(M)
 
-'''for ii in range(N):
-    plot(trace.t/second, trace.Theta[ii]%(2*pi))
-'''
+    # store them in lists
+    G_kur_all.append(G)
+    S_kur_all.append(S)
+    M_kur_all.append(M)
+
+# run the simulation
+net_kur.run(duration1, report='text', report_period=10*second, profile=True)
+print("Simulation done")
 
 fig, axs = subplots(2,1)
-axs[0].plot(trace.t/second, mean(sin(trace.Theta), axis=0))
-axs[0].plot(trace.t/second, sin(imag(r)), '--')
-axs[1].plot(trace.t/second, abs(r))
+for ii in range(len(G_kur_all)):
+    print(ii,':')
+    samples = len(M_kur_all[ii].Theta[0])
+    r = np.zeros(samples, dtype='complex')
+    for s in tqdm(range(samples)):
+        r[s] = 1/N[ii] * sum(exp(1j*M_kur_all[ii].Theta[:,s])) # order parameter r(t)
+
+    axs[0].plot(M_kur_all[ii].t/second, mean(sin(M_kur_all[ii].Theta), axis=0))
+    axs[0].plot(M_kur_all[ii].t/second, sin(imag(r)), '--')
+    axs[1].plot(M_kur_all[ii].t/second, abs(r), '--', label='N=%d'%N[ii])
+
 axs[0].set_ylabel("Ensemble Theta Rhythm")
 axs[1].set_ylabel("Kuramoto Order Parameter")
 axs[1].set_xlabel("Time [s]")
@@ -78,11 +102,13 @@ axs[1].set_ylim([0,1])
 axs[0].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
 axs[1].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
 
+legend()
+grid()
 show()
 
 exit()
 # ------------------------------------------------------------------------------
-
+"""
 
 
 # Configuration
@@ -129,6 +155,13 @@ p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivit
 
 global duration
 duration = data['simulation']['duration']*ms
+
+global N_Kur, f0, sigma, kN
+N_Kur = data['Kuramoto']['N']
+f0 = data['Kuramoto']['f0']
+sigma = data['Kuramoto']['sigma']
+kN = data['Kuramoto']['kN']
+
 
 # Make the neuron groups
 # -------------------------------------------------------------_#
@@ -237,6 +270,21 @@ for ngroup in G_flat:
     ngroup.v = '-60*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
     ngroup.r = 0 # int -> same init. val. for all neurons
 
+
+# Kuramoto oscillators group
+G_K = NeuronGroup(N_Kur, kuramoto_eqs_stim_test, threshold='True', method='euler', name='Kuramoto_oscillators_N_%d' % N_Kur)
+G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
+G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
+G_K.kN = kN
+G_K.I_stim = 10e3
+print('Kuramoto oscillators: done')
+
+# spikes-to-rates group
+G_S2R = NeuronGroup(1, 'dvout/dt = -vout/tau : 1', method='exact', namespace={'tau' : 50*ms})
+G_S2R.vout = 0
+print('Spikes2Rates: done')
+
+
 # Make the synapses
 # -------------------------------------------------------------_#
 print('\n >  Making the synapses...')
@@ -285,6 +333,42 @@ print('CA1-to-EC: done')
 syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, syn_CA3_CA1_all, syn_CA1_EC_all]
 
 
+# Kuramoto synapses
+syn_kuramoto =  Synapses(G_K, G_K, on_pre = '''ThetaPreInput_post = Theta_pre''', method='euler')
+syn_kuramoto.connect(condition='i!=j')
+print('Kuramoto intra: done')
+
+# CA1 spikes2rates synapses
+# find the CA1-E group
+G_CA1_E = None
+for g in G_flat:
+    if g.name=='CA1_pyCAN':
+        G_CA1_E = g
+        break
+
+# connect the CA1-E group to the low-pass-filter spikes-2-rates (S2R) group
+if G_CA1_E:
+    syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='vout_post += 1./%d' %G_CA1_E.N)
+    syn_CA1_2_rates.connect()
+print('CA1-to-S2R: done')
+
+# connect the S2R group to the Kuramoto by linking variables X to v
+G_K.X = linked_var(G_S2R, 'vout')
+print('Linking S2R to Kuramoto oscillators: done')
+
+
+
+
+
+# TODO: Find a way to get the output of the Kuramoto group as a whole
+
+
+
+
+
+
+
+
 # Stimulation and other inputs
 # -------------------------------------------------------------_#
 print('\n >  Inputs and Stimulation...')
@@ -323,11 +407,20 @@ for group in G_flat:
 
 '''
 
+
+# Kuramoto monitors
+kuramoto_mon = StateMonitor(G_K, ['Theta'], record=True)
+s2r_mon = StateMonitor(G_S2R, 'vout', record=True)
+
+
+
 # Create the Network
 # -------------------------------------------------------------_#
 print('\n >  Connecting the network...')
 net = Network()
 net.add(G_all) # add groups
+net.add(G_K)
+net.add(G_S2R)
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
     if syn_intra_curr!=0:
@@ -337,12 +430,17 @@ for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
     if syn_inter_curr!=0:
         net.add(syn_inter_curr)
 
+net.add(syn_kuramoto) # kuramoto intra-synapses
+net.add(syn_CA1_2_rates) # CA1 spikes2rates
+
 net.add(state_mon_E_all) # monitors
 net.add(state_mon_I_all)
 net.add(spike_mon_E_all)
 net.add(spike_mon_I_all)
 net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
+net.add(kuramoto_mon)
+net.add(s2r_mon)
 
 
 # run simulation
@@ -368,7 +466,7 @@ raster_fig = figure()
 for ii in range(4):
     subplot(4,2,ii*2+1)
     title('raster '+zones[ii]+' exc')
-    plot(spike_mon_E_all[ii][0].t/msecond, spike_mon_E_all[ii][0].i, '.b',
+    plot(spike_mon_E_all[ii][0].t/msecond, spike_mon_E_all[ii][0].i, '.g',
                 markersize=.5,alpha=0.5)
     xlim(0, duration/msecond)
     ylim(0, N_all[ii][0])
@@ -383,6 +481,29 @@ for ii in range(4):
     ylim(0, N_all[ii][1])
     xlabel('Time (ms)')
     ylabel('Neuron index')
+
+fig, axs = subplots(2,1)
+samples = len(kuramoto_mon.Theta[0])
+r = np.zeros(samples, dtype='complex')
+for s in range(samples):
+    r[s] = 1/N_Kur * sum(exp(1j*kuramoto_mon.Theta[:,s])) # order parameter r(t)
+
+axs[0].plot(kuramoto_mon.t/second, mean(sin(kuramoto_mon.Theta), axis=0))
+axs[0].plot(kuramoto_mon.t/second, sin(imag(r)), '--', label='sin(Im(r))')
+axs[1].plot(kuramoto_mon.t/second, abs(r), label='N=%d'%N_Kur)
+legend()
+grid()
+
+axs[0].set_ylabel("Ensemble Theta Rhythm")
+axs[1].set_ylabel("Kuramoto Order Parameter")
+axs[1].set_xlabel("Time [s]")
+axs[0].set_ylim([-1,1])
+axs[1].set_ylim([0,1])
+#axs[0].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+#axs[1].axvline(x=3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+legend()
+grid()
+
 
 tight_layout()
 show()
