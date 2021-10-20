@@ -13,7 +13,7 @@ import subprocess
 
 # Default parameters
 _data = {
-    "seed"                  : 42,       # Reproducibility
+    "seed_val"              : 42,       # Reproducibility
 
     # additive noise terms
     "noise": {
@@ -74,7 +74,8 @@ _data = {
         "N" : 50,
         "f0" : 4.,
         "sigma" : 0.5,  # normal std
-        "kN" : 5
+        "kN" : 10,
+        "gain" : 15
     },
 
     # connectivity parameters

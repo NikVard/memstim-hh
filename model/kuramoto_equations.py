@@ -8,40 +8,46 @@ Date: 11/10/2021
 Implementation Notes
 --------------------------------------------------------------------------------
     | 1: For more information, refer to: https://michaelsmclayton.github.io/travellingWaves.html
-    | 2:
+    | 2: For the details regarding the (summed) keyword and the synapses, refer to the question I posed on the Brian2 forum, here: https://brian.discourse.group/t/how-can-i-get-the-population-firing-rate-from-a-spiking-hh-network-during-simulation/496
+    | 3: A demo of the Kuramoto Brian2 model is implemented in the jupyter notebook titled 'Stimberg_Oscillators.ipynb'
 """
 
-kuramoto_eqs = '''
-    dTheta/dt = ((omega + (kN * PIF)) * second**-1) : 1
-    PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
-    Vm = sin(Theta)*mV : volt
-    ThetaPreInput : 1
-    omega : 1
-    kN : 1
-'''
-
-
+# Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - I_stim*X*sin(Theta)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - G*X*sin(Theta)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
     Vm = sin(Theta)*mV : volt
     ThetaPreInput : 1
     omega : 1
-    kN : 1
-    I_stim : amp
-    X = pulse_train(t) : amp**-1
+    kN : 1 # k/N ratio, affects sync.
+    G : 1 # this is the input gain, affects the phase reset aggressiveness
+    X : 1 (linked) # this is linked to the firing rates
 '''
 
-kuramoto_eqs_stim_test = '''
-    dTheta/dt = ((omega + (kN * PIF) - I_stim*X*sin(Theta)) * second**-1) : 1
-    PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
-    Vm = sin(Theta)*mV : volt
-    ThetaPreInput : 1
-    omega : 1
-    kN : 1
-    I_stim : 1
-    X : 1 (linked)
+# synapses
+syn_kuramoto_eqs = '''
+    ThetaPreInput_post = Theta_pre
 '''
+
+# Order parameter group calculation equations
+pop_avg_eqs = '''
+    x : 1
+    y : 1
+    coherence = sqrt(x**2 + y**2) : 1
+    phase = arctan(y/x) + int(x<0 and y>0)*pi - int(x<0 and y<0)*pi: 1
+    rhythm = coherence * sin(phase) : 1
+    rhythm_pos = coherence * (sin(phase)+1)/2 : 1
+    rhythm_simple = rhythm*nA : amp
+    rhythm_abs = abs(rhythm)*nA : amp
+    rhythm_rect = rhythm_pos*nA : amp
+    rhythm_zero = 0*rhythm_rect : amp # debugging
+'''
+
+syn_avg_eqs = '''
+    x_post = cos(Theta_pre)/N_incoming : 1 (summed)
+    y_post = sin(Theta_pre)/N_incoming : 1 (summed)
+'''
+
 
 
 ''' Keep for later
