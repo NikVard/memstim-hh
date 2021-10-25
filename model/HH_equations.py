@@ -16,7 +16,7 @@ Implementation Notes
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
 py_CAN_inp_eqs = '''
-    dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
+    dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + G_sin*I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
     Vm = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
     I_CAN = ((gCAN) * (size)) * mCAN ** 2 * (v - (-20 * mV)) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
@@ -76,12 +76,7 @@ py_CAN_inp_eqs = '''
     x_dendrite : metre
     y_dendrite : metre
     z_dendrite : metre
-    x_inh : metre
-    y_inh : metre
-    z_inh : metre
-    dir_x : 1
-    dir_y : 1
-    dir_z : 1
+    G_sin = int(y_soma>5000*scale) : 1 # this is the scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # this is the input theta rhythm from the MS
     r : 1
     I_stim = inputs_stim(t) : amp
@@ -149,12 +144,6 @@ py_CAN_eqs = '''
     x_dendrite : metre
     y_dendrite : metre
     z_dendrite : metre
-    x_inh : metre
-    y_inh : metre
-    z_inh : metre
-    dir_x : 1
-    dir_y : 1
-    dir_z : 1
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre ** 2
@@ -218,12 +207,6 @@ py_eqs = '''
     x_dendrite : metre
     y_dendrite : metre
     z_dendrite : metre
-    x_inh : metre
-    y_inh : metre
-    z_inh : metre
-    dir_x : 1
-    dir_y : 1
-    dir_z : 1
     r : 1
     I_stim = inputs_stim(t):amp
     size : metre ** 2
@@ -233,7 +216,7 @@ py_eqs = '''
 """ Inhibitory Neuron Types """
 """ ------------------------------------------------------------------------ """
 inh_inp_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + G_sin*I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
     Vm = (- I_leak - I_K - I_Na) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
     I_leak = ((0.1e-3 * siemens * cm ** -2) * (size)) * (v - (-65 * mV)) : amp
     I_K = ((9e-3 * siemens * cm ** -2) * (size)) * (n ** 4) * (v - (-90 * mV)) : amp
@@ -273,6 +256,7 @@ inh_inp_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
+    G_sin = int(y_soma>5000*scale) : 1 # this is the scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # same as in the pyCAN group, excitatory input from MS
     r : 1
     I_stim = inputs_stim(t) : amp
