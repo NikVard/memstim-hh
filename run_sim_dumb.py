@@ -23,8 +23,6 @@ from src.annex_funcs import make_flat
 # -------------------------------------------------------------_#
 # Use C++ standalone code generation TODO: Experimental!
 #set_device('cpp_standalone')
-
-
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
 parser.add_argument('parameters_file',
                     nargs='?',
@@ -81,9 +79,11 @@ seed(data['seed_val'])
 
 
 
-# Make the neuron groups (Aussel)
+# Make the neuron groups
 # -------------------------------------------------------------_#
 print('\n >  Making the neuron groups...')
+
+fig, axs = subplots(nrows=1, ncols=1)
 
 G_all = [[[] for pops in range(2)] for areas in range(4)]
 
@@ -97,6 +97,10 @@ G_E = NeuronGroup(N=N_EC[0],
     name='EC_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+pos = np.load('./neuron_positions/full/EC_E-stipple-10000.npy')
+G_E.x_soma = pos[:,0]*scale
+G_E.y_soma = pos[:,1]*scale
+axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='EC-PyCAN')
 
 G_I = NeuronGroup(N=N_EC[1],
     model=inh_inp_eqs,
@@ -106,6 +110,10 @@ G_I = NeuronGroup(N=N_EC[1],
     name='EC_inh')
 G_I.size = cell_size_inh
 print('EC: done')
+pos = np.load('./neuron_positions/full/EC_I-stipple-1000.npy')
+G_I.x_soma = pos[:,0]*scale
+G_I.y_soma = pos[:,1]*scale
+axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='EC-Inh')
 
 G_all[0][0].append(G_E)
 G_all[0][1].append(G_I)
@@ -121,6 +129,10 @@ G_E = NeuronGroup(N=N_DG[0],
     name='DG_py')
 G_E.size = cell_size_py
 G_E.glu = 1
+pos = np.load('./neuron_positions/full/DG_E-stipple-10000.npy')
+G_E.x_soma = pos[:,0]*scale
+G_E.y_soma = pos[:,1]*scale
+axs.plot(G_E.x_soma, G_E.y_soma, 'g.', markersize=.5, alpha=0.5, label='DG-Py')
 
 G_I = NeuronGroup(N=N_DG[1],
     model=inh_eqs,
@@ -130,6 +142,10 @@ G_I = NeuronGroup(N=N_DG[1],
     name='DG_inh')
 G_I.size = cell_size_inh
 print('DG: done')
+pos = np.load('./neuron_positions/full/DG_I-stipple-100.npy')
+G_I.x_soma = pos[:,0]*scale
+G_I.y_soma = pos[:,1]*scale
+axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='DG-Inh')
 
 G_all[1][0].append(G_E)
 G_all[1][1].append(G_I)
@@ -145,6 +161,10 @@ G_E = NeuronGroup(N=N_CA3[0],
     name='CA3_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+pos = np.load('./neuron_positions/full/CA3_E-stipple-1000.npy')
+G_E.x_soma = pos[:,0]*scale
+G_E.y_soma = pos[:,1]*scale
+axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA3-PyCAN')
 
 G_I = NeuronGroup(N=N_CA3[1],
     model=inh_eqs,
@@ -154,6 +174,10 @@ G_I = NeuronGroup(N=N_CA3[1],
     name='CA3_inh')
 G_I.size = cell_size_inh
 print('CA3: done')
+pos = np.load('./neuron_positions/full/CA3_I-stipple-100.npy')
+G_I.x_soma = pos[:,0]*scale
+G_I.y_soma = pos[:,1]*scale
+axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA3-Inh')
 
 G_all[2][0].append(G_E)
 G_all[2][1].append(G_I)
@@ -169,6 +193,10 @@ G_E = NeuronGroup(N=N_CA1[0],
     name='CA1_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+pos = np.load('./neuron_positions/full/CA1_E-stipple-10000.npy')
+G_E.x_soma = pos[:,0]*scale
+G_E.y_soma = pos[:,1]*scale
+axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA1-PyCAN')
 
 G_I = NeuronGroup(N=N_CA1[1],
     model=inh_eqs,
@@ -178,6 +206,10 @@ G_I = NeuronGroup(N=N_CA1[1],
     name='CA1_inh')
 G_I.size = cell_size_inh
 print('CA1: done')
+pos = np.load('./neuron_positions/full/CA1_I-stipple-1000.npy')
+G_I.x_soma = pos[:,0]*scale
+G_I.y_soma = pos[:,1]*scale
+axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA1-Inh')
 
 G_all[3][0].append(G_E)
 G_all[3][1].append(G_I)
@@ -189,10 +221,13 @@ for ngroup in G_flat:
     ngroup.v = '-60*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
 
     # EC populations get stimulated
-    if ngroup.name=='EC_pyCAN' or ngroup.name=='EC_inh':
-        ngroup.r = 1
+    if ngroup.name=='EC_pyCAN':# or ngroup.name=='EC_inh':
+        ngroup.r = 1 #1
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
+
+#show()
+#exit()
 
 
 
@@ -269,7 +304,7 @@ print('\n >  Inputs and Stimulation...')
 dt_stim = 1*ms
 I_stim = 1*namp
 tv = linspace(0, duration/second, int(duration/(dt_stim))+1)
-xstim = I_stim * logical_and(tv>0.3, tv<0.31)
+xstim = I_stim * logical_and(tv>0.75, tv<0.76)
 inputs_stim = TimedArray(xstim, dt=dt_stim)
 
 
@@ -285,7 +320,7 @@ G_K = NeuronGroup(N_Kur,
 G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
 G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
 G_K.kN = kN_frac
-G_K.G = k_gain
+G_K.kG = k_gain
 G_flat.append(G_K) # append to the group list!
 syn_kuramoto =  Synapses(G_K, G_K, on_pre=syn_kuramoto_eqs, method='euler', name='Kuramoto_intra')
 syn_kuramoto.connect(condition='i!=j')
@@ -305,6 +340,7 @@ print('Kuramoto oscillators: done')
 # Firing Rate Filter Population
 # -------------------------------------------------------------_#
 # Make the spikes-to-rates group
+
 G_S2R = NeuronGroup(1,
     model=firing_rate_filter_eqs,
     method='exact',
@@ -331,6 +367,7 @@ if G_CA1_E:
     syn_CA1_2_rates.connect()
 print('CA1-to-S2R: done')
 
+
 # connect the S2R group to the Kuramoto by linking input X to firing rates (drive)
 G_K.X = linked_var(G_S2R, 'drive')
 print('Linking S2R to Kuramoto oscillators: done')
@@ -353,7 +390,7 @@ kuramoto_mon = StateMonitor(G_K, ['Theta'], record=True)
 order_param_mon = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
 
 # spikes2rates monitor (vout)
-s2r_mon = StateMonitor(G_S2R, ['Y', 'drive'], record=True)
+s2r_mon = StateMonitor(G_S2R, ['drive'], record=True)
 
 '''
 G_CA1_E, G_CA1_I = None, None
@@ -410,7 +447,7 @@ tstep = defaultclock.dt
 
 print('\n >  Starting simulation...')
 start = time.time()
-net.run(duration, report='text', report_period=60*second, profile=True)
+net.run(duration, report='text', report_period=10*second, profile=True)
 end = time.time()
 print('Simulation ended')
 print('Simulation ran for '+str((end-start)/60)+' minutes')
@@ -475,9 +512,9 @@ axs[2].set_xlabel("Time [s]")
 #axs[0].set_ylim([-1,1])
 axs[1].set_ylim([-pi,pi])
 axs[2].set_ylim([0,1])
-axs[0].axvline(x=0.3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
-axs[1].axvline(x=0.3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
-axs[2].axvline(x=0.3, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+axs[0].axvline(x=0.75, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+axs[1].axvline(x=0.75, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+axs[2].axvline(x=0.75, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
 
 # make things pretty
 axs[0].legend()

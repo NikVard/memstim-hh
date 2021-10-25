@@ -18,8 +18,9 @@ g_max_i = 600.*psiemens
 V_th = -20.*mvolt               # spiking threshold
 refractory_time = 3.*ms         # refractory time after a spike
 
-cell_size_py = 29.e3*umetre**2   # single cell type
+cell_size_py = 29.e3*umetre**2  # single cell type
 cell_size_inh = 14.e3*umetre**2
+scale = 1.5*umetre             # model scale | 150*umetre
 
 sigma_noise_inh = 1.*uvolt
 sigma_noise_exc = 100.*uvolt
@@ -58,7 +59,7 @@ p_tri = None # def: 0.45 # trisynaptic pathway connectivity
 #topo_file = '' # imported image file name
 
 
-# Kuramoto oscillator parameters
+# Kuramoto oscillators parameters
 N_Kur = None
 f0 = 4 # Hz
 sigma = 0.5 # std of Gaussian for phase/ang.vel. initialization

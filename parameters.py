@@ -103,7 +103,7 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration" : 1e3 # ms
+        "duration" : 2e3 # ms
     },
 
     # git stuff

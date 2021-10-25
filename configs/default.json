@@ -111,10 +111,10 @@
     },
     "stimulation": {},
     "simulation": {
-        "duration": 1000.0
+        "duration": 2000.0
     },
-    "git_short_hash": "cadfa3d",
-    "timestamp": "Wed Oct 20 12:39:32 2021",
+    "git_short_hash": "039e90f",
+    "timestamp": "Mon Oct 25 12:00:05 2021",
     "git_branch": "master",
-    "git_hash": "cadfa3d800938615bb299fd9b762e9fcc0fe00d3"
+    "git_hash": "039e90f22052bac90ec76396edb91f7c738613c3"
 }
