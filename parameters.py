@@ -75,7 +75,7 @@ _data = {
         "f0" : 4.,
         "sigma" : 0.5,  # normal std
         "kN" : 10,
-        "gain" : 15
+        "gain" : 1e-3
     },
 
     # connectivity parameters
@@ -99,7 +99,11 @@ _data = {
     },
 
     # stimulation parameters
-    "stimulation" : {},
+    "stimulation" : {
+        "I_stim" : 1, # value in nA
+        "t_stim" : 750, # value in ms
+        "dt_stim" : 1
+    },
 
     # simulation parameters
     "simulation" : {
