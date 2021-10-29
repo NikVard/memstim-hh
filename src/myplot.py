@@ -28,13 +28,13 @@ def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
         axs[ii][1].set_xlabel('Time (ms)')
         axs[ii][1].set_ylabel('Neuron index')
 
-    print('Raster all duration: ', settings.duration)
+    #print('Raster all duration: ', settings.duration)
 
     return fig, axs
 
 
 
-def plot_kuramoto(order_param_mon, tstim=None):
+def plot_kuramoto(order_param_mon, stim=False):
     """ Plots the average phase and the phase coherence of the ensemble of Kuramoto oscillators. Also plots the generated theta rhythm from the MS. """
 
     # Kuramoto oscillators plots
@@ -57,10 +57,10 @@ def plot_kuramoto(order_param_mon, tstim=None):
     axs[1].set_ylim([-pi,pi])
     axs[2].set_ylim([0,1])
 
-    if tstim:
-        axs[0].axvline(x=tstim, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
-        axs[1].axvline(x=tstim, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
-        axs[2].axvline(x=tstim, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+    if stim:
+        axs[0].axvline(x=settings.t_stim/second, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[1].axvline(x=settings.t_stim/second, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[2].axvline(x=settings.t_stim/second, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
 
     # make things pretty
     axs[0].legend()
@@ -70,7 +70,7 @@ def plot_kuramoto(order_param_mon, tstim=None):
     axs[2].legend()
     axs[2].grid()
 
-    print('Kuramoto duration: ', settings.duration)
+    #print('Kuramoto duration: ', settings.duration)
 
     return fig, axs
 
@@ -124,6 +124,11 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[4].legend()
     axs[4].grid()
 
-    print('Network output duration: ', settings.duration)
+    axs[0].axvline(x=settings.t_stim/msecond, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+    axs[1].axvline(x=settings.t_stim/msecond, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+    axs[2].axvline(x=settings.t_stim/msecond, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+    axs[3].axvline(x=settings.t_stim/msecond, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+    axs[4].axvline(x=settings.t_stim/msecond, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+
 
     return fig, axs

@@ -265,7 +265,7 @@ for ngroup in G_flat:
 
     # EC populations get stimulated
     if ngroup.name=='EC_pyCAN' or ngroup.name=='EC_inh':
-        ngroup.r = 0 #1
+        ngroup.r = 1 #1
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
@@ -506,7 +506,7 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 # -------------------------------------------------------------_#
 # raster plot of all regions
 raster_fig, raster_axs = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-raster_fig.savefig('figures/Raster_stim_EC_E_I_only.png')
+raster_fig.savefig('figures/Raster_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
 
 '''
 # calculate order parameter in the end
@@ -517,13 +517,13 @@ for s in range(samples):
 '''
 
 # kuramoto order parameter plots
-kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon, tstim=None)
-kuramoto_fig.savefig('figures/Kuramoto_rhythms_stim_EC_E_I_only.png')
+kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon, stim=True)
+kuramoto_fig.savefig('figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
 
 
 # Plot more stuff
 fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
-fig_extra.savefig('figures/Kuramoto_extra_stim_EC_E_I_only.png')
+fig_extra.savefig('figures/Kuramoto_extra_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
 
 
 tight_layout()
