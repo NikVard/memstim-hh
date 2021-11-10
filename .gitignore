@@ -132,3 +132,6 @@ dmypy.json
 /figures
 *.png
 *.pdf
+
+# backups
+*.backup
