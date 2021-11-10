@@ -110,15 +110,15 @@
         "gmax_i": 60.0
     },
     "stimulation": {
-        "I_stim": 1,
+        "I_stim": 0,
         "t_stim": 750,
         "dt_stim": 1
     },
     "simulation": {
         "duration": 2000.0
     },
-    "git_short_hash": "6efa1c1",
-    "timestamp": "Thu Oct 28 15:45:48 2021",
-    "git_branch": "globals",
-    "git_hash": "6efa1c13ddefde7ec7367263460e54b1affc1952"
+    "git_short_hash": "628abc8",
+    "timestamp": "Thu Nov  4 11:12:25 2021",
+    "git_branch": "master",
+    "git_hash": "628abc8f739c17e3b3ca32802ea655d423cf0f74"
 }

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 from brian2 import *
 from tqdm import tqdm
 
@@ -20,10 +19,13 @@ from model import setup
 from src.annex_funcs import make_flat
 from src.myplot import *
 
+# C++ standalone mode :: NOT WORKING
+#set_device('cpp_standalone')
+
 
 
 # Configuration
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 # Use C++ standalone code generation TODO: Experimental!
 #set_device('cpp_standalone')
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
@@ -51,7 +53,7 @@ settings.init(data)
 
 
 # Make the neuron groups
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 print('\n >  Making the neuron groups...')
 
 #fig, axs = subplots(nrows=1, ncols=1)
@@ -94,7 +96,6 @@ parse_coords(fname='positions/EC_exc.txt', NG=G_E)
 # Plot X,Y,Z
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
-
 
 G_I = NeuronGroup(N=settings.N_EC[1],
     model=inh_inp_eqs,
@@ -259,20 +260,21 @@ print('CA1: done')
 
 G_flat = make_flat(G_all)
 
-# initialize the group variables
+# initialize the groups, set initial conditions
 for ngroup in G_flat:
-    ngroup.v = '-60*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
+    ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
+    #ngroup.v = -60.*mV
 
     # EC populations get stimulated
     if ngroup.name=='EC_pyCAN' or ngroup.name=='EC_inh':
-        ngroup.r = 1 #1
+        ngroup.r = 1 # 1 means on
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
 
 
 # Make the synapses
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 print('\n >  Making the synapses...')
 
 # gains
@@ -321,25 +323,28 @@ syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, 
 
 
 # Add the monitors (spikes/rates)
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 print('\n >  Monitors...')
 state_mon_all = []
 spike_mon_all = []
 rate_mon_all = []
 
-state_mon_E_all = [[StateMonitor(G_py, 'v', record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
-state_mon_I_all = [[StateMonitor(G_inh, 'v', record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+state_mon_E_all = [[StateMonitor(G_py, ['v', 'm', 'n', 'h'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
+state_mon_I_all = [[StateMonitor(G_inh, ['v', 'm', 'n', 'h'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+print('State monitors [v]: done')
 
 spike_mon_E_all = [[SpikeMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
 spike_mon_I_all = [[SpikeMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+print('Spike monitors: done')
 
 rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
 rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+print('Rate monitors: done')
 
 
 
 # Stimulation and other inputs
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 print('\n >  Inputs and Stimulation...')
 tv = linspace(0, settings.duration/second, int(settings.duration/(settings.dt_stim))+1)
 xstim = settings.I_stim * logical_and(tv>settings.t_stim/second, tv<settings.t_stim/second+0.01)
@@ -351,7 +356,9 @@ inp_theta = TimedArray(inp_theta_sin*nA, dt=settings.dt_stim) # external theta (
 
 
 # Kuramoto Oscillators (MS)
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
+print('\n >  Kuramoto Oscillators...')
+
 # Make the necessary groups
 f0 = settings.f0 # settings.f0 does not work inside equations
 sigma = settings.sigma
@@ -364,10 +371,12 @@ G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
 G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
 G_K.kN = settings.kN_frac
 G_K.kG = settings.k_gain
-
 G_flat.append(G_K) # append to the group list!
+print('Group: done')
+
 syn_kuramoto =  Synapses(G_K, G_K, on_pre=syn_kuramoto_eqs, method='euler', name='Kuramoto_intra')
 syn_kuramoto.connect(condition='i!=j')
+print('Synapses: done')
 
 # Kuramoto order parameter group
 G_pop_avg = NeuronGroup(1, pop_avg_eqs)
@@ -377,13 +386,14 @@ G_pop_avg.y = imag(r0)
 G_flat.append(G_pop_avg) # append to the group list!
 syn_avg = Synapses(G_K, G_pop_avg, syn_avg_eqs, name='Kuramoto_avg')
 syn_avg.connect()
-print('Kuramoto oscillators: done')
+print('Order parameter group: done')
 
 
 
 # Firing Rate Filter Population
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 # Make the spikes-to-rates group
+print('\n >  Spikes-to-Rates Filter...')
 
 G_S2R = NeuronGroup(1,
     model=firing_rate_filter_eqs,
@@ -391,12 +401,14 @@ G_S2R = NeuronGroup(1,
     namespace=filter_params)
 G_S2R.Y = 0 # initial conditions
 G_flat.append(G_S2R) # append to the group list!
-print('Spikes-to-rates LPF: done')
+print('Group: done')
 
 
 
 # Connections
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
+print('\n >  Connections...')
+
 # CA1 spikes-to-rates synapses
 # find the CA1-E group
 G_CA1_E = None
@@ -423,20 +435,25 @@ print('Linking S2R to Kuramoto oscillators: done')
         g.I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 '''
 # avoid linking when using a fixed theta input sin : TESTING
+#G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+#G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 
 # Monitors
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 # Kuramoto monitors
-print("Preparing monitors")
+print('\n >  Kuramoto and Filter Monitors...')
+
 kuramoto_mon = StateMonitor(G_K, ['Theta'], record=True)
 order_param_mon = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
+print('State monitor [Theta]: done')
 
 # spikes2rates monitor (vout)
 s2r_mon = StateMonitor(G_S2R, ['drive'], record=True)
+print('State monitor [drive]: done')
 
 '''
 G_CA1_E, G_CA1_I = None, None
@@ -455,7 +472,7 @@ mon_tmp_I = StateMonitor(G_CA1_I, [], record=True)
 
 
 # Create the Network
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 print('\n >  Connecting the network...')
 net = Network()
 net.add(G_all) # add groups
@@ -484,11 +501,13 @@ net.add(rate_mon_I_all)
 net.add(kuramoto_mon)
 net.add(order_param_mon)
 net.add(s2r_mon)
+print('Network connections: done')
 
 
 
 # Run the simulation
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
+#defaultclock.dt = 0.01*ms
 tstep = defaultclock.dt
 
 print('\n >  Starting simulation...')
@@ -503,10 +522,11 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 
 
 # Plot the results
-# -------------------------------------------------------------_#
+# -------------------------------------------------------------#
 # raster plot of all regions
 raster_fig, raster_axs = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-raster_fig.savefig('figures/Raster_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
+print("Saving figure 'figures/Raster_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
+raster_fig.savefig('figures/Raster_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
 
 '''
 # calculate order parameter in the end
@@ -517,13 +537,15 @@ for s in range(samples):
 '''
 
 # kuramoto order parameter plots
-kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon, stim=True)
-kuramoto_fig.savefig('figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
+kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon)
+print("Saving figure 'figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
+kuramoto_fig.savefig('figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
 
 
 # Plot more stuff
 fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
-fig_extra.savefig('figures/Kuramoto_extra_stim_EC_I_stim_%d_nA.png' % (settings.I_stim/namp))
+print("Saving figure 'figures/Kuramoto_extra_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
+fig_extra.savefig('figures/Kuramoto_extra_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
 
 
 tight_layout()

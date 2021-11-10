@@ -252,7 +252,7 @@ inh_inp_eqs = '''
         dhi/dt = -hi/(10*ms) : siemens
 
 
-    noise = sigma_noise_inh*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5*randn()/sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_inh*(2*(0.1e-3 * siemens ) / (1 * ufarad))**.5 * randn() /sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre

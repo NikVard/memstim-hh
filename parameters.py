@@ -100,7 +100,7 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "I_stim" : 1, # value in nA
+        "I_stim" : 0, # value in nA
         "t_stim" : 750, # value in ms
         "dt_stim" : 1
     },
