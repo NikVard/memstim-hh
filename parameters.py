@@ -107,7 +107,8 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration" : 2e3 # ms
+        "debugging" : False,
+        "duration"  : 2e3 # ms
     },
 
     # git stuff

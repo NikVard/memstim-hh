@@ -52,6 +52,18 @@ settings.init(data)
 
 
 
+# Debugging?
+# -------------------------------------------------------------#
+if settings.debugging:
+    prefs.codegen.target = 'numpy' # Use Python code generation instead of Cython
+    prefs.codegen.loop_invariant_optimisations = False # Switch off some optimization that makes the link between code and equations less obvious
+    np.seterr(all='raise') # Make numpy raise errors for all kind of floating point problems, including division by 0
+    print('###########################')
+    print(' >  DEBUGGING MODE: ON')
+    print('###########################')
+
+
+
 # Make the neuron groups
 # -------------------------------------------------------------#
 print('\n >  Making the neuron groups...')
@@ -424,7 +436,7 @@ if G_CA1_E:
 print('CA1-to-S2R: done')
 
 
-# connect the S2R group to the Kuramoto by linking input X to firing rates (drive)
+# connect the S2R group to the Kuramoto oscillators by linking input X to firing rates (drive)
 G_K.X = linked_var(G_S2R, 'drive')
 print('Linking S2R to Kuramoto oscillators: done')
 

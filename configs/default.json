@@ -115,10 +115,11 @@
         "dt_stim": 1
     },
     "simulation": {
+        "debugging": false,
         "duration": 2000.0
     },
-    "git_short_hash": "628abc8",
-    "timestamp": "Thu Nov  4 11:12:25 2021",
+    "git_short_hash": "6b44474",
+    "timestamp": "Fri Nov 12 12:27:56 2021",
     "git_branch": "master",
-    "git_hash": "628abc8f739c17e3b3ca32802ea655d423cf0f74"
+    "git_hash": "6b44474aa68858934314ab3aba97fa95d7564d13"
 }

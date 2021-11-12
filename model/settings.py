@@ -4,6 +4,7 @@ from brian2 import seed
 """ JSON PARAMETERS HERE (+DEFAULTS) """
 # Simulation
 duration = 1*second # simulation duration
+debugging = False # run in debugging mode (numpy vs cython, no optimization, reporting)
 
 # population sizes per area | [E, I]
 N_EC = [] # def: [10e3, 1e3]
@@ -57,8 +58,9 @@ def init(data):
     p_mono = data['connectivity']['inter']['p_mono'] # monosynaptic pathway connectivity
     p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivity
 
-    global duration
+    global duration, debugging
     duration = data['simulation']['duration']*ms
+    debugging = data['simulation']['debugging']
 
     global N_Kur, f0, sigma, kN_frac, k_gain
     N_Kur = data['Kuramoto']['N']
