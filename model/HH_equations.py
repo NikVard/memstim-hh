@@ -19,7 +19,7 @@ Implementation Notes
 py_CAN_inp_eqs = '''
     dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + G_sin*I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
     Vm = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca) / ((1 * ufarad * cm ** -2) * (size))*tstep : volt
-    I_CAN = ((gCAN) * (size)) * mCAN ** 2 * (v - (-20 * mV)) : amp
+    I_CAN = ((gCAN) * (size)) * (mCAN ** 2) * (v - (-20 * mV)) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
         mCANInf = alpha2 / (alpha2 + (0.0002 * ms ** -1)) : 1
         mCANTau = 1. / (alpha2 + (0.0002 * ms ** -1)) / (3.0 ** ((36. -22) / 10)) : second
