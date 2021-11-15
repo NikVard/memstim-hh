@@ -3,6 +3,7 @@
 from brian2 import *
 from tqdm import tqdm
 
+import os
 import time
 
 import argparse
@@ -18,9 +19,6 @@ from model import setup
 
 from src.annex_funcs import make_flat
 from src.myplot import *
-
-# C++ standalone mode :: NOT WORKING
-#set_device('cpp_standalone')
 
 
 
@@ -50,6 +48,9 @@ print()
 # settings initialization
 settings.init(data)
 
+# Create the necessary directories
+if not os.path.exists('figures'):
+    os.makedirs('figures')
 
 
 # Debugging?
