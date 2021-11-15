@@ -110,14 +110,14 @@ def connect_inter(all_G_py_from, all_G_py_to, all_G_inh_to, all_p, gains):
                 G_py_to = all_G_py_to[destination]
                 if G_py_to:
                     syn_E = Synapses(G_py_from, G_py_to, on_pre="he_ext_post+="+str(gains[origin])+"*"+str(g_max_e/siemens)+"*siemens*glu_pre", name=G_py_from.name+"to"+G_py_to.name)
-                    syn_E.connect(condition="i!=j", p=str(all_p[origin][destination])+'*exp(-((z_soma_pre-z_soma_post)**2)/(2*(1000*umetre)**2))')
+                    syn_E.connect(p=str(all_p[origin][destination])+'*exp(-((z_soma_pre-z_soma_post)**2)/(2*(1000*umetre)**2))')
                     syn_all[origin][destination] = syn_E
 
             for destination in range(N_inh_to): # from Py (origin) to Inh (destination)
                 G_inh_to = all_G_inh_to[destination]
                 if G_inh_to:
                     syn_I = Synapses(G_py_from, G_inh_to, on_pre="he_ext_post+="+str(gains[origin])+"*"+str(g_max_e/siemens)+"*siemens*glu_pre", name=G_py_from.name+"to"+G_inh_to.name)
-                    syn_I.connect(condition="i!=j", p=str(all_p[origin][N_py_to+destination])+'*exp(-((z_soma_pre-z_soma_post)**2)/(2*(1000*umetre)**2))')
+                    syn_I.connect(p=str(all_p[origin][N_py_to+destination])+'*exp(-((z_soma_pre-z_soma_post)**2)/(2*(1000*umetre)**2))')
 
                     syn_all[origin][N_py_to+destination] = syn_I
 
