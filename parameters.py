@@ -7,6 +7,7 @@ import os
 import json
 import time
 import subprocess
+from numpy import pi
 
 # Constants
 
@@ -75,7 +76,8 @@ _data = {
         "f0" : 4.,
         "sigma" : 0.5,  # normal std
         "kN" : 10,
-        "gain" : 1e-3
+        "gain" : 1e-3,
+        "offset" : pi/8
     },
 
     # connectivity parameters
@@ -101,7 +103,7 @@ _data = {
     # stimulation parameters
     "stimulation" : {
         "I_stim" : 0, # value in nA
-        "t_stim" : 750, # value in ms
+        "t_stim" : 1000, # value in ms
         "dt_stim" : 1
     },
 

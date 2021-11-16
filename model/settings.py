@@ -62,12 +62,13 @@ def init(data):
     duration = data['simulation']['duration']*ms
     debugging = data['simulation']['debugging']
 
-    global N_Kur, f0, sigma, kN_frac, k_gain
+    global N_Kur, f0, sigma, kN_frac, k_gain, offset
     N_Kur = data['Kuramoto']['N']
     f0 = data['Kuramoto']['f0']
     sigma = data['Kuramoto']['sigma']
     kN_frac = data['Kuramoto']['kN']
     k_gain = data['Kuramoto']['gain']
+    offset = data['Kuramoto']['offset']
 
     global I_stim, t_stim, dt_stim
     I_stim = data['stimulation']['I_stim']*nA

@@ -14,14 +14,15 @@ Implementation Notes
 
 # Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - kG*X*sin(Theta-pi/2)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - kG*X*sin(Theta-offset)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
     Vm = sin(Theta)*mV : volt
     ThetaPreInput : 1
     omega : 1
-    kN : 1 # k/N ratio, affects sync.
-    kG : 1 # this is the input gain, affects the phase reset aggressiveness
-    X : 1 (linked) # this is linked to the firing rates
+    kN : 1 (shared)         # k/N ratio, affects sync.
+    kG : 1 (shared)         # this is the input gain, affects the phase reset aggressiveness
+    offset : 1 (shared)     # range [0, 2*pi], controls phase reset PRC
+    X : 1 (linked)          # this is linked to the firing rates
 '''
 
 # synapses

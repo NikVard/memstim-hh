@@ -384,6 +384,7 @@ G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
 G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
 G_K.kN = settings.kN_frac
 G_K.kG = settings.k_gain
+G_K.offset = settings.offset
 G_flat.append(G_K) # append to the group list!
 print('Group: done')
 
@@ -538,8 +539,9 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 # -------------------------------------------------------------#
 # raster plot of all regions
 raster_fig, raster_axs = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-print("Saving figure 'figures/Raster_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
-raster_fig.savefig('figures/Raster_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
+fig_name = 'Raster_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Raster_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+print("Saving figure 'figures/%s'" %fig_name)
+raster_fig.savefig('figures/%s' %fig_name)
 
 '''
 # calculate order parameter in the end
@@ -551,15 +553,15 @@ for s in range(samples):
 
 # kuramoto order parameter plots
 kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon)
-print("Saving figure 'figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
-kuramoto_fig.savefig('figures/Kuramoto_rhythms_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
-
+fig_name = 'Kuramoto_rhythms_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Kuramoto_rhythms_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+print("Saving figure 'figures/%s'" %fig_name)
+kuramoto_fig.savefig('figures/%s' %fig_name)
 
 # Plot more stuff
 fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
-print("Saving figure 'figures/Kuramoto_extra_stim_EC_I_stim_%d_nA_tstim_%d_ms.png'" % (settings.I_stim/namp, settings.t_stim/ms))
-fig_extra.savefig('figures/Kuramoto_extra_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.I_stim/namp, settings.t_stim/ms))
-
+fig_name = 'Kuramoto_extra_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Kuramoto_extra_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+print("Saving figure 'figures/%s'" %fig_name)
+fig_extra.savefig('figures/%s' %fig_name)
 
 tight_layout()
 show()
