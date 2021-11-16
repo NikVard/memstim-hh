@@ -83,7 +83,7 @@ py_CAN_inp_eqs = '''
     #I_exc = inp_theta(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
-    size : metre**2
+    size : metre**2 (shared)
 '''
 
 py_CAN_eqs = '''
@@ -150,7 +150,7 @@ py_CAN_eqs = '''
     z_dendrite : metre
     r : 1
     I_stim = inputs_stim(t) : amp
-    size : metre**2
+    size : metre**2 (shared)
 '''
 
 #Pyramidal non CAN :
@@ -212,8 +212,8 @@ py_eqs = '''
     y_dendrite : metre
     z_dendrite : metre
     r : 1
-    I_stim = inputs_stim(t):amp
-    size : metre**2
+    I_stim = inputs_stim(t) : amp
+    size : metre**2 (shared)
 '''
 
 
@@ -265,7 +265,7 @@ inh_inp_eqs = '''
     #I_exc = inp_theta(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
-    size : metre**2
+    size : metre**2 (shared)
 '''
 
 
@@ -313,7 +313,7 @@ inh_eqs = '''
     z_soma : metre
     r : 1
     I_stim = inputs_stim(t) : amp
-    size : metre**2
+    size : metre**2 (shared)
 '''
 
 
