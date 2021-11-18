@@ -13,7 +13,7 @@ def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
     fig.set_figwidth(12)
 
     for ii in range(4):
-        axs[ii][0].plot(spike_mon_E_all[ii][0].t/msecond, spike_mon_E_all[ii][0].i, '.g', markersize=.5,alpha=0.5)
+        axs[ii][0].plot(spike_mon_E_all[ii][0].t/msecond, spike_mon_E_all[ii][0].i, '.g', markersize=.5, alpha=0.5)
         axs[ii][0].set_title('raster '+areas[ii]+' exc')
         axs[ii][0].set_xlim(0, settings.duration/msecond)
         axs[ii][0].set_ylim(0, settings.N_all[ii][0])
@@ -21,8 +21,7 @@ def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
         axs[ii][0].set_ylabel('Neuron index')
 
         axs[ii][1].set_title('raster '+areas[ii]+' inh')
-        axs[ii][1].plot(spike_mon_I_all[ii][0].t/msecond, spike_mon_I_all[ii][0].i, '.r',
-                    markersize=.5,alpha=0.5)
+        axs[ii][1].plot(spike_mon_I_all[ii][0].t/msecond, spike_mon_I_all[ii][0].i, '.r', markersize=.5, alpha=0.5)
         axs[ii][1].set_xlim(0, settings.duration/msecond)
         axs[ii][1].set_ylim(0, settings.N_all[ii][1])
         axs[ii][1].set_xlabel('Time (ms)')
@@ -116,10 +115,9 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[3].grid()
 
     axs[4].plot(order_param_mon.t/msecond, order_param_mon.rhythm_rect[0]/nA, '-', label='Theta Rhythm (Ensemble)')
-    #axs[4].plot(tv, inp_theta_sin, '--', label='Constant Theta')
     axs[4].set_title('Generated Theta Rhythm')
     axs[4].set_xlim(0, settings.duration/msecond)
-    axs[4].set_ylabel('MS output (corr)')
+    axs[4].set_ylabel('Theta rhythm (corr)')
     axs[4].set_xlabel('Time (ms)')
     axs[4].legend()
     axs[4].grid()
