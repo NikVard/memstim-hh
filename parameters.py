@@ -77,7 +77,7 @@ _data = {
         "sigma" : 0.5,  # normal std
         "kN" : 10,
         "gain" : 1e-3,
-        "offset" : pi/8
+        "offset" : -1*pi/2
     },
 
     # connectivity parameters
