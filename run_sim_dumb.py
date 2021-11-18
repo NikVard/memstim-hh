@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from brian2 import *
+from scipy.spatial import distance as dst
 from tqdm import tqdm
 
 import os
@@ -71,7 +72,7 @@ print('\n >  Making the neuron groups...')
 
 #fig, axs = subplots(nrows=1, ncols=1)
 fig_anat = figure()
-ax_anat = fig_anat.add_subplot(111, projection='3d')
+ax_anat = fig_anat.add_subplot(111)#, projection='3d')
 
 G_all = [[[] for pops in range(2)] for areas in range(4)]
 
@@ -285,6 +286,34 @@ for ngroup in G_flat:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
 
+# DEBUGGING DISTANCES
+print('Intra-region distances:')
+for group in G_flat:
+    # organize positions for this specific group
+    neuron_pos = column_stack((group.x_soma, group.y_soma, group.z_soma))
+
+    # calculate pair-wise distances using pdist
+    dist_res = dst.pdist(neuron_pos, 'euclidean')
+
+    # if using cdist: generate a mask to skip the diagonal for minimum calculation
+    #mask = ones(dist_res.shape, dtype=bool)
+    #fill_diagonal(mask, False)
+
+    # calculate intra-area distance boundaries
+    min_dist, max_dist = (dist_res.min(), dist_res.max())
+
+    print('{:10} pdist: ({:20} , {:20})\n\tx ---> ({:28}, {:28})\n\ty ---> ({:28}, {:28})\n\tz ---> ({:28}, {:28})\n'.format(
+    '{}'.format(group.name),
+    '{}'.format(min_dist),
+    '{}'.format(max_dist),
+    '{}'.format(group.x_soma[:].min()),
+    '{}'.format(group.x_soma[:].max()),
+    '{}'.format(group.y_soma[:].min()),
+    '{}'.format(group.y_soma[:].max()),
+    '{}'.format(group.z_soma[:].min()),
+    '{}'.format(group.z_soma[:].max())))
+
+
 
 # Make the synapses
 # -------------------------------------------------------------#
@@ -342,8 +371,8 @@ state_mon_all = []
 spike_mon_all = []
 rate_mon_all = []
 
-state_mon_E_all = [[StateMonitor(G_py, ['v', 'm', 'n', 'h'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
-state_mon_I_all = [[StateMonitor(G_inh, ['v', 'm', 'n', 'h'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
+state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('State monitors [v]: done')
 
 spike_mon_E_all = [[SpikeMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
@@ -363,8 +392,11 @@ tv = linspace(0, settings.duration/second, int(settings.duration/(settings.dt_st
 xstim = settings.I_stim * logical_and(tv>settings.t_stim/second, tv<settings.t_stim/second+0.01)
 inputs_stim = TimedArray(xstim, dt=settings.dt_stim)
 
-inp_theta_sin = 1*sin(2*pi*4*tv)
-inp_theta = TimedArray(inp_theta_sin*nA, dt=settings.dt_stim) # external theta (TESTING)
+#inp_theta_sin = 1*sin(2*pi*4*tv)
+inp_theta_rect = (-cos(2*pi*4*tv)+1)/2
+trail_zeros = zeros(int(250*ms/(settings.dt_stim)))
+inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
+inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.dt_stim) # external theta (TESTING)
 
 
 
@@ -558,7 +590,7 @@ print("Saving figure 'figures/%s'" %fig_name)
 kuramoto_fig.savefig('figures/%s' %fig_name)
 
 # Plot more stuff
-fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, inp_theta_slow[:int(settings.duration/settings.dt_stim)+1])
 fig_name = 'Kuramoto_extra_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Kuramoto_extra_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
 print("Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig('figures/%s' %fig_name)
