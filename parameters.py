@@ -30,41 +30,41 @@ _data = {
     "areas": {
         "EC"    : {
             "E" : {
-                "N" : 10e3,
+                "N" : int(10e3),
                 "type" : "PyCAN"
             },
             "I" : {
-                "N" : 1e3,
+                "N" : int(1e3),
                 "type" : "Inh"
             }
         },
         "DG"    : {
             "E" : {
-                "N" : 10e3,
+                "N" : int(10e3),
                 "type" : "Py"
             },
             "I" : {
-                "N" : 0.1e3,
+                "N" : int(0.1e3),
                 "type" : "Inh"
             }
         },
         "CA3"   : {
             "E" : {
-                "N" : 1e3,
+                "N" : int(1e3),
                 "type" : "PyCAN"
             },
                 "I" : {
-                "N" : 0.1e3,
+                "N" : int(0.1e3),
                 "type" : "Inh"
             }
         },
         "CA1"   : {
             "E" : {
-                "N" : 10e3,
+                "N" : int(10e3),
                 "type" : "PyCAN"
             },
             "I" : {
-                "N" : 1e3,
+                "N" : int(1e3),
                 "type" : "Inh"
             }
         }
