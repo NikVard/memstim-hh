@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from brian2 import *
 from scipy.spatial import distance as dst
+from scipy.spatial.transform import Rotation as R
 from tqdm import tqdm
 
 import os
@@ -70,11 +71,14 @@ if settings.debugging:
 # -------------------------------------------------------------#
 print('\n >  Making the neuron groups...')
 
+G_all = [[[] for pops in range(2)] for areas in range(4)]
+
 #fig, axs = subplots(nrows=1, ncols=1)
 fig_anat = figure()
-ax_anat = fig_anat.add_subplot(111)#, projection='3d')
+ax_anat = fig_anat.add_subplot(111, projection='3d')
 
-G_all = [[[] for pops in range(2)] for areas in range(4)]
+# rotation matrix for fixing rotated y-positions from stippling program
+r = R.from_euler('x', 180, degrees=True)
 
 def parse_coords(fname, NG):
     """ Opens file and parses coordinates """
@@ -89,7 +93,12 @@ def parse_coords(fname, NG):
             NG.z_soma[idx] = float(tok[2])*scale
             idx += 1
 
-# EC -> theta input from MS
+# EC -> receives theta input from MS
+pos = np.load('./neuron_positions/full/EC_E-stipple-10000.npy')
+pos = hstack((pos, zeros((settings.N_EC[0], 1))))
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_EC[0])
 G_E = NeuronGroup(N=settings.N_EC[0],
     model=py_CAN_inp_eqs,
     threshold='v>V_th',
@@ -99,18 +108,21 @@ G_E = NeuronGroup(N=settings.N_EC[0],
     name='EC_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-'''
-pos = np.load('./neuron_positions/full/EC_E-stipple-10000.npy')
-G_E.x_soma = pos[:,0]*scale
-G_E.y_soma = pos[:,1]*scale
-axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='EC-PyCAN')
-'''
-parse_coords(fname='positions/EC_exc.txt', NG=G_E)
+G_E.x_soma = pos[:,0]*metre
+G_E.y_soma = pos[:,1]*metre
+G_E.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/EC_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
+#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='EC-PyCAN')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
+pos = np.load('./neuron_positions/full/EC_I-stipple-1000.npy')
+pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_EC[1])
 G_I = NeuronGroup(N=settings.N_EC[1],
     model=inh_inp_eqs,
     threshold='v>V_th',
@@ -118,15 +130,13 @@ G_I = NeuronGroup(N=settings.N_EC[1],
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
-'''
-pos = np.load('./neuron_positions/full/EC_I-stipple-1000.npy')
-G_I.x_soma = pos[:,0]*scale
-G_I.y_soma = pos[:,1]*scale
-axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='EC-Inh')
-'''
-parse_coords(fname='positions/EC_inh.txt', NG=G_I)
+G_I.x_soma = pos[:,0]*metre
+G_I.y_soma = pos[:,1]*metre
+G_I.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/EC_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
+#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='EC-Inh')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
@@ -136,6 +146,11 @@ print('EC: done')
 
 
 # DG
+pos = np.load('./neuron_positions/full/DG_E-stipple-10000.npy')
+pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_DG[0])
 G_E = NeuronGroup(N=settings.N_DG[0],
     model=py_eqs,
     threshold='v>V_th',
@@ -145,18 +160,21 @@ G_E = NeuronGroup(N=settings.N_DG[0],
     name='DG_py')
 G_E.size = cell_size_py
 G_E.glu = 1
-'''
-pos = np.load('./neuron_positions/full/DG_E-stipple-10000.npy')
-G_E.x_soma = pos[:,0]*scale
-G_E.y_soma = pos[:,1]*scale
-axs.plot(G_E.x_soma, G_E.y_soma, 'g.', markersize=.5, alpha=0.5, label='DG-Py')
-'''
-parse_coords(fname='positions/DG_exc.txt', NG=G_E)
+G_E.x_soma = pos[:,0]*metre
+G_E.y_soma = pos[:,1]*metre
+G_E.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/DG_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
+#axs.plot(G_E.x_soma, G_E.y_soma, 'g.', markersize=.5, alpha=0.5, label='DG-Py')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
 
+pos = np.load('./neuron_positions/full/DG_I-stipple-100.npy')
+pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_DG[1])
 G_I = NeuronGroup(N=settings.N_DG[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -164,15 +182,13 @@ G_I = NeuronGroup(N=settings.N_DG[1],
     method=integ_method,
     name='DG_inh')
 G_I.size = cell_size_inh
-'''
-pos = np.load('./neuron_positions/full/DG_I-stipple-100.npy')
-G_I.x_soma = pos[:,0]*scale
-G_I.y_soma = pos[:,1]*scale
-axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='DG-Inh')
-'''
-parse_coords(fname='positions/DG_inh.txt', NG=G_I)
+G_I.x_soma = pos[:,0]*metre
+G_I.y_soma = pos[:,1]*metre
+G_I.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/DG_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
+#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='DG-Inh')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
@@ -182,6 +198,11 @@ print('DG: done')
 
 
 # CA3
+pos = np.load('./neuron_positions/full/CA3_E-stipple-1000.npy')
+pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_CA3[0])
 G_E = NeuronGroup(N=settings.N_CA3[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -191,18 +212,21 @@ G_E = NeuronGroup(N=settings.N_CA3[0],
     name='CA3_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-'''
-pos = np.load('./neuron_positions/full/CA3_E-stipple-1000.npy')
-G_E.x_soma = pos[:,0]*scale
-G_E.y_soma = pos[:,1]*scale
-axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA3-PyCAN')
-'''
-parse_coords(fname='positions/CA3_exc.txt', NG=G_E)
+G_E.x_soma = pos[:,0]*metre
+G_E.y_soma = pos[:,1]*metre
+G_E.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/CA3_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
+#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA3-PyCAN')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
+pos = np.load('./neuron_positions/full/CA3_I-stipple-100.npy')
+pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_CA3[1])
 G_I = NeuronGroup(N=settings.N_CA3[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -210,15 +234,13 @@ G_I = NeuronGroup(N=settings.N_CA3[1],
     method=integ_method,
     name='CA3_inh')
 G_I.size = cell_size_inh
-'''
-pos = np.load('./neuron_positions/full/CA3_I-stipple-100.npy')
-G_I.x_soma = pos[:,0]*scale
-G_I.y_soma = pos[:,1]*scale
-axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA3-Inh')
-'''
-parse_coords(fname='positions/CA3_inh.txt', NG=G_I)
+G_I.x_soma = pos[:,0]*metre
+G_I.y_soma = pos[:,1]*metre
+G_I.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/CA3_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
+#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA3-Inh')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
@@ -228,6 +250,11 @@ print('CA3: done')
 
 
 # CA1
+pos = np.load('./neuron_positions/full/CA1_E-stipple-10000.npy')
+pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_CA1[0])
 G_E = NeuronGroup(N=settings.N_CA1[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -237,18 +264,21 @@ G_E = NeuronGroup(N=settings.N_CA1[0],
     name='CA1_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-'''
-pos = np.load('./neuron_positions/full/CA1_E-stipple-10000.npy')
-G_E.x_soma = pos[:,0]*scale
-G_E.y_soma = pos[:,1]*scale
-axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA1-PyCAN')
-'''
-parse_coords(fname='positions/CA1_exc.txt', NG=G_E)
+G_E.x_soma = pos[:,0]*metre
+G_E.y_soma = pos[:,1]*metre
+G_E.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/CA1_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
+#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA1-PyCAN')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
+pos = np.load('./neuron_positions/full/CA1_I-stipple-1000.npy')
+pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
+pos = r.apply(pos)
+pos *= scale
+pos[:,2] += 15*mm*rand(settings.N_CA1[1])
 G_I = NeuronGroup(N=settings.N_CA1[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -256,15 +286,13 @@ G_I = NeuronGroup(N=settings.N_CA1[1],
     method=integ_method,
     name='CA1_inh')
 G_I.size = cell_size_inh
-'''
-pos = np.load('./neuron_positions/full/CA1_I-stipple-1000.npy')
-G_I.x_soma = pos[:,0]*scale
-G_I.y_soma = pos[:,1]*scale
-axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA1-Inh')
-'''
-parse_coords(fname='positions/CA1_inh.txt', NG=G_I)
+G_I.x_soma = pos[:,0]*metre
+G_I.y_soma = pos[:,1]*metre
+G_I.z_soma = pos[:,2]*metre
+#parse_coords(fname='positions/CA1_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
+#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA1-Inh')
 #ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
@@ -276,6 +304,7 @@ G_flat = make_flat(G_all)
 
 # initialize the groups, set initial conditions
 for ngroup in G_flat:
+    #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
     ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
     #ngroup.v = -60.*mV
 

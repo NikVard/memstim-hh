@@ -75,10 +75,7 @@ py_CAN_inp_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    x_dendrite : metre
-    y_dendrite : metre
-    z_dendrite : metre
-    G_sin = 1.5*int(z_soma<100*scale)*int(z_soma>0*scale) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
+    G_sin = 1.5*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # this is the input theta rhythm from the MS
     #I_exc = inp_theta(t) : amp
     r : 1
@@ -260,7 +257,7 @@ inh_inp_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    G_sin = 1.5*int(z_soma<100*scale)*int(z_soma>0*scale) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
+    G_sin = 1.5*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # same as in the pyCAN group, excitatory input from MS
     #I_exc = inp_theta(t) : amp
     r : 1
