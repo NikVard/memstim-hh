@@ -60,7 +60,7 @@ if not os.path.exists('figures'):
 if settings.debugging:
     prefs.codegen.target = 'numpy' # Use Python code generation instead of Cython
     prefs.codegen.loop_invariant_optimisations = False # Switch off some optimization that makes the link between code and equations less obvious
-    np.seterr(all='raise') # Make numpy raise errors for all kind of floating point problems, including division by 0
+    np.seterr(all='raise', under='ignore') # Make numpy raise errors for all kind of floating point problems, including division by 0, but ignoring underflows
     print('###########################')
     print(' >  DEBUGGING MODE: ON')
     print('###########################')
@@ -434,17 +434,21 @@ inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.dt_stim) # external theta 
 print('\n >  Kuramoto Oscillators...')
 
 # Make the necessary groups
-f0 = settings.f0 # settings.f0 does not work inside equations
-sigma = settings.sigma
+#f0 = settings.f0 # settings.f0 does not work inside equations
+#sigma = settings.sigma
 G_K = NeuronGroup(settings.N_Kur,
     model=kuramoto_eqs_stim,
     threshold='True',
     method='euler',
     name='Kuramoto_oscillators_N_%d' % settings.N_Kur)
-G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
-G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
+#G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
+#G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
+theta0 = 2*pi*randn(settings.N_Kur)
+omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur))
+G_K.Theta = theta0
+G_K.omega = omega0
 G_K.kN = settings.kN_frac
-G_K.kG = settings.k_gain
+G_K.gain = settings.k_gain
 G_K.offset = settings.offset
 G_flat.append(G_K) # append to the group list!
 print('Group: done')
@@ -454,7 +458,10 @@ syn_kuramoto.connect(condition='i!=j')
 print('Synapses: done')
 
 # Kuramoto order parameter group
-G_pop_avg = NeuronGroup(1, pop_avg_eqs)
+G_pop_avg = NeuronGroup(1,
+    model=pop_avg_eqs,
+    #method='euler',
+    name='Kuramoto_averaging')
 r0 = 1/settings.N_Kur * sum(exp(1j*G_K.Theta))
 G_pop_avg.x = real(r0)  # avoid division by zero
 G_pop_avg.y = imag(r0)
@@ -473,6 +480,8 @@ print('\n >  Spikes-to-Rates Filter...')
 G_S2R = NeuronGroup(1,
     model=firing_rate_filter_eqs,
     method='exact',
+    #method='integ_method',
+    name='S2R_filter',
     namespace=filter_params)
 G_S2R.Y = 0 # initial conditions
 G_flat.append(G_S2R) # append to the group list!

@@ -14,13 +14,12 @@ Implementation Notes
 
 # Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - kG*X*sin(Theta+offset)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - gain*X*sin(Theta+offset)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
-    Vm = sin(Theta)*mV : volt
     ThetaPreInput : 1
-    omega : 1
+    omega : 1 (constant)
     kN : 1 (shared)         # k/N ratio, affects sync.
-    kG : 1 (shared)         # this is the input gain, affects the phase reset aggressiveness
+    gain : 1 (shared)       # this is the input gain, affects the phase reset aggressiveness
     offset : 1 (shared)     # range [0, 2*pi], controls phase reset PRC
     X : 1 (linked)          # this is linked to the firing rates
 '''
@@ -41,7 +40,7 @@ pop_avg_eqs = '''
     rhythm_simple = rhythm*nA : amp
     rhythm_abs = abs(rhythm)*nA : amp
     rhythm_rect = rhythm_pos*nA : amp
-    rhythm_zero = 0*rhythm_rect : amp # debugging
+    rhythm_zero = 0*rhythm_rect : amp   # for debugging
 '''
 
 syn_avg_eqs = '''

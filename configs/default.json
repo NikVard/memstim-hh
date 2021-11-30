@@ -11,41 +11,41 @@
     "areas": {
         "EC": {
             "E": {
-                "N": 10000.0,
+                "N": 10000,
                 "type": "PyCAN"
             },
             "I": {
-                "N": 1000.0,
+                "N": 1000,
                 "type": "Inh"
             }
         },
         "DG": {
             "E": {
-                "N": 10000.0,
+                "N": 10000,
                 "type": "Py"
             },
             "I": {
-                "N": 100.0,
+                "N": 100,
                 "type": "Inh"
             }
         },
         "CA3": {
             "E": {
-                "N": 1000.0,
+                "N": 1000,
                 "type": "PyCAN"
             },
             "I": {
-                "N": 100.0,
+                "N": 100,
                 "type": "Inh"
             }
         },
         "CA1": {
             "E": {
-                "N": 10000.0,
+                "N": 10000,
                 "type": "PyCAN"
             },
             "I": {
-                "N": 1000.0,
+                "N": 1000,
                 "type": "Inh"
             }
         }
@@ -119,8 +119,8 @@
         "debugging": false,
         "duration": 2000.0
     },
-    "git_short_hash": "969ffe4",
-    "timestamp": "Thu Nov 18 10:46:42 2021",
-    "git_branch": "master",
-    "git_hash": "969ffe4a0441b84253f5b3abfc1ff1352fc91458"
+    "git_short_hash": "3af4dee",
+    "timestamp": "Tue Nov 30 12:33:36 2021",
+    "git_branch": "crash_at_1.4354",
+    "git_hash": "3af4dee02ae46819b0f676275c1e1d60c91f4f43"
 }
