@@ -56,7 +56,7 @@
         "sigma": 0.5,
         "kN": 10,
         "gain": 0.001,
-        "offset": -1.5707963267948966
+        "offset": 0.0
     },
     "connectivity": {
         "intra": {
@@ -119,8 +119,8 @@
         "debugging": false,
         "duration": 2000.0
     },
-    "git_short_hash": "3f98828",
-    "timestamp": "Wed Dec  1 20:54:05 2021",
+    "git_short_hash": "86de16a",
+    "timestamp": "Wed Dec  1 13:53:09 2021",
     "git_branch": "master",
-    "git_hash": "3f9882852f759be0aba6afeb18a78d14f1a1c78f"
+    "git_hash": "86de16a3c8670bb93ab6b344d586a4e43019a9bc"
 }

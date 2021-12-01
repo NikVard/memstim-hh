@@ -1,0 +1,35 @@
+Running simulation 0 with config file ./configs/default.json at time 16:07:58
+Done
+Running simulation 1 with config file ./configs/par0.json at time 16:16:08
+Done
+Running simulation 2 with config file ./configs/par10.json at time 16:24:07
+Done
+Running simulation 3 with config file ./configs/par11.json at time 16:31:58
+Done
+Running simulation 4 with config file ./configs/par12.json at time 16:39:49
+Done
+Running simulation 5 with config file ./configs/par13.json at time 16:47:20
+Done
+Running simulation 6 with config file ./configs/par14.json at time 16:55:06
+Done
+Running simulation 7 with config file ./configs/par15.json at time 17:03:02
+Done
+Running simulation 8 with config file ./configs/par16.json at time 17:52:22
+Done
+Running simulation 9 with config file ./configs/par1.json at time 18:00:35
+Done
+Running simulation 10 with config file ./configs/par2.json at time 18:09:05
+Done
+Running simulation 11 with config file ./configs/par3.json at time 18:17:37
+Done
+Running simulation 12 with config file ./configs/par4.json at time 18:26:22
+Done
+Running simulation 13 with config file ./configs/par5.json at time 18:35:06
+Done
+Running simulation 14 with config file ./configs/par6.json at time 18:43:51
+Done
+Running simulation 15 with config file ./configs/par7.json at time 18:52:37
+Running simulation 16 with config file ./configs/par8.json at time 18:59:55
+Done
+Running simulation 17 with config file ./configs/par9.json at time 19:08:21
+Done
