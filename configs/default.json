@@ -119,8 +119,8 @@
         "debugging": false,
         "duration": 2000.0
     },
-    "git_short_hash": "3f98828",
-    "timestamp": "Wed Dec  1 20:54:05 2021",
-    "git_branch": "master",
-    "git_hash": "3f9882852f759be0aba6afeb18a78d14f1a1c78f"
+    "git_short_hash": "ff1674f",
+    "timestamp": "Wed Dec  1 21:07:59 2021",
+    "git_branch": "debug_floats",
+    "git_hash": "ff1674fdd51283d60647b7d7bb17c060f85014bf"
 }
