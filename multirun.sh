@@ -13,7 +13,7 @@ for FN_CONF in ./configs/*;
 		echo "Running simulation $CNT with config file $FN_CONF at time $CURRDATE";
 		
 		python3 -c "from brian2 import *; clear_cache('cython');" > /dev/null 2>&1
-		time python3 run_sim_dumb.py > "./results/sim_res_$CNT.txt" 2>&1 && echo Done
+		time python3 run_sim_dumb.py $FN_CONF > "./results/sim_res_$CNT.txt" 2>&1 && echo Done
 		#python3 -run_sim_dumb.py > /dev/null 2>&1
 		
 		if [ "$?" = 0 ]; then
@@ -22,6 +22,6 @@ for FN_CONF in ./configs/*;
 			RESULT="failure"
 		fi
 		
-		echo "$CNT : $FN_CONF : $RESULT" >> total.txt
+		echo "$CNT : $FN_CONF : $RESULT" >> "./results/total.txt"
 		let "CNT+=1"
 	done
