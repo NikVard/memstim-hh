@@ -57,7 +57,8 @@ if not os.path.exists('figures'):
 
 # Debugging?
 # -------------------------------------------------------------#
-if settings.debugging:
+#if settings.debugging:
+if True:
     prefs.codegen.target = 'numpy' # Use Python code generation instead of Cython
     prefs.codegen.loop_invariant_optimisations = False # Switch off some optimization that makes the link between code and equations less obvious
     np.seterr(all='raise', under='ignore') # Make numpy raise errors for all kind of floating point problems, including division by 0, but ignoring underflows
@@ -401,7 +402,7 @@ spike_mon_all = []
 rate_mon_all = []
 
 state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
-state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+state_mon_I_all = [[StateMonitor(G_inh, ['v', 'm', 'n', 'h', 'm_inf', 'n_inf', 'h_inf', 'alpham', 'alphan', 'alphah', 'betam', 'betan', 'betah', 'tau_m', 'tau_n', 'tau_h', 'I_K', 'I_Na'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('State monitors [v]: done')
 
 spike_mon_E_all = [[SpikeMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
