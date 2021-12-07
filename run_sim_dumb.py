@@ -100,6 +100,8 @@ pos = hstack((pos, zeros((settings.N_EC[0], 1))))
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_EC[0])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_EC[0],
     model=py_CAN_inp_eqs,
     threshold='v>V_th',
@@ -112,11 +114,9 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/EC_exc.txt', NG=G_E)
+# parse_coords(fname='positions/EC_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
-#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='EC-PyCAN')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
 pos = np.load('./neuron_positions/full/EC_I-stipple-1000.npy')
@@ -124,6 +124,8 @@ pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_EC[1])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_EC[1],
     model=inh_inp_eqs,
     threshold='v>V_th',
@@ -134,11 +136,9 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/EC_inh.txt', NG=G_I)
+# parse_coords(fname='positions/EC_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
-#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='EC-Inh')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
 G_all[0][0].append(G_E)
@@ -152,6 +152,8 @@ pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_DG[0])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_DG[0],
     model=py_eqs,
     threshold='v>V_th',
@@ -164,11 +166,9 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/DG_exc.txt', NG=G_E)
+# parse_coords(fname='positions/DG_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
-#axs.plot(G_E.x_soma, G_E.y_soma, 'g.', markersize=.5, alpha=0.5, label='DG-Py')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
 
 pos = np.load('./neuron_positions/full/DG_I-stipple-100.npy')
@@ -176,6 +176,8 @@ pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_DG[1])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_DG[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -186,11 +188,9 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/DG_inh.txt', NG=G_I)
+# parse_coords(fname='positions/DG_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
-#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='DG-Inh')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
 G_all[1][0].append(G_E)
@@ -204,6 +204,8 @@ pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA3[0])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_CA3[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -216,11 +218,9 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/CA3_exc.txt', NG=G_E)
+# parse_coords(fname='positions/CA3_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
-#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA3-PyCAN')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
 pos = np.load('./neuron_positions/full/CA3_I-stipple-100.npy')
@@ -228,6 +228,8 @@ pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA3[1])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_CA3[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -238,11 +240,9 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/CA3_inh.txt', NG=G_I)
+# parse_coords(fname='positions/CA3_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
-#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA3-Inh')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
 G_all[2][0].append(G_E)
@@ -256,6 +256,8 @@ pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA1[0])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_CA1[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -268,11 +270,9 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/CA1_exc.txt', NG=G_E)
+# parse_coords(fname='positions/CA1_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
-#axs.plot(G_E.x_soma, G_E.y_soma, 'b.', markersize=.5, alpha=0.5, label='CA1-PyCAN')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
 pos = np.load('./neuron_positions/full/CA1_I-stipple-1000.npy')
@@ -280,6 +280,8 @@ pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA1[1])
+idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
+pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_CA1[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -290,11 +292,9 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-#parse_coords(fname='positions/CA1_inh.txt', NG=G_I)
+# parse_coords(fname='positions/CA1_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
-#axs.plot(G_I.x_soma, G_I.y_soma, 'r.', markersize=.5, alpha=0.5, label='CA1-Inh')
-#ax_anat.plot_trisurf(G_E.x_soma, G_E.y_soma, G_E.z_soma, color='white', edgecolors='grey', alpha=0.5)
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
 G_all[3][0].append(G_E)
@@ -635,4 +635,4 @@ print("Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig('figures/%s' %fig_name)
 
 tight_layout()
-#show()
+show()
