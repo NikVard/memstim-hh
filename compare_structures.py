@@ -143,6 +143,10 @@ fig = figure(figsize=plt.figaspect(0.5))
 # =============
 # set up the axes for the first plot
 ax = fig.add_subplot(121, projection='3d')
+ax.set_title("Reference")
+ax.set_xlabel("X [m]")
+ax.set_ylabel("Y [m]")
+ax.set_zlabel("Z [m]")
 
 # Function for parsing coordinates
 def parse_coords_3d(fname):
@@ -183,6 +187,10 @@ for area in areas:
 # ==============
 # set up the axes for the second plot
 ax = fig.add_subplot(122, projection='3d')
+ax.set_title("Adjusted")
+ax.set_xlabel("X [m]")
+ax.set_ylabel("Y [m]")
+ax.set_zlabel("Z [m]")
 
 # Iterate over position files from adjusted model
 for area in areas:
@@ -204,5 +212,6 @@ for area in areas:
             c = 'red'
 
         ax.scatter(coords_adj[:,0], -coords_adj[:,1], coords_adj[:,2], c=c)
+
 
 show()
