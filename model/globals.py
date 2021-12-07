@@ -3,7 +3,7 @@ from brian2 import defaultclock
 
 """ Fixed parameters required by the equations """
 tau_Cl = 0.1*second             # removal rate of chloride ions in excitatory cells; healthy 0.1s | epilepsy 0.5s or 1.0s, page 88, Aussel
-Ek = -100*mV                    # resting potential of potassium channels in excitatory cells; healthy -100mV | epilepsy -90mV or -80mV, page 88, Aussel
+Ek = -100.*mV                   # resting potential of potassium channels in excitatory cells; healthy -100mV | epilepsy -90mV or -80mV, page 88, Aussel
 
 # gains and global conductances
 gM = 90.*usiemens*cmetre**-2    # conductance for M-current
