@@ -3,6 +3,14 @@ from brian2 import *
 from model import settings
 from model.globals import *
 
+def plot_watermark(fig, script_filename, config_filename, branch, hash):
+    """ Add simulation infomation on the figure """
+
+    plt.text(.995, .99, '{0}\n {1} ({2}, {3})\n using "{4}"'.format(
+        time.ctime(), script_filename, branch, hash, config_filename),
+             transform=fig.transFigure, ha="right", va="top", clip_on=False,
+             color = "black", family="Roboto Mono", weight="400", size="xx-small")
+
 def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
     """ Plots the activity of all the excitatory and inhibitory populations in the network in a raster plot.
     Returns a figure handler """
