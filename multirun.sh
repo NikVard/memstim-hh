@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 # -*- coding: utf-8 -*-
-rm results/*.txt
-touch results/total.txt
+
+RESDIR="./results"
+
+if [ -d $RESDIR ]; then
+	echo "Directory $RESDIR exists. Cleaning..."
+	rm $RESDIR/*.txt
+else
+	echo "Directory $RESDIR does not exist. Creating..."
+	mkdir $RESDIR
+fi
+echo "Creating txt output..."
+touch "$RESDIR/total.txt"
+
 
 CNT=0
 RESULT=""

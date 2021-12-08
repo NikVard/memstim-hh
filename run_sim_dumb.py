@@ -635,4 +635,4 @@ print("Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig('figures/%s' %fig_name)
 
 tight_layout()
-show()
+#show()
