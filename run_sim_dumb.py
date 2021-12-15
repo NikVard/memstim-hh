@@ -413,6 +413,8 @@ rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] 
 rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('Rate monitors: done')
 
+state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
+
 
 
 # Stimulation and other inputs
@@ -564,6 +566,7 @@ net.add(G_all) # add groups
 net.add(G_K)
 net.add(G_pop_avg)
 net.add(G_S2R)
+print('Network groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
     if syn_intra_curr!=0:
@@ -576,6 +579,7 @@ for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
 net.add(syn_kuramoto) # kuramoto intra-synapses
 net.add(syn_avg) # kuramoto population average (order parameter) synapses
 net.add(syn_CA1_2_rates) # CA1 spikes2rates
+print('Network connections: done')
 
 net.add(state_mon_E_all) # monitors
 net.add(state_mon_I_all)
@@ -586,7 +590,8 @@ net.add(rate_mon_I_all)
 net.add(kuramoto_mon)
 net.add(order_param_mon)
 net.add(s2r_mon)
-print('Network connections: done')
+net.add(state_mon_noise_all)
+print('Network monitors: done')
 
 
 
