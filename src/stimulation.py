@@ -77,7 +77,7 @@ def generate_stim(duration, dt=1e-4, stim_on=0., nr_of_trains=5, nr_of_pulses=4,
     pulse_train = np.append(pulse_train, np.zeros((1,delay)), axis=1)
 
     # step 3: repeat the whole group
-    waveform = np.tile(pulse_train, nr_of_trains)
+    waveform_ = np.tile(pulse_train, nr_of_trains) # temp array
 
     # step 4: create the stimulation waveform
     tv = np.linspace(0, duration, int(duration/dt)+1)
@@ -91,10 +91,15 @@ def generate_stim(duration, dt=1e-4, stim_on=0., nr_of_trains=5, nr_of_pulses=4,
 
     v, i = find_nearest(tv, stim_on)
 
+    # step 5: clip the waveform, removing unused trailing zeros
+    idxs = np.where(waveform_.flatten() != 0)
+    idx = np.max(idxs)
+    waveform = waveform_[0,:idx+10]
+
     # check that waveform is not too large
-    if (i+len(waveform[0]) > len(tv)):
+    if (i+len(waveform) > len(tv)):
         raise ValueError('Generated signal too large for given duration.')
 
-    stimulation[i:i+len(waveform[0])] = waveform[0,:]
+    stimulation[i:i+len(waveform)] = waveform
 
     return stimulation
