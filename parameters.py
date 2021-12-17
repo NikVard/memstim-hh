@@ -90,27 +90,35 @@ _data = {
         },
         "inter" : { # inter-area conn. probabilities
             "p_tri" : 0.45, # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
-            "p_mono" : 0.2 # mono: [EC->CA3, EC->CA1]
+            "p_mono" : 0.2  # mono: [EC->CA3, EC->CA1]
         }
     },
 
     # synapses
     "synapses" : {
-        "gmax_e" : 600., # pSiemens
+        "gmax_e" : 600.,    # pSiemens
         "gmax_i" : 60.
     },
 
     # stimulation parameters
     "stimulation" : {
-        "I_stim" : 0, # value in nA
-        "t_stim" : 1000, # value in ms
-        "dt_stim" : 1
-    },
+        "duration" : 2,             # [sec]
+        "dt" : 1e-3,                # [sec]
+        "stim_type" : "monophasic", # monophasic | anodic-first | cathodic-first
+        "stim_onset" : 0.2,         # [sec]
+        "nr_of_trains" : 1,         # number of pulse trains
+        "nr_of_pulses" : 1,         # number of pulses per train
+        "f_stim" : 5,               # stimulation frequency [Hz]
+        "pulse_width" : .2e-3,      # width (in time) of pulse ON phase [sec]
+        "pulse_freq" : 100,         # pulse frequency, determines ON duration [Hz]
+        "I_stim" : 0,               # stimulation amplitude [nA]
+        },
 
     # simulation parameters
     "simulation" : {
         "debugging" : False,
-        "duration"  : 2e3 # ms
+        "duration"  : 2e3,  # ms
+        "dt"        : 1e-4  # ms
     },
 
     # git stuff

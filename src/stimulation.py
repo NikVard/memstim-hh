@@ -1,20 +1,6 @@
-"""
---------------------------------------------------------------------------------
-Date: 09/12/2021
-
-@author: Nikolaos Vardalakis
---------------------------------------------------------------------------------
-
-Implementation Notes
---------------------------------------------------------------------------------
-    | 1. Includes functions to generate stimulation waveforms. The functions are
-    | not restricted to brian2, i.e. the functions return numpy arrays which can
-    | later be transformed into TimedArrays in the main program.
-"""
-
 import numpy as np
 
-def generate_stim(duration, dt=1e-4, stim_on=0., nr_of_trains=5, nr_of_pulses=4, stim_freq=5, stim_type="monophasic", pulse_width=.2e-3, pulse_freq=100, ipi=.1e-3):
+def generate_stim(duration, dt=1e-4, I_stim=[1.], stim_on=0., nr_of_trains=5, nr_of_pulses=4, stim_freq=5, pulse_width=[.2e-3], pulse_freq=100, ipi=.1e-3):
     ''' Generate a pulse train to be used as the stimulation waveform.
 
     Parameters:
@@ -22,6 +8,9 @@ def generate_stim(duration, dt=1e-4, stim_on=0., nr_of_trains=5, nr_of_pulses=4,
     *       duration    :   stimulation waveform duration - [sec]
     |
     *           dt      :   sampling rate - [sec]
+    |
+    *        I_stim     :   stimulation amplitudes, given in list format [I_first, I_second] - [nA]
+    |                       I < 0 -> cathodic pulse (e.g. I_stim = [-1.,1.] means biphasic, cathodic-first)
     |
     *       stim_on     :   stimulation start time - [sec]
     |
@@ -31,45 +20,57 @@ def generate_stim(duration, dt=1e-4, stim_on=0., nr_of_trains=5, nr_of_pulses=4,
     |
     *       stim_freq   :   stimulation frequency - [Hz]
     |
-    *       stim_type   :   "monophasic" | "anodic-first" | "cathodic-first"
-    |
-    *       pulse_width :   width (in time) of pulse ON phase - [sec]
+    *       pulse_width :   width (in time) of pulse ON phase, given in list format [pw_first, pw_second] - [sec]
+    |                       I[i] < 0 means pw[i] is the width of the cathodic phase
     |
     *       pulse_freq  :   pulse frequency; determines ON duration - [Hz]
     |
     *               ipi :   inter-pulse interval - [sec]
     ---------------------------------------------------------------------------
     '''
-
-    # step 0: parse arguments and evaluate
-    if pulse_width > 1/pulse_freq:
-        raise ValueError('Pulse width is too large for given pulse frequency.')
-
-
     # calculate single pulse duration
     pd = 1./pulse_freq                  # pulse duration [sec]
     pd_samples = int(pd/dt)             # pulse duration [samples]
-    pw_samples = int(pulse_width/dt)    # pulse width [samples]
-    ipi_samples = int(ipi/dt)           # inter-pulse interval [samples]
 
     # step 1: create a single pulse
-    if stim_type.lower() == "monophasic":
+    if len(I_stim) == 1:
         # monophasic pulse
+        I0 = I_stim[0] # get pulse amplitude
+        pw = pulse_width[0] # get pulse width
+        pw_samples = int(pw/dt) # pulse width [samples]
+
+        # evaluation
+        if (pw_samples > pd_samples):
+            raise ValueError('Pulse width is too large for given pulse frequency.')
+
+        # make the pulse
         pulse = np.zeros((1,pd_samples), dtype="int")
-        pulse[0,:pw_samples] = 1        # ON state
-    else:
+        pulse[0,:pw_samples] = I0           # ON state
+
+    elif len(I_stim) == 2:
         # biphasic pulse
+        I0 = np.array(I_stim)
+        pw = np.array(pulse_width)
+
+        pw_samples = pw/dt    # pulse width [samples]
+        pw_samples = pw_samples.astype(int)
+        ipi_samples = int(ipi/dt)           # inter-pulse interval [samples]
+
+        # evaluation
+        if ((np.sum(pw_samples) + ipi_samples) > pd_samples):
+            raise ValueError('Pulse width is too large for given pulse frequency.')
+
+        if np.sum(np.multiply(I0, pw)) != 0:
+            raise ValueError('Current settings do not lead to charge-balanced pulses.')
+
+        # make the pulse
         pulse = np.zeros((1,pd_samples), dtype="int")
-        pulse[0,:pw_samples]            # ON state
         idx = 0
-        pulse[0,0:idx+pw_samples] = 1
-        idx += pw_samples
+        pulse[0,0:idx+pw_samples[0]] = I0[0]
+        idx += pw_samples[0]
         pulse[0,idx:idx+ipi_samples] = 0
         idx += ipi_samples
-        pulse[0,idx:idx+pw_samples] = -1
-
-        if stim_type.lower()=="cathodic-first":
-            pulse *= -1
+        pulse[0,idx:idx+pw_samples[1]] = I0[1]
 
     # step 2: repeat the pulse and add the delay between bursts
     pulse_train = np.tile(pulse, nr_of_pulses)
