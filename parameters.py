@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # Memory Stimulation and Phase-Amplitude Coupling
 # Copyright 2021 Nikolaos Vardlakis & Nicolas P. Rougier
@@ -16,56 +18,54 @@ from numpy import pi
 _data = {
     "seed_val"              : 42,       # Reproducibility
 
-    # additive noise terms
-    "noise": {
-        "py": {
-            "sigma"         : 0.
-        },
-        "inh": {
-            "sigma"         : 0.
-        }
-    },
-
     # areas, tables 3.1-3.3, pages 45-48, Aussel
     "areas": {
         "EC"    : {
             "E" : {
                 "N" : int(10e3),
-                "type" : "PyCAN"
+                "type" : "PyCAN",
+                "noise" : 100.e-6       # Volts
             },
             "I" : {
                 "N" : int(1e3),
-                "type" : "Inh"
+                "type" : "Inh",
+                "noise" : 1.e-6
             }
         },
         "DG"    : {
             "E" : {
                 "N" : int(10e3),
-                "type" : "Py"
+                "type" : "Py",
+                "noise" : 100.e-6       # Volts
             },
             "I" : {
                 "N" : int(0.1e3),
-                "type" : "Inh"
+                "type" : "Inh",
+                "noise" : 1.e-6
             }
         },
         "CA3"   : {
             "E" : {
                 "N" : int(1e3),
-                "type" : "PyCAN"
+                "type" : "PyCAN",
+                "noise" : 100.e-6
             },
                 "I" : {
                 "N" : int(0.1e3),
-                "type" : "Inh"
+                "type" : "Inh",
+                "noise" : 1.e-6
             }
         },
         "CA1"   : {
             "E" : {
                 "N" : int(10e3),
-                "type" : "PyCAN"
+                "type" : "PyCAN",
+                "noise" : 100.e-6
             },
             "I" : {
                 "N" : int(1e3),
-                "type" : "Inh"
+                "type" : "Inh",
+                "noise" : 1.e-6
             }
         }
     },
@@ -103,15 +103,15 @@ _data = {
     # stimulation parameters
     "stimulation" : {
         "duration" : 2,             # [sec]
-        "dt" : 1e-3,                # [sec]
-        "stim_type" : "monophasic", # monophasic | anodic-first | cathodic-first
-        "stim_onset" : 0.2,         # [sec]
-        "nr_of_trains" : 1,         # number of pulse trains
-        "nr_of_pulses" : 1,         # number of pulses per train
-        "f_stim" : 5,               # stimulation frequency [Hz]
-        "pulse_width" : .2e-3,      # width (in time) of pulse ON phase [sec]
+        "dt" : .1e-3,               # [sec]
+        "onset" : 0.2,              # [sec]
+        "I" : [1.],                 # stimulation amplitude [nA]
+        "pulse_width" : [1.e-3],    # width (in time) of pulse ON phase [sec]
+        "stim_freq" : 5,            # stimulation frequency [Hz]
         "pulse_freq" : 100,         # pulse frequency, determines ON duration [Hz]
-        "I_stim" : 0,               # stimulation amplitude [nA]
+        "nr_of_trains" : 2,         # number of pulse trains
+        "nr_of_pulses" : 5,         # number of pulses per train
+        "ipi" : .1e-3               # inter-pulse interval [sec]
         },
 
     # simulation parameters
