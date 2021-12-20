@@ -1,6 +1,6 @@
 import numpy as np
 
-def generate_stim(duration, dt=1e-4, I_stim=[1.], stim_on=0., nr_of_trains=5, nr_of_pulses=4, stim_freq=5, pulse_width=[.2e-3], pulse_freq=100, ipi=.1e-3):
+def generate_stim(duration, dt=1e-4, stim_on=.2, I_stim=[1.], nr_of_trains=5, nr_of_pulses=4, stim_freq=5, pulse_width=[.2e-3], pulse_freq=100, ipi=.1e-3):
     ''' Generate a pulse train to be used as the stimulation waveform.
 
     Parameters:

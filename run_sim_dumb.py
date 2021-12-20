@@ -21,6 +21,7 @@ from model import setup
 
 from src.annex_funcs import make_flat
 from src.myplot import *
+from src import stimulation
 
 
 
@@ -29,14 +30,14 @@ from src.myplot import *
 # Use C++ standalone code generation TODO: Experimental!
 #set_device('cpp_standalone')
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
-parser.add_argument('parameters_file',
+parser.add_argument('-p', '--parameters',
                     nargs='?',
-                    metavar='m',
+                    metavar='-p',
                     type=str,
                     default='configs/default.json',
                     help='Parameters file (json format)')
 args = parser.parse_args()
-filename = args.parameters_file
+filename = args.parameters
 print('Using "{0}"'.format(filename))
 
 try:
@@ -420,15 +421,34 @@ state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
 # Stimulation and other inputs
 # -------------------------------------------------------------#
 print('\n >  Inputs and Stimulation...')
-tv = linspace(0, settings.duration/second, int(settings.duration/(settings.dt_stim))+1)
-xstim = settings.I_stim * logical_and(tv>settings.t_stim/second, tv<settings.t_stim/second+0.01)
-inputs_stim = TimedArray(xstim, dt=settings.dt_stim)
+tv = linspace(0, settings.duration/second, int(settings.duration/(settings.stim_dt))+1)
+# xstim = settings.I_stim * logical_and(tv>settings.t_stim/second, tv<settings.t_stim/second+0.01)
+# inputs_stim = TimedArray(xstim, dt=settings.dt_stim)
 
-#inp_theta_sin = 1*sin(2*pi*4*tv)
-inp_theta_rect = (-cos(2*pi*4*tv)+1)/2
-trail_zeros = zeros(int(250*ms/(settings.dt_stim)))
-inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
-inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.dt_stim) # external theta (TESTING)
+# generate stimulation signal
+if settings.I_stim:
+    print("Stimulation ON")
+    xstim = stimulation.generate_stim(duration=settings.stim_duration,
+                                      dt=settings.stim_dt,
+                                      I_stim=settings.I_stim,
+                                      stim_on=settings.stim_onset,
+                                      nr_of_trains=settings.nr_of_trains,
+                                      nr_of_pulses=settings.nr_of_pulses,
+                                      stim_freq=settings.stim_freq,
+                                      pulse_width=settings.pulse_width,
+                                      pulse_freq=settings.pulse_freq,
+                                      ipi=settings.stim_ipi)
+    inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
+else:
+    print("No stimulation defined; using empty TimedArray")
+    inputs_stim = TimedArray(values=[0.]*nA, dt=1*second, name='Input_stim')
+
+
+# inp_theta_sin = 1*sin(2*pi*4*tv)
+# inp_theta_rect = (-cos(2*pi*4*tv)+1)/2
+# trail_zeros = zeros(int(250*ms/(settings.stim_dt*second)))
+# inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
+# inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.stim_dt*second) # external theta (TESTING)
 
 
 
@@ -437,8 +457,8 @@ inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.dt_stim) # external theta 
 print('\n >  Kuramoto Oscillators...')
 
 # Make the necessary groups
-#f0 = settings.f0 # settings.f0 does not work inside equations
-#sigma = settings.sigma
+# f0 = settings.f0 # settings.f0 does not work inside equations
+# sigma = settings.sigma
 G_K = NeuronGroup(settings.N_Kur,
     model=kuramoto_eqs_stim,
     threshold='True',
@@ -446,8 +466,8 @@ G_K = NeuronGroup(settings.N_Kur,
     name='Kuramoto_oscillators_N_%d' % settings.N_Kur)
 #G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
 #G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
-theta0 = 2*pi*randn(settings.N_Kur)
-omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur))
+theta0 = 2*pi*rand(settings.N_Kur) # uniform U~[0,2π]
+omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur)) # ~N(2πf0,σ)
 G_K.Theta = theta0
 G_K.omega = omega0
 G_K.kN = settings.kN_frac
@@ -522,10 +542,10 @@ print('Linking S2R to Kuramoto oscillators: done')
         g.I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 '''
 # avoid linking when using a fixed theta input sin : TESTING
-#G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-#G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 
@@ -606,7 +626,6 @@ net.run(settings.duration, report='text', report_period=10*second, profile=True)
 end = time.time()
 print('Simulation ended')
 print('Simulation ran for '+str((end-start)/60)+' minutes')
-
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
 
 
@@ -614,9 +633,9 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 # Plot the results
 # -------------------------------------------------------------#
 # raster plot of all regions
-raster_fig, raster_axs = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-fig_name = 'Raster_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Raster_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 print("Saving figure 'figures/%s'" %fig_name)
+plot_watermark(raster_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 raster_fig.savefig('figures/%s' %fig_name)
 
 '''
@@ -628,14 +647,14 @@ for s in range(samples):
 '''
 
 # kuramoto order parameter plots
-kuramoto_fig, kuramoto_axs = plot_kuramoto(order_param_mon)
-fig_name = 'Kuramoto_rhythms_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Kuramoto_rhythms_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(order_param_mon)
+plot_watermark(kuramoto_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("Saving figure 'figures/%s'" %fig_name)
 kuramoto_fig.savefig('figures/%s' %fig_name)
 
 # Plot more stuff
-fig_extra, raster_extra = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, inp_theta_slow[:int(settings.duration/settings.dt_stim)+1])
-fig_name = 'Kuramoto_extra_offset_%.2f.png' %settings.offset if (settings.I_stim == 0) else 'Kuramoto_extra_offset_%.2f_stim_EC_I_stim_%d_nA_tstim_%d_ms.png' % (settings.offset, settings.I_stim/namp, settings.t_stim/ms)
+fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig('figures/%s' %fig_name)
 
