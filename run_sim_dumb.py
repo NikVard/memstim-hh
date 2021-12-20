@@ -38,11 +38,13 @@ parser.add_argument('-p', '--parameters',
                     help='Parameters file (json format)')
 args = parser.parse_args()
 filename = args.parameters
-print('Using "{0}"'.format(filename))
 
 try:
     data = parameters.load(filename)
-except:
+    print('Using "{0}"'.format(filename))
+except Exception as e:
+    print(e)
+    print('Using "default.json"')
     data = parameters._data
 parameters.dump(data)
 print()
