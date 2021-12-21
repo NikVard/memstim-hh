@@ -1,6 +1,5 @@
 from brian2.units import *
 from brian2 import seed
-import os
 
 """ JSON PARAMETERS HERE (+DEFAULTS) """
 # Simulation

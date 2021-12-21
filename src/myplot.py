@@ -35,6 +35,12 @@ def generate_fig_name(initials=''):
     if settings.stim_freq:
         fig_name += 'fstim_{fstim:d}_Hz_'.format(fstim=int(settings.stim_freq))
 
+    if settings.nr_of_trains:
+        fig_name += 'trains_{train_nr:d}_'.format(train_nr=int(settings.nr_of_trains))
+
+    if settings.nr_of_pulses:
+        fig_name += 'pulses_{pulse_nr:d}_'.format(pulse_nr=int(settings.nr_of_pulses))
+
     if settings.stim_onset:
         fig_name += 'ton_{stim_on:d}_ms'.format(stim_on=int(settings.stim_onset*1000))
 

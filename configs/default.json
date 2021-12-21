@@ -111,7 +111,7 @@
         "gmax_i": 60.0
     },
     "stimulation": {
-        "duration": 2,
+        "duration": 1,
         "dt": 0.0001,
         "onset": 0.2,
         "I": [
@@ -122,17 +122,17 @@
         ],
         "stim_freq": 5,
         "pulse_freq": 100,
-        "nr_of_trains": 2,
-        "nr_of_pulses": 5,
+        "nr_of_trains": 1,
+        "nr_of_pulses": 1,
         "ipi": 0.0001
     },
     "simulation": {
         "debugging": false,
-        "duration": 2000.0,
+        "duration": 1000.0,
         "dt": 0.0001
     },
-    "git_short_hash": "c2b6584",
-    "timestamp": "Mon Dec 20 15:50:31 2021",
+    "git_short_hash": "13ac335",
+    "timestamp": "Tue Dec 21 12:50:23 2021",
     "git_branch": "master",
-    "git_hash": "c2b658474892b5159fb0b5f2d98b1e750141095e"
+    "git_hash": "13ac335bd1bb40a7ded2482f68a6b296c25d3a0a"
 }

@@ -102,22 +102,22 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "duration" : 2,             # [sec]
+        "duration" : 1,             # [sec]
         "dt" : .1e-3,               # [sec]
         "onset" : 0.2,              # [sec]
         "I" : [1.],                 # stimulation amplitude [nA]
         "pulse_width" : [1.e-3],    # width (in time) of pulse ON phase [sec]
         "stim_freq" : 5,            # stimulation frequency [Hz]
         "pulse_freq" : 100,         # pulse frequency, determines ON duration [Hz]
-        "nr_of_trains" : 2,         # number of pulse trains
-        "nr_of_pulses" : 5,         # number of pulses per train
+        "nr_of_trains" : 1,         # number of pulse trains
+        "nr_of_pulses" : 1,         # number of pulses per train
         "ipi" : .1e-3               # inter-pulse interval [sec]
         },
 
     # simulation parameters
     "simulation" : {
         "debugging" : False,
-        "duration"  : 2e3,  # ms
+        "duration"  : 1e3,  # ms
         "dt"        : 1e-4  # ms
     },
 
