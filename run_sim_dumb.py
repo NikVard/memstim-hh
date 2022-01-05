@@ -54,9 +54,49 @@ print()
 settings.init(data)
 
 # Create the necessary directories
+<<<<<<< Updated upstream
 if not os.path.exists('figures'):
     os.makedirs('figures')
+=======
+dirs = {}
 
+dirs['results'] = 'results/'
+if not os.path.exists(dirs['results']):
+    print("Making directory", dirs['results'])
+    os.makedirs(dirs['results'])
+
+if settings.I_stim[0]:
+    dirs['stim'] = dirs['results'] + '{stimamp:d}_nA/'.format(stimamp=int(settings.I_stim[0]))
+    if not os.path.exists(dirs['stim']):
+        print("Making directory", dirs['stim'])
+        os.makedirs(dirs['stim'])
+
+    dirs['offset'] = dirs['stim'] + '{phase:.2f}_{stim_on:.1f}_ms/'.format(phase=settings.offset, stim_on=settings.stim_onset*1e3)
+    if not os.path.exists(dirs['offset']):
+        print("Making directory", dirs['offset'])
+        os.makedirs(dirs['offset'])
+
+    dirs['base'] = dirs['offset']
+
+else:
+    dirs['stim'] = dirs['results'] + 'None/'
+    if not os.path.exists(dirs['stim']):
+        print("Making directory", dirs['stim'])
+        os.makedirs(dirs['stim'])
+
+    dirs['base'] = dirs['stim']
+
+dirs['figures'] = dirs['base'] + 'figures/'
+if not os.path.exists(dirs['figures']):
+    print("Making directory", dirs['figures'])
+    os.makedirs(dirs['figures'])
+
+dirs['data'] = dirs['base']+'data/'
+if not os.path.exists(dirs['data']):
+    print("Making directory", dirs['data'])
+    os.makedirs(dirs['data'])
+
+>>>>>>> Stashed changes
 
 # Debugging?
 # -------------------------------------------------------------#
@@ -428,7 +468,7 @@ tv = linspace(0, settings.duration/second, int(settings.duration/(settings.stim_
 # inputs_stim = TimedArray(xstim, dt=settings.dt_stim)
 
 # generate stimulation signal
-if settings.I_stim:
+if settings.I_stim[0]:
     print("Stimulation ON")
     xstim = stimulation.generate_stim(duration=settings.stim_duration,
                                       dt=settings.stim_dt,
@@ -440,10 +480,12 @@ if settings.I_stim:
                                       pulse_width=settings.pulse_width,
                                       pulse_freq=settings.pulse_freq,
                                       ipi=settings.stim_ipi)
-    inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
+    # inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 else:
     print("No stimulation defined; using empty TimedArray")
-    inputs_stim = TimedArray(values=[0.]*nA, dt=1*second, name='Input_stim')
+    xstim = zeros(int(settings.stim_duration/settings.stim_dt))
+
+inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 
 
 # inp_theta_sin = 1*sin(2*pi*4*tv)
@@ -544,10 +586,10 @@ print('Linking S2R to Kuramoto oscillators: done')
         g.I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 '''
 # avoid linking when using a fixed theta input sin : TESTING
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 

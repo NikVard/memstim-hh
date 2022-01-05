@@ -22,27 +22,32 @@ def generate_fig_name(initials=''):
         fig_name += 'offset_{offset:.2f}_'.format(offset=settings.offset)
 
     # stimulation
-    if settings.I_stim:
+    if settings.I_stim[0]:
         fig_name += 'stim_on_'
         if len(settings.I_stim)==1:
             fig_name += 'mono_{stim:.2f}_nA_'.format(stim=settings.I_stim[0])
         else:
             fig_name += 'biphasic_{stimA:.2f}_nA_{stimB:.2f}_nA_'.format(stimA=settings.I_stim[0], stimB=settings.I_stim[1])
-    else:
-        fig_name += 'stim_off_'
 
-    # stimulation frequency
-    if settings.stim_freq:
-        fig_name += 'fstim_{fstim:d}_Hz_'.format(fstim=int(settings.stim_freq))
+        # stimulation frequency
+        if settings.stim_freq:
+            fig_name += 'fstim_{fstim:d}_Hz_'.format(fstim=int(settings.stim_freq))
 
-    if settings.nr_of_trains:
-        fig_name += 'trains_{train_nr:d}_'.format(train_nr=int(settings.nr_of_trains))
+        if settings.nr_of_trains:
+            fig_name += 'trains_{train_nr:d}_'.format(train_nr=int(settings.nr_of_trains))
 
-    if settings.nr_of_pulses:
-        fig_name += 'pulses_{pulse_nr:d}_'.format(pulse_nr=int(settings.nr_of_pulses))
+        if settings.nr_of_pulses:
+            fig_name += 'pulses_{pulse_nr:d}_'.format(pulse_nr=int(settings.nr_of_pulses))
 
+<<<<<<< Updated upstream
     if settings.stim_onset:
         fig_name += 'ton_{stim_on:d}_ms'.format(stim_on=int(settings.stim_onset*1000))
+=======
+        if settings.stim_onset:
+            fig_name += 'ton_{stim_on:.1f}_ms'.format(stim_on=settings.stim_onset*1000)
+    else:
+        fig_name += 'stim_off'
+>>>>>>> Stashed changes
 
     return fig_name+'.png'
 
@@ -101,7 +106,7 @@ def plot_kuramoto(order_param_mon):
     axs[1].set_ylim([-pi,pi])
     axs[2].set_ylim([0,1])
 
-    if settings.I_stim:
+    if settings.I_stim[0]:
         axs[0].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
         axs[1].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
         axs[2].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
@@ -168,7 +173,7 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[4].legend()
     axs[4].grid()
 
-    if settings.I_stim:
+    if settings.I_stim[0]:
         axs[0].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
         axs[1].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
         axs[2].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
