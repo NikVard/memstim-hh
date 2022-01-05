@@ -111,25 +111,16 @@
         "gmax_i": 60.0
     },
     "stimulation": {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "duration": 1,
-        "dt": 0.0001,
-        "onset": 0.2,
-        "I": [
-            1.0
-=======
-=======
->>>>>>> Stashed changes
+        "target": "CA1",
+        "coordinates": [
+            0.0,
+            0.0
+        ],
         "duration": 2.0,
         "dt": 0.0001,
         "onset": 1.0,
         "I": [
             null
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         ],
         "pulse_width": [
             0.001
@@ -142,28 +133,11 @@
     },
     "simulation": {
         "debugging": false,
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         "duration": 1000.0,
         "dt": 0.0001
     },
-    "git_short_hash": "13ac335",
-    "timestamp": "Tue Dec 21 12:50:23 2021",
+    "git_short_hash": "1aba526",
+    "timestamp": "Wed Jan  5 13:39:54 2022",
     "git_branch": "master",
-    "git_hash": "13ac335bd1bb40a7ded2482f68a6b296c25d3a0a"
+    "git_hash": "1aba52622cbf92242d0c17e14167d13c30db58ef"
 }
-=======
-=======
->>>>>>> Stashed changes
-        "duration": 2000.0,
-        "dt": 0.0001
-    },
-    "git_short_hash": "83446ae",
-    "timestamp": "Wed Jan  5 11:54:33 2022",
-    "git_branch": "stim_test_CA1_mono_PRC",
-    "git_hash": "83446ae6882809a683584b59df1f7aef5ab5e2f0"
-}
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
