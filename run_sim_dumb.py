@@ -54,10 +54,6 @@ print()
 settings.init(data)
 
 # Create the necessary directories
-<<<<<<< Updated upstream
-if not os.path.exists('figures'):
-    os.makedirs('figures')
-=======
 dirs = {}
 
 dirs['results'] = 'results/'
@@ -96,7 +92,6 @@ if not os.path.exists(dirs['data']):
     print("Making directory", dirs['data'])
     os.makedirs(dirs['data'])
 
->>>>>>> Stashed changes
 
 # Debugging?
 # -------------------------------------------------------------#

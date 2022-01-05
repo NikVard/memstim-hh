@@ -39,15 +39,10 @@ def generate_fig_name(initials=''):
         if settings.nr_of_pulses:
             fig_name += 'pulses_{pulse_nr:d}_'.format(pulse_nr=int(settings.nr_of_pulses))
 
-<<<<<<< Updated upstream
-    if settings.stim_onset:
-        fig_name += 'ton_{stim_on:d}_ms'.format(stim_on=int(settings.stim_onset*1000))
-=======
         if settings.stim_onset:
             fig_name += 'ton_{stim_on:.1f}_ms'.format(stim_on=settings.stim_onset*1000)
     else:
         fig_name += 'stim_off'
->>>>>>> Stashed changes
 
     return fig_name+'.png'
 

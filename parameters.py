@@ -102,17 +102,11 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-<<<<<<< Updated upstream
-        "duration" : 1,             # [sec]
-        "dt" : .1e-3,               # [sec]
-        "onset" : 0.2,              # [sec]
-=======
         "target" : "CA1",           # target area [EC | DG | CA3 | CA1]
         "coordinates" : (0., 0.),   # point electrode coordinates (x,y)
         "duration" : 2.,            # [sec]
         "dt" : .1e-3,               # [sec]
         "onset" : 1.,               # [sec]
->>>>>>> Stashed changes
         "I" : [1.],                 # stimulation amplitude [nA]
         "pulse_width" : [1.e-3],    # width (in time) of pulse ON phase [sec]
         "stim_freq" : 5,            # stimulation frequency [Hz]
