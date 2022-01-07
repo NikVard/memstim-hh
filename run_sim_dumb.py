@@ -348,8 +348,18 @@ for ngroup in G_flat:
     #ngroup.v = -60.*mV
 
     # CA1 populations get stimulated
-    if ngroup.name=='CA1_pyCAN' or ngroup.name=='CA1_inh':
-        ngroup.r = 1 # 1 means on
+    if ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
+        print("Stimulation applied @", ngroup.name)
+
+        # calculate the distance
+        # ngroup.r = 1 # 1 means on
+        # d1 = '{rho}*mm/(4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
+
+        # alternatively, calculate distances like so:
+        neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
+        elec_or = array(settings.stim_coordinates)[np.newaxis,...]
+        d0 = dst.cdist(elec_or, neuron_pos)
+        ngroup.r = 100/(4*pi*d0)
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 

@@ -102,8 +102,9 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "target" : "CA1",               # target area [EC | DG | CA3 | CA1]
-        "coordinates" : (0., 0., 0.),   # point electrode coordinates (x,y,z) [mm]
+        "target" : "EC",               # target area [EC | DG | CA3 | CA1]
+        "coordinates" : (5.0, -10., 7.5),   # point electrode coordinates (x,y,z) [mm]
+        "rho" : 1.,                     # resistivity of homogeneous conductive medium [Ω/cm]
         "duration" : 2.,                # [sec]
         "dt" : .1e-3,                   # [sec]
         "onset" : 1.,                   # [sec]
