@@ -38,18 +38,19 @@ for FN_CONF in ./configs/*;
         FNAME=$(echo $FNAME | cut -f 1 -d '.')
 
         python3 -c "from brian2 import *; clear_cache('cython');" > /dev/null 2>&1
-		time python3 run_sim_dumb.py -p $FN_CONF > "./results/sim_${CNT}_${FNAME}.txt" 2>&1 && echo 'Done'
+		time python3 run_sim_dumb.py -p $FN_CONF > "$RESDIR/sim_${CNT}_${FNAME}.txt" 2>&1
 		#python3 -run_sim_dumb.py > /dev/null 2>&1
+        CODE=$? ; echo 'Done'
 
-		if [ "$?" = 0 ]; then
+		if [ $CODE = 0 ]; then
 			RESULT="success"
 		else
 			RESULT="failure"
 		fi
 
-		echo "$CNT : $FN_CONF : $RESULT" >> "./results/total.txt"
+		echo "$CNT : $FN_CONF : $RESULT" >> "$RESDIR/total.txt"
 		let "CNT+=1"
-		
+
 		### Copy the config file used to results dir
 		cp $FN_CONF $BACKCONF
 	done
