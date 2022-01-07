@@ -102,24 +102,24 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "target" : "CA1",           # target area [EC | DG | CA3 | CA1]
-        "coordinates" : (0., 0.),   # point electrode coordinates (x,y)
-        "duration" : 2.,            # [sec]
-        "dt" : .1e-3,               # [sec]
-        "onset" : 1.,               # [sec]
-        "I" : [1.],                 # stimulation amplitude [nA]
-        "pulse_width" : [1.e-3],    # width (in time) of pulse ON phase [sec]
-        "stim_freq" : 5,            # stimulation frequency [Hz]
-        "pulse_freq" : 100,         # pulse frequency, determines ON duration [Hz]
-        "nr_of_trains" : 1,         # number of pulse trains
-        "nr_of_pulses" : 1,         # number of pulses per train
-        "ipi" : .1e-3               # inter-pulse interval [sec]
+        "target" : "CA1",               # target area [EC | DG | CA3 | CA1]
+        "coordinates" : (0., 0., 0.),   # point electrode coordinates (x,y,z) [mm]
+        "duration" : 2.,                # [sec]
+        "dt" : .1e-3,                   # [sec]
+        "onset" : 1.,                   # [sec]
+        "I" : [1.],                     # stimulation amplitude [nA]
+        "pulse_width" : [1.e-3],        # width (in time) of pulse ON phase [sec]
+        "stim_freq" : 5,                # stimulation frequency [Hz]
+        "pulse_freq" : 100,             # pulse frequency, determines ON duration [Hz]
+        "nr_of_trains" : 1,             # number of pulse trains
+        "nr_of_pulses" : 1,             # number of pulses per train
+        "ipi" : .1e-3                   # inter-pulse interval [sec]
         },
 
     # simulation parameters
     "simulation" : {
         "debugging" : False,
-        "duration"  : 1e3,  # ms
+        "duration"  : 2e3,  # ms
         "dt"        : 1e-4  # ms
     },
 
