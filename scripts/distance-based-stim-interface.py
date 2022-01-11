@@ -5,6 +5,7 @@ import traceback
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
 
 from scipy.spatial import distance as dst
@@ -25,17 +26,10 @@ class GUI(tk.Tk):
     labels['slider'] = {'label':'Stimulation Current', 'limits':['-10nA', '10nA']}
     labels['buttons'] = ['Draw']
 
-    # TODO: write the methods to draw and update given button clicks
-    # def method(self):
-    #     return 'instance method called', self
-    #
-    # @classmethod
-    # def classmethod(cls):
-    #     return 'class method called', cls
-    #
-    # @staticmethod
-    # def staticmethod():
-    #     return 'static method called'
+    # Handle "Enter" events
+    def func(self, event):
+        print("You hit return.")
+        self.plot_structure()
 
     def plot_structure(self):
         self.ax.cla()
@@ -62,22 +56,22 @@ class GUI(tk.Tk):
         # Resistivity
         rho = None
         try:
-            rho = float(self.rho.get())
+            rho = float(self.rho.get()) # Ohm/mm
         except ValueError:
             traceback.print_exc()
             return
 
         # Stim amplitude
-        I_stim = self.I_stim.get()*1e-9
+        I_stim = self.I_stim.get()*1e-9 # nA -> A
 
         # Add the electrode to the plot
-        self.ax.scatter(float(self.ex.get()), float(self.ey.get()), float(self.ez.get()), c='blue')
+        self.ax.scatter(float(self.ex.get()), float(self.ey.get()), float(self.ez.get()), s=48, c='blue', marker='X', label='Point electrode')
 
         # Colormap selection
         cmap = 'hot'
 
         # Downsample plotted neurons
-        ds = 0.25
+        ds = 1.
 
         # Check and plot
         neuron_pos = self.hipp_coords['EC']['exc']
@@ -87,7 +81,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
 
         neuron_pos = self.hipp_coords['EC']['inh']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -96,7 +90,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
 
         neuron_pos = self.hipp_coords['DG']['exc']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -105,7 +99,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='*')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='s', alpha=.5)
 
         neuron_pos = self.hipp_coords['DG']['inh']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -114,7 +108,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
 
         neuron_pos = self.hipp_coords['CA3']['exc']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -123,7 +117,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
 
         neuron_pos = self.hipp_coords['CA3']['inh']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -132,7 +126,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
 
         neuron_pos = self.hipp_coords['CA1']['exc']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -141,7 +135,7 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
 
         neuron_pos = self.hipp_coords['CA1']['inh']
         idx = np.random.rand(len(neuron_pos)) <= ds
@@ -150,12 +144,23 @@ class GUI(tk.Tk):
             val = rho*I_stim/(4*np.pi*d0[0,idx])
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^')
+        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
 
         self.ax.set_title("Anatomical Schematic")
         self.ax.set_xlabel("X [mm]")
         self.ax.set_ylabel("Y [mm]")
         self.ax.set_zlabel("Z [mm]")
+
+        # Custom legend entries
+        custom_lines = [Line2D([0], [0], ls='', marker='o', color='k', markersize=10, label='Py-CAN'),
+                        Line2D([0], [0], ls='', marker='s', color='k', markersize=10, label='Py-non-CAN'),
+                        Line2D([0], [0], ls='', marker='^', color='k', markersize=10, label='Inh. interneurons')]
+
+        handles, labels = self.ax.get_legend_handles_labels()
+        handles.extend(custom_lines)
+        self.ax.legend(handles=handles)
+
+        # TODO: add colorbar w/ limits
 
         self.canvas.draw()
 
@@ -224,14 +229,12 @@ class GUI(tk.Tk):
         __controlsFrame1 = tk.Frame(self, width=700, height=300, background='red')
         __controlsFrame1.grid(row=1, column=0, padx=5, pady=2, sticky=tk.SW+tk.SE)
 
-        __controlsFrame2 = tk.Frame(self, width=300, height=800, bg='green')
+        __controlsFrame2 = tk.Frame(self, width=300, height=800, background='green')
         __controlsFrame2.grid(row=0, column=1, rowspan=2, padx=5, pady=2, sticky=tk.NE+tk.SE)
 
 
         # Plot figure
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # TODO: implement the drawing of the figure using matplotlib
-
         # the figure that will contain the plot
         self.fig = Figure(figsize=(6,6), dpi = 128)
         self.ax = self.fig.add_subplot(111, projection='3d')
@@ -241,8 +244,12 @@ class GUI(tk.Tk):
         self.canvas.get_tk_widget().grid(row=0, column=0, padx=2, pady=2, sticky="nsew")
         self.canvas.draw()
 
+        # __toolbarFrame = tk.Frame(master=__plotFrame)
+        # self.toolbar = NavigationToolbar2Tk(self.canvas, __toolbarFrame)
+        # self.toolbar.update()
+        # self.toolbar.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        # TODO: add sub-frames
+
         # Controls #1
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # layout the containers, weight applied on the slider
@@ -256,83 +263,101 @@ class GUI(tk.Tk):
         stimLabel.grid(row=0, column=0, sticky="", padx=2, pady=5)
         self.stimSlider.grid(row=1, column=0, sticky="", padx=2, pady=5)
 
-        # Rho [Ohm/cm]
-        condLabel = tk.Label(__controlsFrame1, text=r'Medium resistivity ρ [Ω/cm]')
+        # Rho [Ohm/mm]
+        condLabel = tk.Label(__controlsFrame1, text=r'Medium resistivity ρ [Ω/mm]')
         self.condEntry = tk.Entry(__controlsFrame1, width=5, textvariable=self.rho)
 
         condLabel.grid(row=0, column=1, sticky="", padx=2, pady=5)
         self.condEntry.grid(row=1, column=1, sticky="", padx=2, pady=5)
 
 
-        # TODO: add sub-frames
         # Controls #2
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         __controlsFrame2.grid_columnconfigure(0, weight=1)
 
         # Electrode coordinates
-        labelCoords = tk.Label(__controlsFrame2, text='Electrode coordinates [mm]')
-        labelX = tk.Label(__controlsFrame2, text='x')
-        labelY = tk.Label(__controlsFrame2, text='y')
-        labelZ = tk.Label(__controlsFrame2, text='z')
-        self.ex = tk.Entry(__controlsFrame2, width=5, textvariable=self.xc)
-        self.ey = tk.Entry(__controlsFrame2, width=5, textvariable=self.yc)
-        self.ez = tk.Entry(__controlsFrame2, width=5, textvariable=self.zc)
+        __coordLabelsFrame = tk.Frame(master=__controlsFrame2, background='orange')
+        # __coordLabelsFrame.grid(row=0, column=0, padx=5, pady=2, sticky='nsew')
+        __coordLabelsFrame.pack(pady=20)
 
-        labelCoords.grid(row=0, column=0, columnspan=6, sticky=tk.W + tk.E, pady=2)
+        labelCoords = tk.Label(__coordLabelsFrame, text='Electrode coordinates [mm]')
+        labelX = tk.Label(__coordLabelsFrame, text='x')
+        labelY = tk.Label(__coordLabelsFrame, text='y')
+        labelZ = tk.Label(__coordLabelsFrame, text='z')
+        self.ex = tk.Entry(__coordLabelsFrame, width=5, textvariable=self.xc)
+        self.ey = tk.Entry(__coordLabelsFrame, width=5, textvariable=self.yc)
+        self.ez = tk.Entry(__coordLabelsFrame, width=5, textvariable=self.zc)
+
+        # Label
+        labelCoords.grid(row=0, column=0, columnspan=3, sticky=tk.W + tk.E, pady=2)
         __controlsFrame2.grid_rowconfigure(0, minsize=20)
 
         # X
         labelX.grid(row=1, column=0, pady=2)
-        self.ex.grid(row=1, column=1, padx=2, pady=2)
+        self.ex.grid(row=2, column=0, padx=2, pady=2)
 
         # Y
-        labelY.grid(row=1, column=2, pady=2)
-        self.ey.grid(row=1, column=3, padx=2, pady=2)
+        labelY.grid(row=1, column=1, pady=2)
+        self.ey.grid(row=2, column=1, padx=2, pady=2)
 
         # Z
-        labelZ.grid(row=1, column=4, pady=2)
-        self.ez.grid(row=1, column=5, padx=2, pady=2)
+        labelZ.grid(row=1, column=2, pady=2)
+        self.ez.grid(row=2, column=2, padx=2, pady=2)
 
         # Stim. areas
-        labelStimAreas = tk.Label(__controlsFrame2, text='Stimulation Areas')
-        labelEC = tk.Label(__controlsFrame2, text='EC')
-        labelDG = tk.Label(__controlsFrame2, text='DG')
-        labelCA3 = tk.Label(__controlsFrame2, text='CA3')
-        labelCA1 = tk.Label(__controlsFrame2, text='CA1')
+        __stimAreasFrame = tk.Frame(master=__controlsFrame2, background='yellow')
+        # __stimAreasFrame.grid(row=1, column=0, padx=5, pady=10, sticky='nsew')
+        __stimAreasFrame.pack(fill=tk.X, expand=False, pady=20)
 
-        self.cbECexc = tk.Checkbutton(__controlsFrame2, text="E", variable=self.EC_exc)
-        self.cbECinh = tk.Checkbutton(__controlsFrame2, text="I", variable=self.EC_inh)
-        self.cbDGexc = tk.Checkbutton(__controlsFrame2, text="E", variable=self.DG_exc)
-        self.cbDGinh = tk.Checkbutton(__controlsFrame2, text="I", variable=self.DG_inh)
-        self.cbCA3exc = tk.Checkbutton(__controlsFrame2, text="E", variable=self.CA3_exc)
-        self.cbCA3inh = tk.Checkbutton(__controlsFrame2, text="I", variable=self.CA3_inh)
-        self.cbCA1exc = tk.Checkbutton(__controlsFrame2, text="E", variable=self.CA1_exc)
-        self.cbCA1inh = tk.Checkbutton(__controlsFrame2, text="I", variable=self.CA1_inh)
+        labelStimAreas = tk.Label(__stimAreasFrame, text='Stimulation Areas')
+        labelEC = tk.Label(__stimAreasFrame, text='EC')
+        labelDG = tk.Label(__stimAreasFrame, text='DG')
+        labelCA3 = tk.Label(__stimAreasFrame, text='CA3')
+        labelCA1 = tk.Label(__stimAreasFrame, text='CA1')
 
-        # spacing, then place in grid
-        __controlsFrame2.grid_rowconfigure(2, minsize=20)
-        labelStimAreas.grid(row=2, column=0, columnspan=6, pady=0, sticky=tk.S)
-        labelEC.grid(row=3, column=0, columnspan=3)
-        labelDG.grid(row=3, column=3, columnspan=3)
-        self.cbECexc.grid(row=4, column=1)
-        self.cbECinh.grid(row=4, column=2)
-        self.cbDGexc.grid(row=4, column=4)
-        self.cbDGinh.grid(row=4, column=5)
+        self.cbECexc = tk.Checkbutton(__stimAreasFrame, text="E", variable=self.EC_exc)
+        self.cbECinh = tk.Checkbutton(__stimAreasFrame, text="I", variable=self.EC_inh)
+        self.cbDGexc = tk.Checkbutton(__stimAreasFrame, text="E", variable=self.DG_exc)
+        self.cbDGinh = tk.Checkbutton(__stimAreasFrame, text="I", variable=self.DG_inh)
+        self.cbCA3exc = tk.Checkbutton(__stimAreasFrame, text="E", variable=self.CA3_exc)
+        self.cbCA3inh = tk.Checkbutton(__stimAreasFrame, text="I", variable=self.CA3_inh)
+        self.cbCA1exc = tk.Checkbutton(__stimAreasFrame, text="E", variable=self.CA1_exc)
+        self.cbCA1inh = tk.Checkbutton(__stimAreasFrame, text="I", variable=self.CA1_inh)
 
-        __controlsFrame2.grid_rowconfigure(5, minsize=25)
-        labelCA3.grid(row=5, column=0, columnspan=3)
-        labelCA1.grid(row=5, column=3, columnspan=3)
-        self.cbCA3exc.grid(row=6, column=1)
-        self.cbCA3inh.grid(row=6, column=2)
-        self.cbCA1exc.grid(row=6, column=4)
-        self.cbCA1inh.grid(row=6, column=5)
+        # then place in grid
+        __stimAreasFrame.grid_rowconfigure(0, weight=1)
+        __stimAreasFrame.grid_columnconfigure(0, weight=1)
+        __stimAreasFrame.grid_columnconfigure(1, weight=1)
+        __stimAreasFrame.grid_columnconfigure(2, weight=1)
+        __stimAreasFrame.grid_columnconfigure(3, weight=1)
+
+        labelStimAreas.grid(row=0, column=0, columnspan=4, sticky=tk.W + tk.E, pady=2)
+        labelEC.grid(row=1, column=0, columnspan=1)
+        labelDG.grid(row=1, column=1, columnspan=1)
+        self.cbECexc.grid(row=2, column=0)
+        self.cbECinh.grid(row=3, column=0)
+        self.cbDGexc.grid(row=2, column=1)
+        self.cbDGinh.grid(row=3, column=1)
+
+        # __controlsFrame2.grid_rowconfigure(5, minsize=25)
+        labelCA3.grid(row=1, column=2, columnspan=1)
+        labelCA1.grid(row=1, column=3, columnspan=1)
+        self.cbCA3exc.grid(row=2, column=2)
+        self.cbCA3inh.grid(row=3, column=2)
+        self.cbCA1exc.grid(row=2, column=3)
+        self.cbCA1inh.grid(row=3, column=3)
 
 
-        # TODO: add sub-frame for the button area
         # Update draw button
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        self.btnUpdate = tk.Button(__controlsFrame2, text='Update', command=self.plot_structure)
-        self.btnUpdate.grid(row=7, column=0, columnspan=6)
+        __updateBtnFrame = tk.Frame(master=__controlsFrame2, background='cyan')
+        # __updateBtnFrame.grid(row=2, column=0, padx=5, pady=10)
+        __updateBtnFrame.pack(pady=20)
+        self.btnUpdate = tk.Button(__updateBtnFrame, text='Update', command=self.plot_structure)
+        self.btnUpdate.grid(row=0, column=0)
+
+
+        self.bind('<Return>', self.func)
 
 
 # Main script
