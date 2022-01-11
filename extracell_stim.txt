@@ -20,7 +20,7 @@ extracellular electrode(s) and is given by
         |===============================|
         |   Vel = rx(x,y,z) Im(x,y,z)   |
         |===============================|
-        
+
 
 -----------------------------------------
 How to simulate extracellular stimulation
@@ -155,3 +155,16 @@ for all points that lie on some plane that is perpendicular to
 the field.  For this "zero potential surface" it is convenient
 to choose the plane that passes through a particular location
 in the cell, such as the 0 end of the soma.
+
+
+
+
+--------------------------------------------------------
+Conventional current flow in a cell
+--------------------------------------------------------
+https://www.gatsby.ucl.ac.uk/~lmate/biblio/dayanabbott.pdf
+--------------------------------------------------------
+
+By convention, current that enters the neuron through an electrode is
+defined as positive-inward, whereas membrane current is defined as
+positive-outward
