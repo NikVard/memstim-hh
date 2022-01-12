@@ -87,10 +87,21 @@ if not os.path.exists(dirs['figures']):
     print("Making directory", dirs['figures'])
     os.makedirs(dirs['figures'])
 
-dirs['data'] = dirs['base']+'data/'
+dirs['data'] = dirs['base'] + 'data/'
 if not os.path.exists(dirs['data']):
     print("Making directory", dirs['data'])
     os.makedirs(dirs['data'])
+
+dirs['positions'] = dirs['data'] + 'positions/'
+if not os.path.exists(dirs['positions']):
+    print("Making directory", dirs['positions'])
+    os.makedirs(dirs['positions'])
+
+dirs['spikes'] = dirs['data'] + 'spikes/'
+if not os.path.exists(dirs['spikes']):
+    print("Making directory", dirs['spikes'])
+    os.makedirs(dirs['spikes'])
+
 
 
 # Debugging?
@@ -453,8 +464,8 @@ state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][
 state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('State monitors [v]: done')
 
-spike_mon_E_all = [[SpikeMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
-spike_mon_I_all = [[SpikeMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+spike_mon_E_all = [[SpikeMonitor(G_py, name=G_py.name+'_spikemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
+spike_mon_I_all = [[SpikeMonitor(G_inh, name=G_inh.name+'_spikemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('Spike monitors: done')
 
 rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
@@ -725,3 +736,39 @@ np.savetxt(dirs['data']+'s2r_mon_drive.txt', s2r_mon.drive_.T, fmt='%.8f')
 
 # External stimulus
 np.savetxt(dirs['data']+'stim_input.txt', xstim, fmt='%.2f')
+
+
+
+# Save the spikes and their times
+# -------------------------------------------------------------#
+print("\nSaving spikes in time....")
+SM_i = []
+SM_t = []
+for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
+    for i_val in SM.i:
+        SM_i.append(i_val)
+
+    for t_val in SM.t:
+        SM_t.append(t_val/msecond)
+
+    fname = SM.name
+    np.savetxt(dirs['spikes'] + fname + '_i', np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(dirs['spikes'] + fname + '_t', np.array(SM_t).astype(np.float32), fmt='%.1f')
+
+    SM_i.clear()
+    SM_t.clear()
+
+
+# Save the positions of the neurons in npy files
+# -------------------------------------------------------------#
+print("\nSaving neuron positions...")
+for G in G_flat:
+    try:
+        print('Current group: ', G.name)
+        fname = '{group}'.format(group=G.name)
+        pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
+        np.save(dirs['positions'] + fname, pos)
+
+    except AttributeError:
+        print('pass...')
+        continue
