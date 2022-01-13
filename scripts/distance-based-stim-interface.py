@@ -34,6 +34,10 @@ class GUI(tk.Tk):
     def plot_structure(self):
         self.ax.cla()
 
+        # reset min/max distance values
+        min_, max_ = 0, 0
+        sp = []
+
         # Electrode position
         elec_pos = []
         try:
@@ -71,7 +75,7 @@ class GUI(tk.Tk):
         cmap = 'hot'
 
         # Downsample plotted neurons
-        ds = 1.
+        ds = .25
 
         # Check and plot
         neuron_pos = self.hipp_coords['EC']['exc']
@@ -79,6 +83,12 @@ class GUI(tk.Tk):
         if self.EC_exc.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
@@ -88,6 +98,12 @@ class GUI(tk.Tk):
         if self.EC_inh.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
@@ -97,6 +113,12 @@ class GUI(tk.Tk):
         if self.DG_exc.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='s', alpha=.5)
@@ -106,6 +128,12 @@ class GUI(tk.Tk):
         if self.DG_inh.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
@@ -115,6 +143,12 @@ class GUI(tk.Tk):
         if self.CA3_exc.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
@@ -124,6 +158,12 @@ class GUI(tk.Tk):
         if self.CA3_inh.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
@@ -133,6 +173,12 @@ class GUI(tk.Tk):
         if self.CA1_exc.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
         self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='o', alpha=.5)
@@ -142,14 +188,22 @@ class GUI(tk.Tk):
         if self.CA1_inh.get():
             d0 = dst.cdist(elec_pos, neuron_pos)
             val = rho*I_stim/(4*np.pi*d0[0,idx])
+
+            if min_ > val.min():
+                min_ = val.min()
+            if max_ < val.max():
+                max_ = val.max()
+
         else:
             val = 'k'
-        self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
+        s0 = self.ax.scatter(neuron_pos[idx,0], neuron_pos[idx,1], neuron_pos[idx,2], c=val, cmap=cmap, marker='^', alpha=.5)
+
 
         self.ax.set_title("Anatomical Schematic")
         self.ax.set_xlabel("X [mm]")
         self.ax.set_ylabel("Y [mm]")
         self.ax.set_zlabel("Z [mm]")
+        # self.fig.colorbar(s0, ax=self.ax).set_label('Distance')
 
         # Custom legend entries
         custom_lines = [Line2D([0], [0], ls='', marker='o', color='k', markersize=10, label='Py-CAN'),
@@ -161,6 +215,7 @@ class GUI(tk.Tk):
         self.ax.legend(handles=handles)
 
         # TODO: add colorbar w/ limits
+
 
         self.canvas.draw()
 
