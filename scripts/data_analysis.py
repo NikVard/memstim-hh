@@ -221,7 +221,7 @@ axs2[3].legend()
 # plt.show()
 
 
-# Analysis #2a: Time-Frequency (Wavelets)
+# Analysis #2a: Time-Frequency % TODO: Fix Z-limits and add colorbar
 # ------------------------------------------------------------------------------
 print("\n* Analysis #2a")
 print(">> Time-frequency analysis (scipy spectrogram)...")
@@ -230,26 +230,52 @@ win_size_t = 0.25
 win_size_s = int(win_size_t * fs2)
 
 f, t, EC_exc_Sxx = signal.spectrogram(EC_exc_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))
+EC_inh_Sxx = signal.spectrogram(EC_inh_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+DG_exc_Sxx = signal.spectrogram(DG_exc_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+DG_inh_Sxx = signal.spectrogram(DG_inh_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+CA3_exc_Sxx = signal.spectrogram(CA3_exc_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+CA3_inh_Sxx = signal.spectrogram(CA3_inh_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+CA1_exc_Sxx = signal.spectrogram(CA1_exc_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
+CA1_inh_Sxx = signal.spectrogram(CA1_inh_rate, fs=int(fs2), nfft=NFFT, window=signal.hann(M=win_size_s,sym=False), nperseg=win_size_s, noverlap=int(2*win_size_s/4))[2]
 
-fig10, axs10 = plt.subplots(1)
 
-plt.pcolormesh(t, f, 1./win_size_s * EC_exc_Sxx**2, shading='gouraud')
-plt.ylabel('Frequency [Hz]')
-plt.xlabel('Time [sec]')
+fig10, axs10 = plt.subplots(nrows=2, ncols=4, sharex=True, sharey=True, figsize=(16,8))
 
-plt.ylim(0,200)
+axs10[0,0].pcolormesh(t, f, 1./win_size_s*EC_exc_Sxx**2, shading='gouraud')
+axs10[1,0].pcolormesh(t, f, 1./win_size_s*EC_inh_Sxx**2, shading='gouraud')
+axs10[0,1].pcolormesh(t, f, 1./win_size_s*DG_exc_Sxx**2, shading='gouraud')
+axs10[1,1].pcolormesh(t, f, 1./win_size_s*DG_inh_Sxx**2, shading='gouraud')
+axs10[0,2].pcolormesh(t, f, 1./win_size_s*CA3_exc_Sxx**2, shading='gouraud')
+axs10[1,2].pcolormesh(t, f, 1./win_size_s*CA3_inh_Sxx**2, shading='gouraud')
+axs10[0,3].pcolormesh(t, f, 1./win_size_s*CA1_exc_Sxx**2, shading='gouraud')
+axs10[1,3].pcolormesh(t, f, 1./win_size_s*CA1_inh_Sxx**2, shading='gouraud')
 
-plt.show()
 
-exit()
+for ax_out in axs10:
+    for ax_in in ax_out:
+        ax_in.set_ylabel('Frequency [Hz]')
+        ax_in.set_xlabel('Time [sec]')
+        ax_in.set_ylim(0,100)
 
-# Analysis #2b: Time-Frequency (Hilbert-Filter)
+axs10[0,0].set_title('EC')
+axs10[0,1].set_title('DG')
+axs10[0,2].set_title('CA3')
+axs10[0,3].set_title('CA1')
+
+fig10.suptitle('Spectrograms', fontsize=16)
+
+# plt.show()
+
+
+# Analysis #2b: Time-Frequency (wavelets?)
 # ------------------------------------------------------------------------------
-print("\n* Analysis #3")
-print(">> Phase-amplitude coupling in theta-gamma using filter-Hilbert method...")
+print("\n* Analysis #2b")
+print(">> Time-frequency analysis (spectrogram) using wavelets...")
+print(":: PASS ::")
 
 
 # Analysis #3: PAC of theta-gamma rhythms
+# https://www.frontiersin.org/articles/10.3389/fnins.2019.00573/full#:~:text=To%20calculate%20phase%2Damplitude%20coupling%2C%20first%2C%20raw%20data%20is,the%20complex%2Dvalued%20analytic%20signal.
 # ------------------------------------------------------------------------------
 print("\n* Analysis #3")
 print(">> Phase-amplitude coupling in theta-gamma using filter-Hilbert method...")
@@ -511,7 +537,61 @@ plt.figlegend(loc='upper left', fancybox=True, framealpha=1, shadow=True, border
 fig5.suptitle('Inhibitory Groups', fontsize=16)
 
 
+# plt.show()
+
+# Analytic signals from Hilbert transform
+# Theta
+EC_exc_theta_a = signal.hilbert(EC_exc_rate_filt_theta)
+EC_inh_theta_a = signal.hilbert(EC_inh_rate_filt_theta)
+DG_exc_theta_a = signal.hilbert(DG_exc_rate_filt_theta)
+DG_inh_theta_a = signal.hilbert(DG_inh_rate_filt_theta)
+CA3_exc_theta_a = signal.hilbert(CA3_exc_rate_filt_theta)
+CA3_inh_theta_a = signal.hilbert(CA3_inh_rate_filt_theta)
+CA1_exc_theta_a = signal.hilbert(CA1_exc_rate_filt_theta)
+CA1_inh_theta_a = signal.hilbert(CA1_inh_rate_filt_theta)
+
+# Gamma (low)
+EC_exc_gamma_low_a = signal.hilbert(EC_exc_rate_filt_gamma_low)
+EC_inh_gamma_low_a = signal.hilbert(EC_inh_rate_filt_gamma_low)
+DG_exc_gamma_low_a = signal.hilbert(DG_exc_rate_filt_gamma_low)
+DG_inh_gamma_low_a = signal.hilbert(DG_inh_rate_filt_gamma_low)
+CA3_exc_gamma_low_a = signal.hilbert(CA3_exc_rate_filt_gamma_low)
+CA3_inh_gamma_low_a = signal.hilbert(CA3_inh_rate_filt_gamma_low)
+CA1_exc_gamma_low_a = signal.hilbert(CA1_exc_rate_filt_gamma_low)
+CA1_inh_gamma_low_a = signal.hilbert(CA1_inh_rate_filt_gamma_low)
+
+# Gamma (high)
+EC_exc_gamma_high_a = signal.hilbert(EC_exc_rate_filt_gamma_high)
+EC_inh_gamma_high_a = signal.hilbert(EC_inh_rate_filt_gamma_high)
+DG_exc_gamma_high_a = signal.hilbert(DG_exc_rate_filt_gamma_high)
+DG_inh_gamma_high_a = signal.hilbert(DG_inh_rate_filt_gamma_high)
+CA3_exc_gamma_high_a = signal.hilbert(CA3_exc_rate_filt_gamma_high)
+CA3_inh_gamma_high_a = signal.hilbert(CA3_inh_rate_filt_gamma_high)
+CA1_exc_gamma_high_a = signal.hilbert(CA1_exc_rate_filt_gamma_high)
+CA1_inh_gamma_high_a = signal.hilbert(CA1_inh_rate_filt_gamma_high)
 
 
+fig6, axs6 = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True, figsize=(16,8))
+axs6[0,0].plot(EC_exc_bin_edges[:-1], EC_exc_rate_filt_theta, label=r'filtered $\theta$')
+axs6[0,0].plot(EC_exc_bin_edges[:-1], np.abs(EC_exc_theta_a), label=r'envelope')
+axs6[1,0].plot(EC_exc_bin_edges[:-1], np.angle(EC_exc_theta_a), label=r'phase')
+
+axs6[0,1].plot(EC_exc_bin_edges[:-1], EC_exc_rate_filt_gamma_low, label=r'filtered $\gamma_{0}$')
+axs6[0,1].plot(EC_exc_bin_edges[:-1], np.abs(EC_exc_gamma_low_a), label=r'envelope')
+axs6[1,1].plot(EC_exc_bin_edges[:-1], np.angle(EC_exc_gamma_low_a), label=r'phase')
+
+axs6[1,0].set_ylabel('Phase')
+axs6[0,0].set_ylabel('Amplitude')
+axs6[1,0].set_xlabel('Time [ms]')
+axs6[1,1].set_xlabel('Time [ms]')
+
+# plt.figlegend(loc='upper left', fancybox=True, framealpha=1, shadow=True, borderpad=1)
+fig6.suptitle('EC Excitatory Hilbert Transform Test', fontsize=16)
 
 plt.show()
+
+# PAC calculation: use either the Phase-Locking-Value (PLV - Mormann 2005) or the Mean Vector Length (MVL - Canolty 2006) (most specific); by the MI as last resort
+
+# PL: Phase extracted from low-frequency (Theta); amplitude extracted from high-frequency (Gamma)
+# The amplitude time series is then again Hilbert transformed and phase is extracted from the “second” analytic signal
+# By these steps, one obtains phase angles for both time series for each data point.
