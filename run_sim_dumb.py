@@ -24,7 +24,6 @@ from src.myplot import *
 from src import stimulation
 
 
-
 # Configuration
 # -------------------------------------------------------------#
 # Use C++ standalone code generation TODO: Experimental!
@@ -81,6 +80,12 @@ else:
         os.makedirs(dirs['stim'])
 
     dirs['base'] = dirs['stim']
+
+dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
+dirs['base'] = dirs['base'] + dtime + '/'
+if not os.path.exists(dirs['base']):
+    print("Making directory", dirs['base'])
+    os.makedirs(dirs['base'])
 
 dirs['figures'] = dirs['base'] + 'figures/'
 if not os.path.exists(dirs['figures']):
@@ -586,7 +591,7 @@ for g in G_flat:
 
 # connect the CA1-E group to the low-pass-filter spikes-2-rates (S2R) group
 if G_CA1_E:
-    syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='Y_post += (1/tauFR)', namespace=filter_params)
+    syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='Y_post += (1/tauFR)/N_incoming', namespace=filter_params)
     syn_CA1_2_rates.connect()
 print('CA1-to-S2R: done')
 

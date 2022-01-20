@@ -34,5 +34,5 @@ integ_method = 'exponential_euler'  # integration method
 
 # Spikes-2-Rates filter
 filter_params = {
-    'tauFR' : 50*ms
+    'tauFR' : 1*ms
 }
