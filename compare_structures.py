@@ -111,6 +111,7 @@ def f0(pc1, pc2):
 
 
 def f1(x, *params):
+    ''' Wrapper around f0(); adjusts the scale '''
     reference, adjusted, scale_ref = params
 
     # calculate the new scale

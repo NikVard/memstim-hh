@@ -1,7 +1,26 @@
 from brian2 import *
 
+from mpl3d import glm
+from mpl3d.camera import Camera
+
 from model import settings
 from model.globals import *
+from src import plot3d
+
+def subplot(index):
+    ax = plt.subplot(index, xlim=[-1,1], ylim=[-1,1], aspect=1)
+    ax.set_axisbelow(True)
+    ax.set_xticks(np.linspace(-1,1,11,endpoint=True)[1:-1])
+    ax.set_yticks(np.linspace(-1,1,11,endpoint=True)[1:-1])
+    ax.grid(True)
+    for tick in ax.xaxis.get_major_ticks():
+        tick.tick1line.set_visible(False)
+        tick.label.set_visible(False)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.tick1line.set_visible(False)
+        tick.label.set_visible(False)
+    return ax
+
 
 def plot_watermark(fig, script_filename, config_filename, branch, hash):
     """ Add simulation infomation on the figure """
@@ -77,7 +96,6 @@ def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
     return fig, axs, fig_name
 
 
-
 def plot_kuramoto(order_param_mon):
     """ Plots the average phase and the phase coherence of the ensemble of Kuramoto oscillators. Also plots the generated theta rhythm from the MS. """
 
@@ -118,7 +136,6 @@ def plot_kuramoto(order_param_mon):
     fig_name = generate_fig_name('Kuramoto_rhythms_')
 
     return fig, axs, fig_name
-
 
 
 def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv, stim_inp):
@@ -179,3 +196,63 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     fig_name = generate_fig_name('Kuramoto_extra_')
 
     return fig, axs, fig_name
+
+
+def plot_structure_3D(neuron_groups):
+    # make a figure
+    fig = figure(figsize=(8,8))
+
+    # add an axis (main plot)
+    #ax = subplot(221)
+    ax = fig.add_axes([0,0,1,1], xlim=[-1,+1], ylim=[-1,+1], aspect=1)
+    ax.axis("off")
+
+    # initialize the numpy arrays
+    V = empty((1,3))
+    C = empty((1,3))
+    S = empty((1,1))
+
+    for ng in neuron_groups:
+        gname = ng.name.lower()
+        if (gname.find("pycan") >= 0):
+            color = (0,0,1)
+        elif (gname.find("py") >= 0):
+            color = (0,1,0)
+        else:
+            color = (1,0,0)
+
+        nsize = len(ng.x_soma)
+        psize = int(.1*nsize)
+        #psize = 100
+        idxs = permutation(nsize)[:psize]
+        V_tmp = zeros((psize,3))
+        V_tmp[:,0] = ng.x_soma[idxs]
+        V_tmp[:,1] = ng.y_soma[idxs]
+        V_tmp[:,2] = ng.z_soma[idxs]
+
+        C_tmp = ones((len(V_tmp),3))
+        C_tmp[:] = color
+
+        S_tmp = ones((len(V_tmp),1))
+
+
+        V = concatenate((V,V_tmp), axis=0)
+        C = concatenate((C,C_tmp), axis=0)
+        S = concatenate((S,S_tmp), axis=0)
+
+    #S = 100+S*300
+
+    FC = ones((len(V),4)) # face colors
+    EC = ones((len(V),4)) # edge colors
+    FC[:,:3] = C
+    EC[:] = 0,0,0,.75
+
+    # initialize the camera
+    camera = Camera("ortho", 10, 0, scale=100)
+
+    # scatter and connect to camera
+    scatter = plot3d.Scatter(ax, camera.transform, V,
+                            facecolors=FC, edgecolors=EC, sizes=squeeze(S))
+    camera.connect(ax, scatter.update)
+
+    show()
