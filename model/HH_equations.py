@@ -74,7 +74,7 @@ py_CAN_inp_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    G_sin = 1.5*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
+    G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # this is the input theta rhythm from the MS
     #I_exc = inp_theta(t) : amp
     r : 1
@@ -108,8 +108,8 @@ py_CAN_eqs = '''
             betah = 4. / (1. + exp(- (v + 15.*mV) / (5.*mV))) / ms : Hz
     I_Ca = ((1e-4 * siemens*cm**-2) * (size)) * (mCaL**2) * hCaL * (v - 120.*mV) : amp
         dmCaL/dt = (alphamCaL * (1. - mCaL)) - (betamCaL * mCaL) : 1
-        alphamCaL = 0.055 * (mV**-1) * (3.8*mV) / exprel(-(v + 27.*mV) / (3.8*mV)) / ms : Hz
-        betamCaL = 0.94 * exp(-(v + 75.*mV) / (17.*mV)) / ms : Hz
+            alphamCaL = 0.055 * (mV**-1) * (3.8*mV) / exprel(-(v + 27.*mV) / (3.8*mV)) / ms : Hz
+            betamCaL = 0.94 * exp(-(v + 75.*mV) / (17.*mV)) / ms : Hz
         dhCaL/dt = (alphahCaL * (1. - hCaL)) - (betahCaL * hCaL) : 1
             alphahCaL = 0.000457 * exp(-(v + 13.*mV) / (50.*mV)) / ms : Hz
             betahCaL = 0.0065 / (exp(-(v + 15.*mV) / (28.*mV)) + 1.) / ms : Hz
@@ -248,7 +248,7 @@ inh_inp_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    G_sin = 1.5*int(z_soma<15*mm)*int(z_soma>0*mm) : 1  # this is the mask/scaling for which neurons get the sinusoidal input
+    G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1  # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked)    # same as in the pyCAN group, excitatory input from MS
     #I_exc = inp_theta(t) : amp
     r : 1
