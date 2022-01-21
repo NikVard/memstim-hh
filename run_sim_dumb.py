@@ -364,7 +364,7 @@ for ngroup in G_flat:
     #ngroup.v = -60.*mV
 
     # CA1 populations get stimulated
-    if ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
+    if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
         print("Stimulation applied @", ngroup.name)
 
         # calculate the distance
