@@ -757,8 +757,8 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_t.append(t_val/msecond)
 
     fname = SM.name
-    np.savetxt(dirs['spikes'] + fname + '_i', np.array(SM_i).astype(np.int16), fmt='%d')
-    np.savetxt(dirs['spikes'] + fname + '_t', np.array(SM_t).astype(np.float32), fmt='%.1f')
+    np.savetxt(dirs['spikes'] + fname + '_i.txt', np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(dirs['spikes'] + fname + '_t.txt', np.array(SM_t).astype(np.float32), fmt='%.1f')
 
     SM_i.clear()
     SM_t.clear()
