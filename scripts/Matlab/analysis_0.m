@@ -128,20 +128,21 @@ plot(fv, DG.inh.PSD)
 title('DG')
 
 % Tile 3
-nexttile
+ax(3) = nexttile;
 plot(fv, CA3.exc.PSD)
 hold on
 plot(fv, CA3.inh.PSD)
 title('CA3')
 
 % Tile 4
-nexttile
+ax(4) = nexttile;
 plot(fv, CA1.exc.PSD)
 hold on
 plot(fv, CA1.inh.PSD)
 title('CA1')
 
 xlabel('Frequency [Hz]')
+linkaxes(ax,'x')
 
 lh = legend(ax(1),'Location','NorthOutside','Orientation','Horizontal');
 lh.Layout.Tile = 'North'; % <----- relative to tiledlayout
@@ -187,7 +188,6 @@ pspectrum(CA1.exc.rates_dm, fs, 'spectrogram', 'OverlapPercent', 99, 'TimeResolu
 % Tile 4/2
 ax(4,2) = nexttile;
 pspectrum(CA1.inh.rates_dm, fs, 'spectrogram', 'OverlapPercent', 99, 'TimeResolution', t_res)
-
 
 
 %% Time-Frequency Analysis (Chronux)
@@ -285,3 +285,4 @@ plot(tv(1:end-1), data_f.gammah)
 
 % Hilbert transform to extract phase/amplitude
 data_ht = hilbert(data);
+
