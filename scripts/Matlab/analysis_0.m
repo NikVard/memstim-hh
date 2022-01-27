@@ -2,6 +2,7 @@ close all
 clear
 clc
 
+
 %% Parameters
 % ------------
 T = 2; %  duration, seconds
@@ -33,6 +34,7 @@ CA1.exc.type = types{1};
 CA1.exc.N = 10000;
 CA1.inh.type = types{3};
 CA1.inh.N = 1000;
+
 
 %% Read the spike data
 % ---------------------
@@ -97,6 +99,7 @@ CA1.inh.rates_dm = detrend(CA1.inh.rates);
 % hold on
 % plot(tv(1:end-1), DG.exc.rates/DG.exc.N/bin_size)
 
+
 %% Power Spectral Density (Single-Sided periodogram)
 % ---------------------------------------------------
 NFFT = 2^nextpow2(length(tv));
@@ -146,6 +149,7 @@ linkaxes(ax,'x')
 
 lh = legend(ax(1),'Location','NorthOutside','Orientation','Horizontal');
 lh.Layout.Tile = 'North'; % <----- relative to tiledlayout
+
 
 %% Time-Frequency Analysis (Spectrogram w/ STFT)
 % -----------------------------------------------
@@ -264,25 +268,174 @@ fc = {};
 fc.low = [12];
 fc.theta = [4, 12];
 fc.gammal = [30, 80];
-fc.gammah = [80, 120];
-fc.high = [120];
-
-data = EC.exc.rates_dm;
+fc.gammah = [80, 200]; % Canolty/Knight 2010
+fc.high = [200];
 
 % Filter the data
-data_f.low = filter_pass(data, fs, [], fc.low(1), 8);
-data_f.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
-data_f.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
-data_f.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+% EC
+data = EC.exc.rates_dm;
+EC.exc.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+EC.exc.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+EC.exc.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+EC.exc.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+data = EC.inh.rates_dm;
+EC.inh.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+EC.inh.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+EC.inh.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+EC.inh.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+% DG
+data = DG.exc.rates_dm;
+DG.exc.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+DG.exc.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+DG.exc.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+DG.exc.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+data = DG.inh.rates_dm;
+DG.inh.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+DG.inh.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+DG.inh.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+DG.inh.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+% CA3
+data = CA3.exc.rates_dm;
+CA3.exc.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+CA3.exc.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+CA3.exc.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+CA3.exc.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+data = CA3.inh.rates_dm;
+CA3.inh.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+CA3.inh.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+CA3.inh.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+CA3.inh.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+% CA1
+data = CA1.exc.rates_dm;
+CA1.exc.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+CA1.exc.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+CA1.exc.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+CA1.exc.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
+
+data = CA1.inh.rates_dm;
+CA1.inh.filt.low = filter_pass(data, fs, [], fc.low(1), 8);
+CA1.inh.filt.theta = filter_pass(data, fs, fc.theta(1), fc.theta(2), 8);
+CA1.inh.filt.gammal = filter_pass(data, fs, fc.gammal(1), fc.gammal(2), 8);
+CA1.inh.filt.gammah = filter_pass(data, fs, fc.gammah(1), fc.gammah(2), 8);
 
 figure()
-plot(tv(1:end-1), data)
+plot(tv(1:end-1), EC.exc.rates_dm)
 hold on;
-plot(tv(1:end-1), data_f.low)
-plot(tv(1:end-1), data_f.theta)
-plot(tv(1:end-1), data_f.gammal)
-plot(tv(1:end-1), data_f.gammah)
+plot(tv(1:end-1), EC.exc.filt.low)
+plot(tv(1:end-1), EC.exc.filt.theta)
+plot(tv(1:end-1), EC.exc.filt.gammal)
+plot(tv(1:end-1), EC.exc.filt.gammah)
+legend('demean', 'low', 'theta', 'gamma low', 'gamma high')
 
 % Hilbert transform to extract phase/amplitude
 data_ht = hilbert(data);
 
+
+%% CFC and PAC between Theta and Gamma rhythms
+% ---------------------------------------------
+% figure()
+% plot(tv(1:end-1), EC.exc.filt.theta)
+% hold on
+% plot(tv(1:end-1), EC.exc.filt.gammah)
+
+% PLV calculation
+EC.exc.analytic.theta = hilbert(EC.exc.filt.theta);
+EC.exc.analytic.gammal = hilbert(EC.exc.filt.gammal);
+EC.exc.analytic.gammah= hilbert(EC.exc.filt.gammah);
+EC.exc.analytic.gammal2 = hilbert(real(EC.exc.analytic.gammal));
+EC.exc.analytic.gammah2 = hilbert(real(EC.exc.analytic.gammah));
+
+% Calculate the phase differences
+phi_theta = angle(EC.exc.analytic.theta);
+phi_gammah = angle(EC.exc.analytic.gammah2);
+phi_d = phi_theta - phi_gammah;
+lags = exp(1j*phi_d);
+
+% Calculate the PLV (mean of lags)
+mu_phi = mean(lags);
+PLV = [abs(mu_phi), angle(mu_phi)];
+
+figure()
+polarplot([angle(lags); angle(lags)], [zeros(1,length(lags)); ones(1,length(lags))], 'Color', [0,0,0,0.1])
+hold on
+polarplot([PLV(2); PLV(2)], [0; PLV(1)], 'Color', 'red')
+
+if PLV(1) < 0.1
+    disp('Nothing there...')
+end
+
+
+%% Coherency between traces of theta and gamma
+% ---------------------------------------------
+params = {};
+params.Fs = fs;                     % sampling frequency
+params.fpass = [0 250];             % frequencies in output
+params.pad = 1;                     % -1: no padding; 0: next power of 2; 1: next power of 2+1
+params.error = 0;                   % error bar calculation; 0: none; 1: theoretical; 2: jackknife
+params.trialave = 0;                % trial averaging; not required
+params.tapers = [3,5];              % 
+params.movingwin = [0.25, 0.01];    % 2-elem array; [size of the moving window, step size to advance the window]
+
+[EC.exc.coh.C,EC.exc.coh.phi, EC.exc.coh.S12,EC.exc.coh.S1,EC.exc.coh.S2,EC.exc.coh.t, EC.exc.coh.f] = cohgramc(EC.exc.filt.gammal.',EC.exc.rates_dm.',params.movingwin,params);
+[EC.inh.coh.C,EC.inh.coh.phi, EC.inh.coh.S12,EC.inh.coh.S1,EC.inh.coh.S2,EC.inh.coh.t, EC.inh.coh.f] = cohgramc(EC.inh.filt.gammal.',EC.inh.rates_dm.',params.movingwin,params);
+[DG.exc.coh.C,DG.exc.coh.phi, DG.exc.coh.S12,DG.exc.coh.S1,DG.exc.coh.S2,DG.exc.coh.t, DG.exc.coh.f] = cohgramc(DG.exc.filt.gammal.',DG.exc.rates_dm.',params.movingwin,params);
+[DG.inh.coh.C,DG.inh.coh.phi, DG.inh.coh.S12,DG.inh.coh.S1,DG.inh.coh.S2,DG.inh.coh.t, DG.inh.coh.f] = cohgramc(DG.inh.filt.gammal.',DG.inh.rates_dm.',params.movingwin,params);
+[CA3.exc.coh.C,CA3.exc.coh.phi, CA3.exc.coh.S12,CA3.exc.coh.S1,CA3.exc.coh.S2,CA3.exc.coh.t, CA3.exc.coh.f] = cohgramc(CA3.exc.filt.gammal.',CA3.exc.rates_dm.',params.movingwin,params);
+[CA3.inh.coh.C,CA3.inh.coh.phi, CA3.inh.coh.S12,CA3.inh.coh.S1,CA3.inh.coh.S2,CA3.inh.coh.t, CA3.inh.coh.f] = cohgramc(CA3.inh.filt.gammal.',CA3.inh.rates_dm.',params.movingwin,params);
+[CA1.exc.coh.C,CA1.exc.coh.phi, CA1.exc.coh.S12,CA1.exc.coh.S1,CA1.exc.coh.S2,CA1.exc.coh.t, CA1.exc.coh.f] = cohgramc(CA1.exc.filt.gammal.',CA1.exc.rates_dm.',params.movingwin,params);
+[CA1.inh.coh.C,CA1.inh.coh.phi, CA1.inh.coh.S12,CA1.inh.coh.S1,CA1.inh.coh.S2,CA1.inh.coh.t, CA1.inh.coh.f] = cohgramc(CA1.inh.filt.gammal.',CA1.inh.rates_dm.',params.movingwin,params);
+
+figure()
+subplot(4,2,1)
+axs(1,1) = imagesc('XData', EC.exc.coh.t.', 'YData', EC.exc.coh.f, 'CData', EC.exc.coh.C.');
+xlim([EC.exc.coh.t(1), EC.exc.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,2)
+axs(1,2) = imagesc('XData', EC.inh.coh.t.', 'YData', EC.inh.coh.f, 'CData', EC.inh.coh.C.');
+xlim([EC.inh.coh.t(1), EC.inh.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,3)
+axs(2,1) = imagesc('XData', DG.exc.coh.t.', 'YData', DG.exc.coh.f, 'CData', DG.exc.coh.C.');
+xlim([DG.exc.coh.t(1), DG.exc.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,4)
+axs(2,2) = imagesc('XData', DG.inh.coh.t.', 'YData', DG.inh.coh.f, 'CData', DG.inh.coh.C.');
+xlim([DG.inh.coh.t(1), DG.inh.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,5)
+axs(3,1) = imagesc('XData', CA3.exc.coh.t.', 'YData', CA3.exc.coh.f, 'CData', CA3.exc.coh.C.');
+xlim([CA3.exc.coh.t(1), CA3.exc.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,6)
+axs(3,2) = imagesc('XData', CA3.inh.coh.t.', 'YData', CA3.inh.coh.f, 'CData', CA3.inh.coh.C.');
+xlim([CA3.inh.coh.t(1), CA3.inh.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,7)
+axs(4,1) = imagesc('XData', CA1.exc.coh.t.', 'YData', CA1.exc.coh.f, 'CData', CA1.exc.coh.C.');
+xlim([CA1.exc.coh.t(1), CA1.exc.coh.t(end)]);
+ylim(params.fpass);
+
+subplot(4,2,8)
+axs(4,2) = imagesc('XData', CA1.inh.coh.t.', 'YData', CA1.inh.coh.f, 'CData', CA1.inh.coh.C.');
+xlim([CA1.inh.coh.t(1), CA1.inh.coh.t(end)]);
+ylim(params.fpass);
+
+
+%% Cross-correlation between traces of theta and gamma
+% -----------------------------------------------------
+EC.exc.xcorr = xcorr(EC.exc.filt.theta, EC.exc.filt.gammal, [], 'coeff'); % normalized to 1
+
+figure()
+plot([-tv(end-2:-1:1), 0, tv(1:end-2)], EC.exc.xcorr)
