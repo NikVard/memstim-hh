@@ -16,7 +16,6 @@ Implementation Notes
 kuramoto_eqs_stim = '''
     dTheta/dt = ((omega + (kN * PIF) - gain*X*sin(Theta - pi/2)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
-    t_off = 0.02 : 1
     ThetaPreInput : 1
     omega : 1 (constant)
     kN : 1 (shared)         # k/N ratio, affects sync.
