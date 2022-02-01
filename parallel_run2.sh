@@ -18,7 +18,8 @@ fi
 
 
 ### Get all config directories
-CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
+#CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
+CONF_DIRS="configs/$1_nA"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
