@@ -57,7 +57,7 @@ for DIR in $CONF_DIRS;
                 echo $FN_CONF
 
                 ### Queue the simulation
-                sbatch --job-name="CA1_STIM_${DIRNAME}_${FCONF}" --time=60 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
+                sbatch --job-name="CA1_STIM_${DIRNAME}_${FCONF}" --mem=16G --exclusive --time=60 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
 
                 let "CNT+=1"
 
