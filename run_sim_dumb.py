@@ -82,11 +82,11 @@ else:
 
     dirs['base'] = dirs['stim']
 
-dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
-dirs['base'] = dirs['base'] + dtime + '/'
-if not os.path.exists(dirs['base']):
-    print("Making directory", dirs['base'])
-    os.makedirs(dirs['base'])
+# dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
+# dirs['base'] = dirs['base'] + dtime + '/'
+# if not os.path.exists(dirs['base']):
+#     print("Making directory", dirs['base'])
+#     os.makedirs(dirs['base'])
 
 dirs['figures'] = dirs['base'] + 'figures/'
 if not os.path.exists(dirs['figures']):
