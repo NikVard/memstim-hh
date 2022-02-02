@@ -53,11 +53,12 @@ for DIR in $CONF_DIRS;
         CNT=0
         RESDIR=$CURRRES
         for FN_CONF in $DIR/*.json;
-        	do
+                do
                 echo $FN_CONF
 
                 ### Queue the simulation
-                sbatch --job-name="CA1_STIM_${DIRNAME}_${FCONF}" --mem=16G --exclusive --time=60 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
+                echo "SIM_${DIR}_${FCONF}"
+                sbatch --job-name="SIM_${DIRNAME}_${FN_CONF}" --time=60 --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
 
                 let "CNT+=1"
 
