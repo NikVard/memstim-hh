@@ -4,7 +4,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-dt = .1 # [sec]
+dt = .1 # [msec]
+delay = 5 # [samples]
 
 # make a time vector (200 ms, one period)
 tv = np.linspace(0,250,2501)
@@ -12,8 +13,8 @@ PRC_all = []
 xvals_all = []
 
 # Open-loop results directory| no stim
-dir_ol = "../results/None/OL/"
-phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
+# dir_ol = "../results/None/OL/"
+# phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
 
 # Closed-loop results directory | no stim
 dir_cl = "../results/None/CL/"
@@ -33,7 +34,7 @@ phase_def = phase_cl
 
 # iterate over stimulation amplitudes
 for root in dirs:
-
+    print(root)
     # initialization of current stim amplitude lists
     PRC = []
     xvals = []
@@ -46,6 +47,7 @@ for root in dirs:
             # get the stimulation onset [ms]
             tmp = item.split("_")
             t_on = float(tmp[1])
+            print(t_on)
 
             # find index of phase reset (based on stim_on)
             idx = int(t_on/dt)
@@ -61,14 +63,14 @@ for root in dirs:
             #d_phi = phase[1:] - phase[:-1]
             #d_phi = np.mean(phase[idx-10:idx]) - np.mean(phase[idx:idx+10])
             #d_phase = phase[1:] - phase[:-1]
-            d_phi = phase[idx+25] - phase_def[idx+25]
+            d_phi = phase[idx+delay] - phase_def[idx+delay]
 
             # phase difference @ time of actual phase reset
             #PRC[int(idx2-10000)] = d_phi[idx2]
             # PRC.append(d_phi[idx2])
             # xvals.append(phase[idx2])
             PRC.append(d_phi)
-            xvals.append(phase[idx+25])
+            xvals.append(phase[idx+delay])
 
     # Get sorting indices
     idxs = np.argsort(xvals)
@@ -107,13 +109,13 @@ axs.fill_between(x=[-4,4], y1=[1., 1.], color='green', alpha=0.1)
 axs.fill_between(x=[-4,4], y1=[-1., -1.], color='red', alpha=0.1)
 
 # Add text
-boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
-axs.text(x=-3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
-axs.text(x=-3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
+#boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
+#axs.text(x=-3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
+#axs.text(x=-3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
 
 # Limits
 axs.set_xlim([-3.3, 3.3])
-axs.set_ylim([-0.3, 0.3])
+axs.set_ylim([-0.05, 0.05])
 
 # Ticks
 def format_func(x, pos):
