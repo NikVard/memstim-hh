@@ -19,7 +19,8 @@ fi
 
 ### Get all config directories
 #CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
-CONF_DIRS="configs/$1_nA"
+ISTIM=$1
+CONF_DIRS="configs/${ISTIM}_nA"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
@@ -57,8 +58,7 @@ for DIR in $CONF_DIRS;
                 echo $FN_CONF
 
                 ### Queue the simulation
-                echo "SIM_${DIR}_${FCONF}"
-                sbatch --job-name="SIM_${DIRNAME}_${FN_CONF}" --time=60 --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
+                sbatch --job-name="SIM_${ISTIM}_${FN_CONF}" --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
 
                 let "CNT+=1"
 
