@@ -1,6 +1,6 @@
 from brian2 import *
 
-from mpl3d import glm
+from mpl3d import glm               # https://github.com/rougier/matplotlib-3d
 from mpl3d.camera import Camera
 
 from model import settings
