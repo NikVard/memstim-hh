@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 dt = .1 # [msec]
-delay = 5 # [samples]
+delay = 25 # [samples]
 
 # make a time vector (200 ms, one period)
 tv = np.linspace(0,250,2501)
@@ -70,7 +70,7 @@ for root in dirs:
             # PRC.append(d_phi[idx2])
             # xvals.append(phase[idx2])
             PRC.append(d_phi)
-            xvals.append(phase[idx+delay])
+            xvals.append(phase[idx])
 
     # Get sorting indices
     idxs = np.argsort(xvals)
