@@ -34,7 +34,7 @@ parser.add_argument('-p', '--parameters',
                     nargs='?',
                     metavar='-p',
                     type=str,
-                    default='configs/default.json',
+                    default=os.path.join('configs', 'default.json'),
                     help='Parameters file (json format)')
 args = parser.parse_args()
 filename = args.parameters
@@ -56,60 +56,60 @@ settings.init(data)
 # Create the necessary directories
 dirs = {}
 
-dirs['results'] = 'results/'
-if not os.path.exists(dirs['results']):
-    print("Making directory", dirs['results'])
+dirs['results'] = 'results'
+if not os.path.isdir(dirs['results']):
+    print('Making directory', dirs['results'])
     os.makedirs(dirs['results'])
 
 if settings.I_stim[0]:
-    dirs['stim'] = dirs['results'] + '{stimamp:d}_nA/'.format(stimamp=int(settings.I_stim[0]))
-    if not os.path.exists(dirs['stim']):
-        print("Making directory", dirs['stim'])
+    dirs['stim'] = os.path.join(dirs['results'], '{stimamp:d}_nA'.format(stimamp=int(settings.I_stim[0])))
+    if not os.path.isdir(dirs['stim']):
+        print('Making directory', dirs['stim'])
         os.makedirs(dirs['stim'])
 
-    dirs['offset'] = dirs['stim'] + '{phase:.2f}_{stim_on:.1f}_ms/'.format(phase=settings.offset, stim_on=settings.stim_onset*1e3)
-    if not os.path.exists(dirs['offset']):
-        print("Making directory", dirs['offset'])
+    dirs['offset'] = os.path.join(dirs['stim'], '{phase:.2f}_{stim_on:.1f}_ms'.format(phase=settings.offset, stim_on=settings.stim_onset*1e3))
+    if not os.path.isdir(dirs['offset']):
+        print('Making directory', dirs['offset'])
         os.makedirs(dirs['offset'])
 
     dirs['base'] = dirs['offset']
 
 else:
-    dirs['stim'] = dirs['results'] + 'None/'
+    dirs['stim'] = os.path.join(dirs['results'], 'None')
     if not os.path.exists(dirs['stim']):
-        print("Making directory", dirs['stim'])
+        print('Making directory', dirs['stim'])
         os.makedirs(dirs['stim'])
 
     dirs['base'] = dirs['stim']
 
 dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
-dirs['base'] = dirs['base'] + dtime + '/'
-if not os.path.exists(dirs['base']):
-    print("Making directory", dirs['base'])
+dirs['base'] = os.path.join(dirs['base'], dtime)
+if not os.path.isdir(dirs['base']):
+    print('Making directory', dirs['base'])
     os.makedirs(dirs['base'])
 
-dirs['figures'] = dirs['base'] + 'figures/'
-if not os.path.exists(dirs['figures']):
-    print("Making directory", dirs['figures'])
+dirs['figures'] = os.path.join(dirs['base'], 'figures')
+if not os.path.isdir(dirs['figures']):
+    print('Making directory', dirs['figures'])
     os.makedirs(dirs['figures'])
 
-dirs['data'] = dirs['base'] + 'data/'
-if not os.path.exists(dirs['data']):
-    print("Making directory", dirs['data'])
+dirs['data'] = os.path.join(dirs['base'], 'data')
+if not os.path.isdir(dirs['data']):
+    print('Making directory', dirs['data'])
     os.makedirs(dirs['data'])
 
-dirs['positions'] = dirs['data'] + 'positions/'
-if not os.path.exists(dirs['positions']):
-    print("Making directory", dirs['positions'])
+dirs['positions'] = os.path.join(dirs['data'], 'positions')
+if not os.path.isdir(dirs['positions']):
+    print('Making directory', dirs['positions'])
     os.makedirs(dirs['positions'])
 
-dirs['spikes'] = dirs['data'] + 'spikes/'
-if not os.path.exists(dirs['spikes']):
-    print("Making directory", dirs['spikes'])
+dirs['spikes'] = os.path.join(dirs['data'], 'spikes')
+if not os.path.isdir(dirs['spikes']):
+    print('Making directory', dirs['spikes'])
     os.makedirs(dirs['spikes'])
 
 # Copy the configuration file on the results directory for safekeeping
-copyfile(filename, dirs['base']+'parameters_bak.json')
+copyfile(filename, os.path.join(dirs['base'], 'parameters_bak.json'))
 
 
 # Debugging?
