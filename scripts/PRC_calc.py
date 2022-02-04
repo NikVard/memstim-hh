@@ -13,21 +13,21 @@ PRC_all = []
 xvals_all = []
 
 # Open-loop results directory| no stim
-# dir_ol = "../results/None/OL/"
+# dir_cl = os.path.join('..', 'results', 'None', 'OL')
 # phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
 
 # Closed-loop results directory | no stim
-dir_cl = "../results/None/CL/"
+dir_cl = os.path.join('..', 'results', 'None', 'CL')
 phase_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_phase.txt'))
 
 # Results directories
 dirs = []
-dirs.append("../results/5_nA")
-dirs.append("../results/10_nA")
-dirs.append("../results/12_nA")
-dirs.append("../results/15_nA")
-dirs.append("../results/20_nA")
-dirs.append("../results/25_nA")
+dirs.append(os.path.join('..', 'results', '5_nA'))
+dirs.append(os.path.join('..', 'results', '6_nA'))
+dirs.append(os.path.join('..', 'results', '7_nA'))
+dirs.append(os.path.join('..', 'results', '8_nA'))
+dirs.append(os.path.join('..', 'results', '9_nA'))
+dirs.append(os.path.join('..', 'results', '10_nA'))
 
 # set default phase to compare against
 phase_def = phase_cl
@@ -56,19 +56,11 @@ for root in dirs:
             frate = np.loadtxt(os.path.join(root, item, 'data', 's2r_mon_drive.txt'))
             phase = np.loadtxt(os.path.join(root, item, 'data', 'order_param_mon_phase.txt'))
 
-            # find index where input actually takes effect
-            #idx2 = np.argmax(frate)
-
             # calculate d_phi
-            #d_phi = phase[1:] - phase[:-1]
-            #d_phi = np.mean(phase[idx-10:idx]) - np.mean(phase[idx:idx+10])
-            #d_phase = phase[1:] - phase[:-1]
+            # d_phi = np.mean(phase[idx-10:idx]) - np.mean(phase[idx:idx+10])
             d_phi = phase[idx+delay] - phase_def[idx+delay]
+            # d_phi = phase[idx+1] - phase[idx-1]
 
-            # phase difference @ time of actual phase reset
-            #PRC[int(idx2-10000)] = d_phi[idx2]
-            # PRC.append(d_phi[idx2])
-            # xvals.append(phase[idx2])
             PRC.append(d_phi)
             xvals.append(phase[idx])
 
