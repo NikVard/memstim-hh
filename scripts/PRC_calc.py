@@ -58,8 +58,9 @@ for root in dirs:
 
             # calculate d_phi
             # d_phi = np.mean(phase[idx-10:idx]) - np.mean(phase[idx:idx+10])
-            d_phi = phase[idx+delay] - phase_def[idx+delay]
-            # d_phi = phase[idx+1] - phase[idx-1]
+            # d_phi = phase[idx+delay] - phase_def[idx+delay]
+            d_phi = (phase[idx+delay] - phase_def[idx+delay])
+            d_phi = (d_phi + np.pi) % (2*np.pi) - np.pi     # wrap between [-pi pi]
 
             PRC.append(d_phi)
             xvals.append(phase[idx])
@@ -94,20 +95,20 @@ axs.plot(xvals_all[5], PRC_all[5], c='C5', ls='--', marker='o', markersize=11, l
 axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
 
 # Vertical line @ x=0
-axs.vlines(x=0., ymin=-1., ymax=1., linestyle=':', colors='k', linewidth=2., zorder=2)
+axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zorder=2)
 
 # Fill positive (y>0) and negative (y<0)
-axs.fill_between(x=[-4,4], y1=[1., 1.], color='green', alpha=0.1)
-axs.fill_between(x=[-4,4], y1=[-1., -1.], color='red', alpha=0.1)
+axs.fill_between(x=[-4,4], y1=[4., 4.], color='green', alpha=0.1)
+axs.fill_between(x=[-4,4], y1=[-4., -4.], color='red', alpha=0.1)
 
 # Add text
-#boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
-#axs.text(x=-3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
-#axs.text(x=-3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
+boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
+axs.text(x=-3.3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
+axs.text(x=-3.3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
 
 # Limits
 axs.set_xlim([-3.3, 3.3])
-axs.set_ylim([-0.05, 0.05])
+axs.set_ylim([-3.5, 3.5])
 
 # Ticks
 def format_func(x, pos):
