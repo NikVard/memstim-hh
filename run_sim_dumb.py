@@ -82,19 +82,11 @@ else:
 
     dirs['base'] = dirs['stim']
 
-<<<<<<< HEAD
-# dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
-# dirs['base'] = dirs['base'] + dtime + '/'
-# if not os.path.exists(dirs['base']):
-#     print("Making directory", dirs['base'])
-#     os.makedirs(dirs['base'])
-=======
-dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
-dirs['base'] = os.path.join(dirs['base'], dtime)
-if not os.path.isdir(dirs['base']):
-    print('Making directory', dirs['base'])
+dtime = datetime.datetime.now().strftime("%d-%m-%Y %HH%MM%SS") # imported from brian2
+dirs['base'] = dirs['base'] + dtime + '/'
+if not os.path.exists(dirs['base']):
+    print("Making directory", dirs['base'])
     os.makedirs(dirs['base'])
->>>>>>> master
 
 dirs['figures'] = os.path.join(dirs['base'], 'figures')
 if not os.path.isdir(dirs['figures']):
