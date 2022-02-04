@@ -34,7 +34,7 @@ parser.add_argument('-p', '--parameters',
                     nargs='?',
                     metavar='-p',
                     type=str,
-                    default='configs/default.json',
+                    default=os.path.join('configs', 'default.json'),
                     help='Parameters file (json format)')
 args = parser.parse_args()
 filename = args.parameters
@@ -56,60 +56,68 @@ settings.init(data)
 # Create the necessary directories
 dirs = {}
 
-dirs['results'] = 'results/'
-if not os.path.exists(dirs['results']):
-    print("Making directory", dirs['results'])
+dirs['results'] = 'results'
+if not os.path.isdir(dirs['results']):
+    print('Making directory', dirs['results'])
     os.makedirs(dirs['results'])
 
 if settings.I_stim[0]:
-    dirs['stim'] = dirs['results'] + '{stimamp:d}_nA/'.format(stimamp=int(settings.I_stim[0]))
-    if not os.path.exists(dirs['stim']):
-        print("Making directory", dirs['stim'])
+    dirs['stim'] = os.path.join(dirs['results'], '{stimamp:d}_nA'.format(stimamp=int(settings.I_stim[0])))
+    if not os.path.isdir(dirs['stim']):
+        print('Making directory', dirs['stim'])
         os.makedirs(dirs['stim'])
 
-    dirs['offset'] = dirs['stim'] + '{phase:.2f}_{stim_on:.1f}_ms/'.format(phase=settings.offset, stim_on=settings.stim_onset*1e3)
-    if not os.path.exists(dirs['offset']):
-        print("Making directory", dirs['offset'])
+    dirs['offset'] = os.path.join(dirs['stim'], '{phase:.2f}_{stim_on:.1f}_ms'.format(phase=settings.offset, stim_on=settings.stim_onset*1e3))
+    if not os.path.isdir(dirs['offset']):
+        print('Making directory', dirs['offset'])
         os.makedirs(dirs['offset'])
 
     dirs['base'] = dirs['offset']
 
 else:
-    dirs['stim'] = dirs['results'] + 'None/'
+    dirs['stim'] = os.path.join(dirs['results'], 'None')
     if not os.path.exists(dirs['stim']):
-        print("Making directory", dirs['stim'])
+        print('Making directory', dirs['stim'])
         os.makedirs(dirs['stim'])
 
     dirs['base'] = dirs['stim']
 
+<<<<<<< HEAD
 # dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
 # dirs['base'] = dirs['base'] + dtime + '/'
 # if not os.path.exists(dirs['base']):
 #     print("Making directory", dirs['base'])
 #     os.makedirs(dirs['base'])
+=======
+dtime = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S") # imported from brian2
+dirs['base'] = os.path.join(dirs['base'], dtime)
+if not os.path.isdir(dirs['base']):
+    print('Making directory', dirs['base'])
+    os.makedirs(dirs['base'])
+>>>>>>> master
 
-dirs['figures'] = dirs['base'] + 'figures/'
-if not os.path.exists(dirs['figures']):
-    print("Making directory", dirs['figures'])
+dirs['figures'] = os.path.join(dirs['base'], 'figures')
+if not os.path.isdir(dirs['figures']):
+    print('Making directory', dirs['figures'])
     os.makedirs(dirs['figures'])
 
-dirs['data'] = dirs['base'] + 'data/'
-if not os.path.exists(dirs['data']):
-    print("Making directory", dirs['data'])
+dirs['data'] = os.path.join(dirs['base'], 'data')
+if not os.path.isdir(dirs['data']):
+    print('Making directory', dirs['data'])
     os.makedirs(dirs['data'])
 
-dirs['positions'] = dirs['data'] + 'positions/'
-if not os.path.exists(dirs['positions']):
-    print("Making directory", dirs['positions'])
+dirs['positions'] = os.path.join(dirs['data'], 'positions')
+if not os.path.isdir(dirs['positions']):
+    print('Making directory', dirs['positions'])
     os.makedirs(dirs['positions'])
 
-dirs['spikes'] = dirs['data'] + 'spikes/'
-if not os.path.exists(dirs['spikes']):
-    print("Making directory", dirs['spikes'])
+dirs['spikes'] = os.path.join(dirs['data'], 'spikes')
+if not os.path.isdir(dirs['spikes']):
+    print('Making directory', dirs['spikes'])
     os.makedirs(dirs['spikes'])
 
 # Copy the configuration file on the results directory for safekeeping
-copyfile(filename, dirs['base']+'parameters_bak.json')
+copyfile(filename, os.path.join(dirs['base'], 'parameters_bak.json'))
 
 
 # Debugging?
@@ -139,7 +147,7 @@ ax_anat = fig_anat.add_subplot(111, projection='3d')
 r = R.from_euler('x', 180, degrees=True)
 
 def parse_coords(fname, NG):
-    """ Opens file and parses coordinates """
+    """ Opens text file and parses coordinates """
     pattern = r'[\[\],\n]' # to remove from read lines
 
     with open(fname, 'r') as fin:
@@ -152,7 +160,7 @@ def parse_coords(fname, NG):
             idx += 1
 
 # EC -> receives theta input from MS
-pos = np.load('./neuron_positions/full/EC_E-stipple-10000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[0], 1))))
 pos = r.apply(pos)
 pos *= scale
@@ -171,12 +179,11 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/EC_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
-pos = np.load('./neuron_positions/full/EC_I-stipple-1000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -193,7 +200,6 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/EC_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
@@ -204,7 +210,7 @@ print('EC: done')
 
 
 # DG
-pos = np.load('./neuron_positions/full/DG_E-stipple-10000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'DG_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -223,12 +229,11 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/DG_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
 
-pos = np.load('./neuron_positions/full/DG_I-stipple-100.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'DG_I-stipple-100.npy'))
 pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -245,7 +250,6 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/DG_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
@@ -256,7 +260,7 @@ print('DG: done')
 
 
 # CA3
-pos = np.load('./neuron_positions/full/CA3_E-stipple-1000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_E-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -275,12 +279,11 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/CA3_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
-pos = np.load('./neuron_positions/full/CA3_I-stipple-100.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_I-stipple-100.npy'))
 pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -297,7 +300,6 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/CA3_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
@@ -308,7 +310,7 @@ print('CA3: done')
 
 
 # CA1
-pos = np.load('./neuron_positions/full/CA1_E-stipple-10000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -327,12 +329,11 @@ G_E.glu = 1
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/CA1_exc.txt', NG=G_E)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 
-pos = np.load('./neuron_positions/full/CA1_I-stipple-1000.npy')
+pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_I-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
@@ -349,7 +350,6 @@ G_I.size = cell_size_inh
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
-# parse_coords(fname='positions/CA1_inh.txt', NG=G_I)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
@@ -704,7 +704,7 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 print("Saving figure 'figures/%s'" %fig_name)
 plot_watermark(raster_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-raster_fig.savefig(dirs['figures'] + fig_name)
+raster_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 '''
 # calculate order parameter in the end
@@ -724,7 +724,7 @@ kuramoto_fig.savefig(dirs['figures'] + fig_name)
 fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("Saving figure 'figures/%s'" %fig_name)
-fig_extra.savefig(dirs['figures'] + fig_name)
+fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 tight_layout()
 #show()
@@ -733,17 +733,17 @@ tight_layout()
 # Save the results as .txt files (rows: time | cols: data)
 # -------------------------------------------------------------#
 # Kuramoto monitors
-np.savetxt(dirs['data']+'kuramoto_mon_Theta.txt', kuramoto_mon.Theta.T, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_phase.txt', order_param_mon.phase.T, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_rhythm.txt', order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_coherence.txt', order_param_mon.coherence.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), order_param_mon.phase.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), order_param_mon.coherence.T, fmt='%.8f')
 
 # CA1 firing rate
-np.savetxt(dirs['data']+'rate_mon_E_CA1.txt', rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
-np.savetxt(dirs['data']+'s2r_mon_drive.txt', s2r_mon.drive_.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'rate_mon_E_CA1.txt'), rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), s2r_mon.drive_.T, fmt='%.8f')
 
 # External stimulus
-np.savetxt(dirs['data']+'stim_input.txt', xstim, fmt='%.2f')
+np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
 
 
 
@@ -760,8 +760,8 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_t.append(t_val/msecond)
 
     fname = SM.name
-    np.savetxt(dirs['spikes'] + fname + '_i.txt', np.array(SM_i).astype(np.int16), fmt='%d')
-    np.savetxt(dirs['spikes'] + fname + '_t.txt', np.array(SM_t).astype(np.float32), fmt='%.1f')
+    np.savetxt(os.path.join(dirs['spikes'], fname, '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(os.path.join(dirs['spikes'], fname, '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
 
     SM_i.clear()
     SM_t.clear()
