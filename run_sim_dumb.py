@@ -696,7 +696,7 @@ print(profiling_summary(net=net, show=4)) # show the top 10 objects that took th
 raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 print("Saving figure 'figures/%s'" %fig_name)
 plot_watermark(raster_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-raster_fig.savefig(dirs['figures'] + fig_name)
+raster_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 '''
 # calculate order parameter in the end
@@ -716,7 +716,7 @@ kuramoto_fig.savefig(dirs['figures'] + fig_name)
 fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("Saving figure 'figures/%s'" %fig_name)
-fig_extra.savefig(dirs['figures'] + fig_name)
+fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 tight_layout()
 #show()
@@ -725,17 +725,17 @@ tight_layout()
 # Save the results as .txt files (rows: time | cols: data)
 # -------------------------------------------------------------#
 # Kuramoto monitors
-np.savetxt(dirs['data']+'kuramoto_mon_Theta.txt', kuramoto_mon.Theta.T, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_phase.txt', order_param_mon.phase.T, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_rhythm.txt', order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
-np.savetxt(dirs['data']+'order_param_mon_coherence.txt', order_param_mon.coherence.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), order_param_mon.phase.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), order_param_mon.coherence.T, fmt='%.8f')
 
 # CA1 firing rate
-np.savetxt(dirs['data']+'rate_mon_E_CA1.txt', rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
-np.savetxt(dirs['data']+'s2r_mon_drive.txt', s2r_mon.drive_.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'rate_mon_E_CA1.txt'), rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), s2r_mon.drive_.T, fmt='%.8f')
 
 # External stimulus
-np.savetxt(dirs['data']+'stim_input.txt', xstim, fmt='%.2f')
+np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
 
 
 
@@ -752,8 +752,8 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_t.append(t_val/msecond)
 
     fname = SM.name
-    np.savetxt(dirs['spikes'] + fname + '_i.txt', np.array(SM_i).astype(np.int16), fmt='%d')
-    np.savetxt(dirs['spikes'] + fname + '_t.txt', np.array(SM_t).astype(np.float32), fmt='%.1f')
+    np.savetxt(os.path.join(dirs['spikes'], fname, '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(os.path.join(dirs['spikes'], fname, '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
 
     SM_i.clear()
     SM_t.clear()
