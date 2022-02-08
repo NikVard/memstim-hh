@@ -52,11 +52,11 @@
     },
     "Kuramoto": {
         "N": 100,
-        "f0": 8.0,
+        "f0": 4.0,
         "sigma": 0.5,
         "kN": 20,
         "gain": 5,
-        "offset": -1.5707963267948966
+        "offset": 0.0
     },
     "connectivity": {
         "intra": {

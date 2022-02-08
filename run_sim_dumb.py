@@ -83,7 +83,7 @@ else:
     dirs['base'] = dirs['stim']
 
 dtime = datetime.datetime.now().strftime("%d-%m-%Y %HH%MM%SS") # imported from brian2
-dirs['base'] = dirs['base'] + dtime + '/'
+dirs['base'] = os.path.join(dirs['base'], dtime)
 if not os.path.exists(dirs['base']):
     print("Making directory", dirs['base'])
     os.makedirs(dirs['base'])
@@ -710,7 +710,7 @@ for s in range(samples):
 kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(order_param_mon)
 plot_watermark(kuramoto_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("Saving figure 'figures/%s'" %fig_name)
-kuramoto_fig.savefig(dirs['figures'] + fig_name)
+kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Plot more stuff
 fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
@@ -752,8 +752,8 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_t.append(t_val/msecond)
 
     fname = SM.name
-    np.savetxt(os.path.join(dirs['spikes'], fname, '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
-    np.savetxt(os.path.join(dirs['spikes'], fname, '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
+    np.savetxt(os.path.join(dirs['spikes'], fname + '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(os.path.join(dirs['spikes'], fname + '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
 
     SM_i.clear()
     SM_t.clear()
