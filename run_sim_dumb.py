@@ -772,3 +772,6 @@ for G in G_flat:
     except AttributeError:
         print('pass...')
         continue
+
+print('\nClearing cython cache')
+clear_cache('cython')
