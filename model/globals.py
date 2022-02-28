@@ -36,3 +36,35 @@ integ_method = 'exponential_euler'  # integration method
 filter_params = {
     'tauFR' : 1*ms
 }
+
+
+# ANSI Colored text output!
+class bcolors:
+    # TEXT COLOR
+    BLACK = '\u001b[30m'
+    RED = '\u001b[31m'
+    GREEN = '\u001b[32m'
+    YELLOW = '\u001b[33m'
+    BLUE = '\u001b[34m'
+    MAGENTA = '\u001b[35m'
+    CYAN = '\u001b[36m'
+    WHITE = '\u001b[37m'
+
+    # BACKGROUND COLOR
+    BGBLACK = '\u001b[40m'
+    BGRED = '\u001b[41m'
+    BGGREEN = '\u001b[42m'
+    BGYELLOW = '\u001b[43m'
+    BGBLUE = '\u001b[44m'
+    BGMAGENTA = '\u001b[45m'
+    BGCYAN = '\u001b[46m'
+    BGWHITE = '\u001b[47m'
+
+    # STYLES
+    BOLD = '\u001b[1m'
+    UND = '\u001b[4m'
+    REV = '\u001b[7m'
+
+
+    # RESET
+    ENDC = '\u001b[0m'
