@@ -96,6 +96,76 @@ def plot_raster_all(spike_mon_E_all, spike_mon_I_all):
     return fig, axs, fig_name
 
 
+def plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsize = 10*ms, interpolation=None):
+    """ Plots the activity of all the excitatory and inhibitory populations in the network in a binned raster plot.
+    Returns a figure handler """
+
+    # Plot in a grid, raster of all regions
+    fig = plt.figure(figsize=(12,16));
+    G = GridSpec(4, 3, width_ratios=(49,49,2))
+    axs = empty((4,2), dtype=object)
+
+    # all the monitors in one array, easy access
+    popmons = [spike_mon_E_all, spike_mon_I_all]
+
+    # Iterate over areas
+    for area_idx in range(4):
+
+        # Iterate over populations
+        for pop_idx in range(2):
+
+            # Parameters
+            N = settings.N_all[area_idx][pop_idx]
+            duration = settings.duration/msecond
+            platenum = int(N/platesize)
+            winnum = int(duration/winsize)
+
+            # Bin the data, neurons vs windows
+            spikecnt = zeros((platenum, winnum))
+            for tp in arange(winnum-1):
+                # Make the mask to isolate current time window
+            	tlow = tp*winsize
+            	thigh = (tp+1)*winsize
+            	tmask = (popmons[pop_idx][area_idx][0].t>=tlow) & (popmons[pop_idx][area_idx][0].t<thigh)
+
+            	# Isolate spikes in time window and corresponding neuron idxs
+            	tmp_t = popmons[pop_idx][area_idx][0].t[tmask]
+            	tmp_i = popmons[pop_idx][area_idx][0].i[tmask]
+
+            	# Neuron groupings consist of plates of <platesize> neurons
+            	for ng in arange(platenum):
+            		# Mask neurons in subgroup
+            		nlow = ng*platesize
+            		nhigh = (ng+1)*platesize
+            		ngmask = (tmp_i>=nlow) & (tmp_i<nhigh)
+
+            		spikecnt[ng,tp] = sum(ngmask)
+
+            # subplot
+            axs[area_idx,pop_idx] = subplot(G[area_idx,pop_idx]);
+            tmp_ax = axs[area_idx,pop_idx]
+
+            # meshgrid, useful for scatter
+            # X, Y = arange(winnum), arange(platenum)
+            # X, Y = meshgrid(X, Y)
+            V = spikecnt
+
+            # tmp_ax.scatter(X, Y, 20, V, marker='s', cmap="Reds")
+            I = tmp_ax.imshow(V, cmap='Reds', interpolation=interpolation, vmin=0, vmax=100)
+
+            # Set x-y limits
+            tmp_ax.set_xlim(0, winnum)
+            tmp_ax.set_ylim(0, platenum)
+
+
+    tight_layout()
+
+    # Generate the figure's name
+    fig_name = generate_fig_name('Raster_')
+
+    return fig, axs, fig_name
+
+
 def plot_kuramoto(order_param_mon):
     """ Plots the average phase and the phase coherence of the ensemble of Kuramoto oscillators. Also plots the generated theta rhythm from the MS. """
 
