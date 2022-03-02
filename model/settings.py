@@ -90,8 +90,9 @@ def init(data):
     p_mono = data['connectivity']['inter']['p_mono'] # monosynaptic pathway connectivity
     p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivity
 
-    global duration, debugging
-    duration = data['simulation']['duration']*ms
+    global duration, dt, debugging
+    duration = data['simulation']['duration']*second
+    dt = data['simulation']['dt']*second
     debugging = data['simulation']['debugging']
 
     global N_Kur, f0, sigma, kN_frac, k_gain, offset

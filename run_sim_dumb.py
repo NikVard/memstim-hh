@@ -687,7 +687,7 @@ print('[\u2022]\tNetwork monitors: done')
 
 # Run the simulation
 # -------------------------------------------------------------#
-#defaultclock.dt = 0.01*ms
+defaultclock.dt = settings.dt
 tstep = defaultclock.dt
 
 print('\n[50] Starting simulation...')

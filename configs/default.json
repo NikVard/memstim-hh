@@ -134,12 +134,12 @@
         "ipi": 0.0001
     },
     "simulation": {
-        "debugging": false,
-        "duration": 2000.0,
-        "dt": 0.0001
+        "duration": 2.0,
+        "dt": 0.0001,
+        "debugging": false
     },
-    "git_short_hash": "54f8493",
-    "timestamp": "Fri Jan  7 16:30:33 2022",
-    "git_branch": "dist_based_stim",
-    "git_hash": "54f84930f30029df0dc780cf4e318e3b5ff83de2"
+    "git_short_hash": "7148bba",
+    "timestamp": "Wed Mar  2 14:19:58 2022",
+    "git_branch": "master",
+    "git_hash": "7148bba276e7a2a97096237ea00895ecda2ad694"
 }

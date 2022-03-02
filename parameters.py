@@ -72,12 +72,12 @@ _data = {
 
     # Kuramoto oscillator parameters
     "Kuramoto" : {
-        "N" : 50,
+        "N" : 200,
         "f0" : 4.,
         "sigma" : 0.5,  # normal std
-        "kN" : 10,
-        "gain" : 1e-3,
-        "offset" : -1*pi/2
+        "kN" : 20,
+        "gain" : 0.5,
+        "offset" : -0*pi/2
     },
 
     # connectivity parameters
@@ -102,26 +102,26 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "target" : "EC",               # target area [EC | DG | CA3 | CA1]
-        "coordinates" : (5.0, -10., 7.5),   # point electrode coordinates (x,y,z) [mm]
-        "rho" : 1.,                     # resistivity of homogeneous conductive medium [Ω/cm]
-        "duration" : 2.,                # [sec]
-        "dt" : .1e-3,                   # [sec]
-        "onset" : 1.,                   # [sec]
-        "I" : [1.],                     # stimulation amplitude [nA]
-        "pulse_width" : [1.e-3],        # width (in time) of pulse ON phase [sec]
-        "stim_freq" : 5,                # stimulation frequency [Hz]
-        "pulse_freq" : 100,             # pulse frequency, determines ON duration [Hz]
-        "nr_of_trains" : 1,             # number of pulse trains
-        "nr_of_pulses" : 1,             # number of pulses per train
-        "ipi" : .1e-3                   # inter-pulse interval [sec]
+        "target" : "CA1",                   # target area [EC | DG | CA3 | CA1]
+        "coordinates" : (5.0, -8., 7.5),    # point electrode coordinates (x,y,z) [mm]
+        "rho" : 1.,                         # resistivity of homogeneous conductive medium [Ω/cm]
+        "duration" : 2.,                    # [sec]
+        "dt" : .1e-3,                       # [sec]
+        "onset" : 1.,                       # [sec]
+        "I" : [0.],                         # stimulation amplitude [nA]
+        "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
+        "stim_freq" : 5,                    # stimulation frequency [Hz]
+        "pulse_freq" : 100,                 # pulse frequency, determines ON duration [Hz]
+        "nr_of_trains" : 1,                 # number of pulse trains
+        "nr_of_pulses" : 1,                 # number of pulses per train
+        "ipi" : .1e-3                       # inter-pulse interval [sec]
         },
 
     # simulation parameters
     "simulation" : {
-        "debugging" : False,
-        "duration"  : 2e3,  # ms
-        "dt"        : 1e-4  # ms
+        "duration"  : 2.0,                  # second
+        "dt"        : .1e-3,                # second
+        "debugging" : False
     },
 
     # git stuff
