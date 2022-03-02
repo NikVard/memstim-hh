@@ -597,7 +597,6 @@ if G_CA1_E:
     syn_CA1_2_rates.connect()
 print('[\u2022]\tCA1-to-S2R: done')
 
-
 # connect the S2R group to the Kuramoto oscillators by linking input X to firing rates (drive)
 G_K.X = linked_var(G_S2R, 'drive')
 print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
@@ -711,8 +710,8 @@ print('-'*32)
 
 print('\n[61] Plotting results...')
 # raster plot of all regions
-raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-# raster_fig, raster_axs, fig_name = plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsize = 10*ms, interpolation=None)
+# raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
+raster_fig, raster_axs, fig_name = plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsize = 10*ms, interpolation=None)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 plot_watermark(raster_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 raster_fig.savefig(os.path.join(dirs['figures'], fig_name))
@@ -775,7 +774,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
     for t_val in SM.t:
         SM_t.append(t_val/msecond)
 
-    print("[+] Saving spikes from ", SM.source.name)
+    print("[+] Saving spikes from", SM.source.name)
     fname = SM.name
     np.savetxt(os.path.join(dirs['spikes'], fname + '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
     np.savetxt(os.path.join(dirs['spikes'], fname + '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
