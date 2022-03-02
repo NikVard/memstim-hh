@@ -101,9 +101,9 @@ def plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsiz
     Returns a figure handler """
 
     # Plot in a grid, raster of all regions
-    fig = plt.figure(figsize=(12,16));
-    G = GridSpec(4, 3, width_ratios=(49,49,2))
-    axs = empty((4,2), dtype=object)
+    fig, axs = plt.subplots(nrows=4, ncols=2)
+    fig.set_figheight(12)
+    fig.set_figwidth(10)
 
     # all the monitors in one array, easy access
     popmons = [spike_mon_E_all, spike_mon_I_all]
@@ -116,47 +116,23 @@ def plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsiz
 
             # Parameters
             N = settings.N_all[area_idx][pop_idx]
-            duration = settings.duration/msecond
-            platenum = int(N/platesize)
-            winnum = int(duration/winsize)
+            duration = settings.duration
+            dt = defaultclock.dt
 
-            # Bin the data, neurons vs windows
-            spikecnt = zeros((platenum, winnum))
-            for tp in arange(winnum-1):
-                # Make the mask to isolate current time window
-            	tlow = tp*winsize
-            	thigh = (tp+1)*winsize
-            	tmask = (popmons[pop_idx][area_idx][0].t>=tlow) & (popmons[pop_idx][area_idx][0].t<thigh)
+            xedges = np.arange(0,duration/dt,winsize/ms)
+            yedges = np.arange(0,N,platesize)
+            H, xedges, yedges = np.histogram2d(t*ms/dt, i, bins=(xedges,yedges))T
+            I = ax[ii,jj].imshow(H.T, extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], cmap='viridis', interpolation=interpolation, vmin=0, vmax=100, origin='lower', aspect='auto')
 
-            	# Isolate spikes in time window and corresponding neuron idxs
-            	tmp_t = popmons[pop_idx][area_idx][0].t[tmask]
-            	tmp_i = popmons[pop_idx][area_idx][0].i[tmask]
+            ax[ii,jj].set_xticklabels([])
+            ax[ii,jj].set_yticklabels([])
 
-            	# Neuron groupings consist of plates of <platesize> neurons
-            	for ng in arange(platenum):
-            		# Mask neurons in subgroup
-            		nlow = ng*platesize
-            		nhigh = (ng+1)*platesize
-            		ngmask = (tmp_i>=nlow) & (tmp_i<nhigh)
+    # Fix labels to appear in ms
 
-            		spikecnt[ng,tp] = sum(ngmask)
 
-            # subplot
-            axs[area_idx,pop_idx] = subplot(G[area_idx,pop_idx]);
-            tmp_ax = axs[area_idx,pop_idx]
-
-            # meshgrid, useful for scatter
-            # X, Y = arange(winnum), arange(platenum)
-            # X, Y = meshgrid(X, Y)
-            V = spikecnt
-
-            # tmp_ax.scatter(X, Y, 20, V, marker='s', cmap="Reds")
-            I = tmp_ax.imshow(V, cmap='Reds', interpolation=interpolation, vmin=0, vmax=100)
-
-            # Set x-y limits
-            tmp_ax.set_xlim(0, winnum)
-            tmp_ax.set_ylim(0, platenum)
-
+    # Colorbar
+    cbar_ax = fig.add_axes([0.09, 0.05, 0.84, 0.01])
+    fig.colorbar(I, cax=cbar_ax, orientation='horizontal')
 
     tight_layout()
 
