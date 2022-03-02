@@ -114,18 +114,21 @@ def plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsiz
         # Iterate over populations
         for pop_idx in range(2):
 
+            t = popmons[area_idx][pop_idx].t/msecond
+            i = popmons[area_idx][pop_idx].i
+
             # Parameters
             N = settings.N_all[area_idx][pop_idx]
             duration = settings.duration
             dt = defaultclock.dt
 
-            xedges = np.arange(0,duration/dt,winsize/ms)
-            yedges = np.arange(0,N,platesize)
-            H, xedges, yedges = np.histogram2d(t*ms/dt, i, bins=(xedges,yedges))T
-            I = ax[ii,jj].imshow(H.T, extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], cmap='viridis', interpolation=interpolation, vmin=0, vmax=100, origin='lower', aspect='auto')
+            xedges = np.arange(0, duration/dt, winsize/ms)
+            yedges = np.arange(0, N, platesize)
+            H, xedges, yedges = np.histogram2d(t*ms/dt, i, bins=(xedges,yedges))
+            I = axs[area_idx,pop_idx].imshow(H.T, extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], cmap='viridis', interpolation=interpolation, vmin=0, vmax=100, origin='lower', aspect='auto')
 
-            ax[ii,jj].set_xticklabels([])
-            ax[ii,jj].set_yticklabels([])
+            axs[area_idx,pop_idx].set_xticklabels([])
+            axs[area_idx,pop_idx].set_yticklabels([])
 
     # Fix labels to appear in ms
 
