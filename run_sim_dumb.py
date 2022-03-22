@@ -155,6 +155,7 @@ def parse_coords(fname, NG):
 
 print('[+] Groups:')
 # EC -> receives theta input from MS
+# E
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[0], 1))))
 pos = r.apply(pos)
@@ -163,7 +164,7 @@ pos[:,2] += 15*mm*rand(settings.N_EC[0])
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_EC[0],
-    model=py_CAN_eqs,
+    model=py_CAN_inp_eqs,
     threshold='v>V_th',
     reset=reset_eqs,
     refractory=refractory_time,
@@ -175,9 +176,7 @@ G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
 
-# Plot X,Y,Z
-ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
-
+# I
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -186,7 +185,7 @@ pos[:,2] += 15*mm*rand(settings.N_EC[1])
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_EC[1],
-    model=inh_eqs,
+    model=inh_inp_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
@@ -197,13 +196,17 @@ G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
 
 # Plot X,Y,Z
+ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
+# Add to list
 G_all[0][0].append(G_E)
 G_all[0][1].append(G_I)
 print('[\u2022]\tEC: done')
 
+
 # DG
+# E
 pos = np.load(os.path.join('neuron_positions', 'full', 'DG_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -224,9 +227,7 @@ G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
 
-# Plot X,Y,Z
-ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
-
+# I
 pos = np.load(os.path.join('neuron_positions', 'full', 'DG_I-stipple-100.npy'))
 pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -246,14 +247,17 @@ G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
 
 # Plot X,Y,Z
+ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
+# Add to list
 G_all[1][0].append(G_E)
 G_all[1][1].append(G_I)
 print('[\u2022]\tDG: done')
 
 
 # CA3
+# E
 pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_E-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -274,9 +278,7 @@ G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
 
-# Plot X,Y,Z
-ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
-
+# I
 pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_I-stipple-100.npy'))
 pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -296,14 +298,17 @@ G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
 
 # Plot X,Y,Z
+ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
+# Add to list
 G_all[2][0].append(G_E)
 G_all[2][1].append(G_I)
 print('[\u2022]\tCA3: done')
 
 
 # CA1
+# E
 pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -312,7 +317,7 @@ pos[:,2] += 15*mm*rand(settings.N_CA1[0])
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 G_E = NeuronGroup(N=settings.N_CA1[0],
-    model=py_CAN_inp_eqs,
+    model=py_CAN_eqs,
     threshold='v>V_th',
     reset=reset_eqs,
     refractory=refractory_time,
@@ -324,9 +329,7 @@ G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
 
-# Plot X,Y,Z
-ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
-
+# I
 pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_I-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
 pos = r.apply(pos)
@@ -335,7 +338,7 @@ pos[:,2] += 15*mm*rand(settings.N_CA1[1])
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_CA1[1],
-    model=inh_inp_eqs,
+    model=inh_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
@@ -346,18 +349,21 @@ G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
 
 # Plot X,Y,Z
+ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
 ax_anat.scatter(G_I.x_soma, G_I.y_soma, G_I.z_soma, c='red')
 
+# Add to list
 G_all[3][0].append(G_E)
 G_all[3][1].append(G_I)
 print('[\u2022]\tCA1: done')
 
+# Flatten
 G_flat = make_flat(G_all)
 
 # initialize the groups, set initial conditions
 for ngroup in G_flat:
     #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
-    ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron
+    ngroup.v = '-60.*mvolt-randn()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
     #ngroup.v = -60.*mV
 
     # CA1 populations get stimulated
@@ -610,8 +616,8 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
 # avoid linking when using a fixed theta input sin : TESTING
 # G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 # G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[6].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-G_flat[7].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 
