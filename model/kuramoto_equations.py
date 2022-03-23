@@ -14,12 +14,13 @@ Implementation Notes
 
 # Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - gain*X*sin(Theta - pi/2 + offset)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - G_in*X*sin(Theta - pi/2 + offset)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
+
     ThetaPreInput : 1
     omega : 1 (constant)
     kN : 1 (shared)         # k/N ratio, affects sync.
-    gain : 1 (shared)       # this is the input gain, affects the phase reset aggressiveness
+    G_in : 1 (shared)       # input gain, affects the phase reset aggressiveness
     offset : 1 (shared)     # range [0, 2*pi], controls phase reset PRC
     X : 1 (linked)          # this is linked to the firing rates
 '''
@@ -31,16 +32,18 @@ syn_kuramoto_eqs = '''
 
 # Order parameter group calculation equations
 pop_avg_eqs = '''
-    x : 1
-    y : 1
     coherence = sqrt(x**2 + y**2) : 1
     phase = arctan(y/x) + int(x<0 and y>0)*pi - int(x<0 and y<0)*pi: 1
     rhythm = coherence * sin(phase) : 1
     rhythm_pos = coherence * (sin(phase)+1)/2 : 1
-    rhythm_simple = rhythm*nA : amp
-    rhythm_abs = abs(rhythm)*nA : amp
-    rhythm_rect = rhythm_pos*nA : amp
+    rhythm_simple = G_out*rhythm : amp
+    rhythm_abs = G_out*abs(rhythm) : amp
+    rhythm_rect = G_out*rhythm_pos : amp
     rhythm_zero = 0*rhythm_rect : amp   # for debugging
+
+    x : 1
+    y : 1
+    G_out : amp                 # output rhythm gain
 '''
 
 syn_avg_eqs = '''

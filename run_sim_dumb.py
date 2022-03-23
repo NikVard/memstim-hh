@@ -172,6 +172,7 @@ G_E = NeuronGroup(N=settings.N_EC[0],
     name='EC_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+G_E.sigma = settings.sigma_EC[0]*volt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -191,6 +192,7 @@ G_I = NeuronGroup(N=settings.N_EC[1],
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
+G_I.sigma = settings.sigma_EC[1]*volt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -223,6 +225,7 @@ G_E = NeuronGroup(N=settings.N_DG[0],
     name='DG_py')
 G_E.size = cell_size_py
 G_E.glu = 1
+G_E.sigma = settings.sigma_DG[0]*volt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -242,6 +245,7 @@ G_I = NeuronGroup(N=settings.N_DG[1],
     method=integ_method,
     name='DG_inh')
 G_I.size = cell_size_inh
+G_I.sigma = settings.sigma_DG[1]*volt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -274,6 +278,7 @@ G_E = NeuronGroup(N=settings.N_CA3[0],
     name='CA3_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+G_E.sigma = settings.sigma_CA3[0]*volt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -293,6 +298,7 @@ G_I = NeuronGroup(N=settings.N_CA3[1],
     method=integ_method,
     name='CA3_inh')
 G_I.size = cell_size_inh
+G_I.sigma = settings.sigma_CA3[1]*volt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -325,6 +331,7 @@ G_E = NeuronGroup(N=settings.N_CA1[0],
     name='CA1_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
+G_E.sigma = settings.sigma_CA1[0]*volt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -344,6 +351,7 @@ G_I = NeuronGroup(N=settings.N_CA1[1],
     method=integ_method,
     name='CA1_inh')
 G_I.size = cell_size_inh
+G_I.sigma = settings.sigma_CA1[1]*volt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -363,7 +371,7 @@ G_flat = make_flat(G_all)
 # initialize the groups, set initial conditions
 for ngroup in G_flat:
     #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
-    ngroup.v = '-60.*mvolt-randn()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
+    ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
     #ngroup.v = -60.*mV
 
     # CA1 populations get stimulated
@@ -495,7 +503,7 @@ tv = linspace(0, settings.duration/second, int(settings.duration/(settings.stim_
 
 # generate stimulation signal
 if settings.I_stim[0]:
-    print(bcolors.GREEN + '[+]' + bcolors.ENDC + 'Stimulation ON')
+    print(bcolors.GREEN + '[+]' + bcolors.ENDC + ' Stimulation ON')
     xstim = stimulation.generate_stim(duration=settings.stim_duration,
                                       dt=settings.stim_dt,
                                       I_stim=settings.I_stim,
@@ -542,7 +550,7 @@ omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur)) # ~N(2πf0,σ
 G_K.Theta = theta0
 G_K.omega = omega0
 G_K.kN = settings.kN_frac
-G_K.gain = settings.k_gain
+G_K.G_in = settings.k_gain
 G_K.offset = settings.offset
 G_flat.append(G_K) # append to the group list!
 print('[\u2022]\tOscillators group: done')
@@ -559,6 +567,7 @@ G_pop_avg = NeuronGroup(1,
 r0 = 1/settings.N_Kur * sum(exp(1j*G_K.Theta))
 G_pop_avg.x = real(r0)  # avoid division by zero
 G_pop_avg.y = imag(r0)
+G_pop_avg.G_out = settings.r_gain
 G_flat.append(G_pop_avg) # append to the group list!
 syn_avg = Synapses(G_K, G_pop_avg, syn_avg_eqs, name='Kuramoto_avg')
 syn_avg.connect()
@@ -708,6 +717,18 @@ print()
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
 
 
+print('\n[51] Mean firing rates...')
+print('-'*32)
+
+for area in range(len(G_all)):
+    # Calculate mean firing rates
+    FR_exc_mean = (len(spike_mon_E_all[area][0].t)/settings.duration)/spike_mon_E_all[area][0].source.N
+    FR_inh_mean = (len(spike_mon_I_all[area][0].t)/settings.duration)/spike_mon_I_all[area][0].source.N
+
+    print(spike_mon_E_all[area][0].name.split('_')[0], 'E: ', FR_exc_mean, '\t', 'I: ', FR_inh_mean)
+    print('='*16)
+
+
 
 # Plot the results
 # -------------------------------------------------------------#
@@ -717,7 +738,7 @@ print('-'*32)
 print('\n[61] Plotting results...')
 # raster plot of all regions
 # raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
-raster_fig, raster_axs, fig_name = plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsize = 10*ms, interpolation=None)
+raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 plot_watermark(raster_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 raster_fig.savefig(os.path.join(dirs['figures'], fig_name))
