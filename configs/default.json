@@ -29,33 +29,34 @@
             "E": {
                 "N": 1000,
                 "type": "PyCAN",
-                "noise": 0.0001
+                "noise": 0.004
             },
             "I": {
                 "N": 100,
                 "type": "Inh",
-                "noise": 1e-06
+                "noise": 4e-05
             }
         },
         "CA1": {
             "E": {
                 "N": 10000,
                 "type": "PyCAN",
-                "noise": 0.0001
+                "noise": 0.004
             },
             "I": {
                 "N": 1000,
                 "type": "Inh",
-                "noise": 1e-06
+                "noise": 4e-05
             }
         }
     },
     "Kuramoto": {
         "N": 200,
-        "f0": 4.0,
+        "f0": 6.0,
         "sigma": 0.5,
         "kN": 20,
-        "gain": 0.5,
+        "gain_reset": 1.0,
+        "gain_rhythm": 0.6,
         "offset": 0.0
     },
     "connectivity": {
@@ -103,7 +104,7 @@
         },
         "inter": {
             "p_tri": 0.45,
-            "p_mono": 0.2
+            "p_mono": 0.5
         }
     },
     "synapses": {
@@ -120,9 +121,9 @@
         "rho": 1.0,
         "duration": 2.0,
         "dt": 0.0001,
-        "onset": 1.0,
+        "onset": 0.59,
         "I": [
-            0.0
+            10.0
         ],
         "pulse_width": [
             0.001
@@ -134,12 +135,12 @@
         "ipi": 0.0001
     },
     "simulation": {
-        "duration": 2.0,
+        "duration": 1.0,
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "7148bba",
-    "timestamp": "Wed Mar  2 14:19:58 2022",
-    "git_branch": "master",
-    "git_hash": "7148bba276e7a2a97096237ea00895ecda2ad694"
+    "git_short_hash": "42fd47d",
+    "timestamp": "Wed Mar 23 15:34:20 2022",
+    "git_branch": "Noises",
+    "git_hash": "42fd47dfaf073c5b46a78633d8b18a8812c64200"
 }
