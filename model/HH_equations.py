@@ -68,13 +68,14 @@ py_CAN_inp_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    G_sin = 1.0*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
+    sigma : volt
+    G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # this is the input theta rhythm from the MS
     #I_exc = inp_theta(t) : amp
     r : 1
@@ -134,15 +135,13 @@ py_CAN_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    x_dendrite : metre
-    y_dendrite : metre
-    z_dendrite : metre
+    sigma : volt
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -196,15 +195,13 @@ py_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    x_dendrite : metre
-    y_dendrite : metre
-    z_dendrite : metre
+    sigma : volt
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -242,15 +239,16 @@ inh_inp_eqs = '''
         dhi/dt = -hi/(10.*ms) : siemens
 
 
-    noise = sigma_noise_inh * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
     y_soma : metre
     z_soma : metre
-    G_sin = 1.0*int(z_soma<15*mm)*int(z_soma>0*mm) : 1  # this is the mask/scaling for which neurons get the sinusoidal input
+    G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1  # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked)    # same as in the pyCAN group, excitatory input from MS
     #I_exc = inp_theta(t) : amp
+    sigma : volt
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -287,12 +285,13 @@ inh_eqs = '''
         dhi/dt = - hi / (10.*ms) : siemens
 
 
-    noise = sigma_noise_inh * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
     y_soma : metre
     z_soma : metre
+    sigma : volt
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)

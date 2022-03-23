@@ -114,8 +114,8 @@ def plot_raster_grid_all(spike_mon_E_all, spike_mon_I_all, platesize=100, winsiz
         # Iterate over populations
         for pop_idx in range(2):
 
-            t = popmons[area_idx][pop_idx].t/msecond
-            i = popmons[area_idx][pop_idx].i
+            t = popmons[pop_idx][area_idx][0].t/msecond
+            i = popmons[pop_idx][area_idx][0].i
 
             # Parameters
             N = settings.N_all[area_idx][pop_idx]

@@ -26,15 +26,15 @@ cell_size_inh = 14.e3*umetre**2
 # scale = round(1000/379,6)*umetre
 scale = round(1000/818,6)*umetre
 
-sigma_noise_inh = 1.*uvolt
-sigma_noise_exc = 100.*uvolt
+# sigma_noise_inh = 1.*uvolt
+# sigma_noise_exc = 100.*uvolt
 
 tstep = defaultclock.dt
 integ_method = 'exponential_euler'  # integration method
 
 # Spikes-2-Rates filter
 filter_params = {
-    'tauFR' : 1*ms
+    'tauFR' : 10*ms
 }
 
 

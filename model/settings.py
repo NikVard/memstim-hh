@@ -35,7 +35,9 @@ p_tri = None # def: 0.45 # trisynaptic pathway connectivity
 N_Kur = None
 f0 = 4 # Hz
 sigma = 0.5 # std of Gaussian for phase/ang.vel. initialization
-kN_frac = 0 # synchronization parameter (k/N factor)
+kN_frac = 0. # synchronization parameter (k/N factor)
+k_gain = 0. # phase reset gain
+r_gain = 0.*nA # output sin rhythm gain (scaling, in nA)
 
 # Stimulation settings - stimulation module is not brian2-dependent!
 stim_target = "" # [EC | DG | CA1 | CA3]
@@ -69,13 +71,13 @@ def init(data):
     N_CA1 = [data['areas']['CA1']['E']['N'], data['areas']['CA1']['I']['N']]
     N_all = [N_EC, N_DG, N_CA3, N_CA1]
 
-    # # Population noise
-    # global sigma_EC, sigma_DG, sigma_CA3, sigma_CA1, sigma_all
-    # sigma_EC = [data['areas']['EC']['E']['noise'], data['areas']['EC']['I']['noise']]
-    # sigma_DG = [data['areas']['DG']['E']['noise'], data['areas']['DG']['I']['noise']]
-    # sigma_CA3 = [data['areas']['CA1']['E']['noise'], data['areas']['CA1']['I']['noise']]
-    # sigma_CA1 = [data['areas']['CA3']['E']['noise'], data['areas']['CA3']['I']['noise']]
-    # sigma_all = [sigma_EC, sigma_DG, sigma_CA3, sigma_CA1]
+    # Population noise
+    global sigma_EC, sigma_DG, sigma_CA3, sigma_CA1, sigma_all
+    sigma_EC = [data['areas']['EC']['E']['noise'], data['areas']['EC']['I']['noise']]
+    sigma_DG = [data['areas']['DG']['E']['noise'], data['areas']['DG']['I']['noise']]
+    sigma_CA3 = [data['areas']['CA3']['E']['noise'], data['areas']['CA3']['I']['noise']]
+    sigma_CA1 = [data['areas']['CA1']['E']['noise'], data['areas']['CA1']['I']['noise']]
+    sigma_all = [sigma_EC, sigma_DG, sigma_CA3, sigma_CA1]
 
     # Intra-conn. probabilities | [[E-E, E-I], [I-E, I-I]]
     global p_EC_all, p_DG_all, p_CA3_all, p_CA1_all, p_intra_all
@@ -95,12 +97,13 @@ def init(data):
     dt = data['simulation']['dt']*second
     debugging = data['simulation']['debugging']
 
-    global N_Kur, f0, sigma, kN_frac, k_gain, offset
+    global N_Kur, f0, sigma, kN_frac, k_gain, r_gain, offset
     N_Kur = data['Kuramoto']['N']
     f0 = data['Kuramoto']['f0']
     sigma = data['Kuramoto']['sigma']
     kN_frac = data['Kuramoto']['kN']
-    k_gain = data['Kuramoto']['gain']
+    k_gain = data['Kuramoto']['gain_reset']
+    r_gain = data['Kuramoto']['gain_rhythm']*nA
     offset = data['Kuramoto']['offset']
 
     # Stimulation

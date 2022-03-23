@@ -48,24 +48,24 @@ _data = {
             "E" : {
                 "N" : int(1e3),
                 "type" : "PyCAN",
-                "noise" : 100.e-6
+                "noise" : 4000.e-6
             },
                 "I" : {
                 "N" : int(0.1e3),
                 "type" : "Inh",
-                "noise" : 1.e-6
+                "noise" : 40.e-6
             }
         },
         "CA1"   : {
             "E" : {
                 "N" : int(10e3),
                 "type" : "PyCAN",
-                "noise" : 100.e-6
+                "noise" : 4000.e-6
             },
             "I" : {
                 "N" : int(1e3),
                 "type" : "Inh",
-                "noise" : 1.e-6
+                "noise" : 40.e-6
             }
         }
     },
@@ -73,10 +73,11 @@ _data = {
     # Kuramoto oscillator parameters
     "Kuramoto" : {
         "N" : 200,
-        "f0" : 4.,
+        "f0" : 6.,
         "sigma" : 0.5,  # normal std
         "kN" : 20,
-        "gain" : 0.5,
+        "gain_reset" : 1.,
+        "gain_rhythm" : 0.6, # nA
         "offset" : -0*pi/2
     },
 
@@ -90,7 +91,7 @@ _data = {
         },
         "inter" : { # inter-area conn. probabilities
             "p_tri" : 0.45, # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
-            "p_mono" : 0.2  # mono: [EC->CA3, EC->CA1]
+            "p_mono" : 0.3  # mono: [EC->CA3, EC->CA1]
         }
     },
 
@@ -107,8 +108,8 @@ _data = {
         "rho" : 1.,                         # resistivity of homogeneous conductive medium [Ω/cm]
         "duration" : 2.,                    # [sec]
         "dt" : .1e-3,                       # [sec]
-        "onset" : 1.,                       # [sec]
-        "I" : [0.],                         # stimulation amplitude [nA]
+        "onset" : 0.59,                     # [sec]
+        "I" : [10.],                        # stimulation amplitude [nA]
         "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
         "stim_freq" : 5,                    # stimulation frequency [Hz]
         "pulse_freq" : 100,                 # pulse frequency, determines ON duration [Hz]
@@ -119,7 +120,7 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration"  : 2.0,                  # second
+        "duration"  : 1.0,                  # second
         "dt"        : .1e-3,                # second
         "debugging" : False
     },
