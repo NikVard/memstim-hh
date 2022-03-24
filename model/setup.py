@@ -94,6 +94,7 @@ def connect_intra(G_py, G_inh, p_conn, gains):
     # done, return the synapses list
     return syn_all
 
+
 def connect_inter(all_G_py_from, all_G_py_to, all_G_inh_to, all_p, gains):
     """ Function that takes care of inter-connectivity between areas.
         Added (Gaussian) distance-based connectivity between the areas """
