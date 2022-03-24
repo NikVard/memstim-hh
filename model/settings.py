@@ -27,6 +27,9 @@ p_CA3_all = [[],[]] # def: [[0.56, 0.75], [0.75, 0.]]
 p_CA1_all = [[],[]] # def: [[0., 0.28], [0.3, 0.7]]
 p_intra_all = None
 
+# inter-area conn. probabilities per area
+p_inter_all = None
+
 # inter-area conn. probabilities
 p_mono = None # def: 0.2 # monosynaptic pathway connectivity
 p_tri = None # def: 0.45 # trisynaptic pathway connectivity
@@ -88,9 +91,43 @@ def init(data):
     p_intra_all = [p_EC_all, p_DG_all, p_CA3_all, p_CA1_all]
 
     # Inter-conn. probabilities | p_mono / p_tri
-    global p_mono, p_tri
-    p_mono = data['connectivity']['inter']['p_mono'] # monosynaptic pathway connectivity
-    p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivity
+    global p_inter_all
+    custom_conn = False
+
+    if 'inter_custom' in data['connectivity'].keys():
+        if data['connectivity']['inter_custom']:
+            custom_conn = True
+
+    if custom_conn:
+        # Custom connectivity
+        print('[!] Custom inter-connectivity being used')
+        p_custom = data['connectivity']['inter_custom']
+
+        p_inter_all = []
+        for k in p_custom.keys():
+            v1 = p_custom[k]
+
+            l0 = []
+            for idx in range(4):
+                v2 = [v1['E'][idx], v1['I'][idx]]
+                l0.append(v2)
+
+            p_inter_all.append(l0)
+    else:
+        # Default mono/tri connectivity
+        print('[-] Default inter-connectivity for mono-/tri-synaptic pathways')
+
+        p_mono = data['connectivity']['inter']['p_mono'] # monosynaptic pathway connectivity
+        p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivity
+
+        p_inter_all = [[[[],[]],[[],[]]],[[[],[]],[[],[]]],[[[],[]],[[],[]]],[[[],[]],[[],[]]]]
+        p_inter_all = [[[[0,0] for ii in range(2)] for jj in range(4)] for kk in range(4)]
+        p_inter_all[0][1][0] = [p_tri for ii in range(2)] # EC_E to DG_E | DG_I
+        p_inter_all[0][2][0] = [p_mono for ii in range(2)] # EC_E to CA3_E | CA3_I
+        p_inter_all[0][3][0] = [p_mono for ii in range(2)] # EC_E to CA1_E | CA1_I
+        p_inter_all[1][2][0] = [p_tri for ii in range(2)] # DG_E to CA3_E | CA3_I
+        p_inter_all[2][3][0] = [p_tri for ii in range(2)] # CA3_E to CA1_E | CA1_I
+        p_inter_all[3][0][0] = [p_tri for ii in range(2)] # CA1_E to EC_E | EC_I
 
     global duration, dt, debugging
     duration = data['simulation']['duration']*second

@@ -444,27 +444,19 @@ syn_intra_all = [syn_EC_all, syn_DG_all, syn_CA3_all, syn_CA1_all]
 # inter
 print('[+] Inter-region')
 
-# p_inter_all = [[[[],[]],[[],[]]],[[[],[]],[[],[]]],[[[],[]],[[],[]]],[[[],[]],[[],[]]]]
-p_inter_all = [[[[0,0] for ii in range(2)] for jj in range(4)] for kk in range(4)]
-p_inter_all[0][1][0] = [settings.p_tri for ii in range(2)] # EC_E to DG_E | DG_I
-p_inter_all[0][2][0] = [settings.p_mono for ii in range(2)] # EC_E to CA3_E | CA3_I
-p_inter_all[0][3][0] = [settings.p_mono for ii in range(2)] # EC_E to CA1_E | CA1_I
-p_inter_all[1][2][0] = [settings.p_tri for ii in range(2)] # DG_E to CA3_E | CA3_I
-p_inter_all[2][3][0] = [settings.p_tri for ii in range(2)] # CA3_E to CA1_E | CA1_I
-p_inter_all[3][0][0] = [settings.p_tri for ii in range(2)] # CA1_E to EC_E | EC_I
-
-syn_EC_DG_all = setup.connect_inter(G_all[0][0], G_all[1][0], G_all[1][1], p_inter_all[0][1], gains_all[0])
-syn_EC_CA3_all = setup.connect_inter(G_all[0][0], G_all[2][0], G_all[2][1], p_inter_all[0][2], gains_all[0])
-syn_EC_CA1_all = setup.connect_inter(G_all[0][0], G_all[3][0], G_all[3][1], p_inter_all[0][3], gains_all[0])
+# syn_EC_EC_all = setup.connect_all()
+syn_EC_DG_all = setup.connect_inter(G_all[0][0], G_all[1][0], G_all[1][1], settings.p_inter_all[0][1], gains_all[0])
+syn_EC_CA3_all = setup.connect_inter(G_all[0][0], G_all[2][0], G_all[2][1], settings.p_inter_all[0][2], gains_all[0])
+syn_EC_CA1_all = setup.connect_inter(G_all[0][0], G_all[3][0], G_all[3][1], settings.p_inter_all[0][3], gains_all[0])
 print('[\u2022]\tEC-to-all: done')
 
-syn_DG_CA3_all = setup.connect_inter(G_all[1][0], G_all[2][0], G_all[2][1], p_inter_all[1][2], gains_all[1])
+syn_DG_CA3_all = setup.connect_inter(G_all[1][0], G_all[2][0], G_all[2][1], settings.p_inter_all[1][2], gains_all[1])
 print('[\u2022]\tDG-to-CA3: done')
 
-syn_CA3_CA1_all = setup.connect_inter(G_all[2][0], G_all[3][0], G_all[3][1], p_inter_all[2][3], gains_all[2])
+syn_CA3_CA1_all = setup.connect_inter(G_all[2][0], G_all[3][0], G_all[3][1], settings.p_inter_all[2][3], gains_all[2])
 print('[\u2022]\tCA3-to-CA1: done')
 
-syn_CA1_EC_all = setup.connect_inter(G_all[3][0], G_all[0][0], G_all[0][1], p_inter_all[3][0], gains_all[3])
+syn_CA1_EC_all = setup.connect_inter(G_all[3][0], G_all[0][0], G_all[0][1], settings.p_inter_all[3][0], gains_all[3])
 print('[\u2022]\tCA1-to-EC: done')
 syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, syn_CA3_CA1_all, syn_CA1_EC_all]
 
