@@ -5,48 +5,48 @@
             "E": {
                 "N": 10000,
                 "type": "PyCAN",
-                "noise": 0.0001
+                "noise": 0.0039
             },
             "I": {
                 "N": 1000,
                 "type": "Inh",
-                "noise": 1e-06
+                "noise": 3.9e-05
             }
         },
         "DG": {
             "E": {
                 "N": 10000,
                 "type": "Py",
-                "noise": 0.001
+                "noise": 0.0036
             },
             "I": {
                 "N": 100,
                 "type": "Inh",
-                "noise": 1e-05
+                "noise": 3.6e-05
             }
         },
         "CA3": {
             "E": {
                 "N": 1000,
                 "type": "PyCAN",
-                "noise": 0.004
+                "noise": 0.0031
             },
             "I": {
                 "N": 100,
                 "type": "Inh",
-                "noise": 4e-05
+                "noise": 3.1e-05
             }
         },
         "CA1": {
             "E": {
                 "N": 10000,
                 "type": "PyCAN",
-                "noise": 0.004
+                "noise": 0.0038
             },
             "I": {
                 "N": 1000,
                 "type": "Inh",
-                "noise": 4e-05
+                "noise": 3.8e-05
             }
         }
     },
@@ -56,7 +56,7 @@
         "sigma": 0.5,
         "kN": 20,
         "gain_reset": 1.5,
-        "gain_rhythm": 0.8,
+        "gain_rhythm": 0.3,
         "offset": 0.0
     },
     "connectivity": {
@@ -114,16 +114,16 @@
                         0.0
                     ],
                     [
-                        0.45,
-                        0.45
+                        4.0,
+                        4.0
                     ],
                     [
-                        0.3,
-                        0.3
+                        0.1,
+                        0.1
                     ],
                     [
-                        0.3,
-                        0.3
+                        1.5,
+                        1.5
                     ]
                 ],
                 "I": [
@@ -156,8 +156,8 @@
                         0.0
                     ],
                     [
-                        0.45,
-                        0.45
+                        0.25,
+                        0.25
                     ],
                     [
                         0.0,
@@ -198,8 +198,8 @@
                         0.0
                     ],
                     [
-                        0.45,
-                        0.45
+                        1.5,
+                        1.5
                     ]
                 ],
                 "I": [
@@ -224,8 +224,8 @@
             "CA1": {
                 "E": [
                     [
-                        0.4,
-                        0.4
+                        0.2,
+                        0.2
                     ],
                     [
                         0.0,
@@ -275,7 +275,7 @@
         "rho": 1.0,
         "duration": 2.0,
         "dt": 0.0001,
-        "onset": 0.67,
+        "onset": 0.66,
         "I": [
             10.0
         ],
@@ -293,8 +293,8 @@
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "a7b06d2",
-    "timestamp": "Thu Mar 24 14:49:47 2022",
-    "git_branch": "inter-connectiv",
-    "git_hash": "a7b06d20732dac3835dda38496bfb61969ad2ad0"
+    "git_short_hash": "ef362ce",
+    "timestamp": "Wed Mar 30 12:00:50 2022",
+    "git_branch": "tuning_params",
+    "git_hash": "ef362ce3920a16dfbc29250915a4fceb8caa4a0c"
 }

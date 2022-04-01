@@ -24,48 +24,48 @@ _data = {
             "E" : {
                 "N" : int(10e3),
                 "type" : "PyCAN",
-                "noise" : 100.e-6       # Volts
+                "noise" : 3900.e-6       # Volts
             },
             "I" : {
                 "N" : int(1e3),
                 "type" : "Inh",
-                "noise" : 1.e-6
+                "noise" : 39.e-6
             }
         },
         "DG"    : {
             "E" : {
                 "N" : int(10e3),
                 "type" : "Py",
-                "noise" : 1000.e-6       # Volts
+                "noise" : 3600.e-6       # Volts
             },
             "I" : {
                 "N" : int(0.1e3),
                 "type" : "Inh",
-                "noise" : 10.e-6
+                "noise" : 36.e-6
             }
         },
         "CA3"   : {
             "E" : {
                 "N" : int(1e3),
                 "type" : "PyCAN",
-                "noise" : 4000.e-6
+                "noise" : 3100.e-6
             },
             "I" : {
                 "N" : int(0.1e3),
                 "type" : "Inh",
-                "noise" : 40.e-6
+                "noise" : 31.e-6
             }
         },
         "CA1"   : {
             "E" : {
                 "N" : int(10e3),
                 "type" : "PyCAN",
-                "noise" : 4000.e-6
+                "noise" : 3800.e-6
             },
             "I" : {
                 "N" : int(1e3),
                 "type" : "Inh",
-                "noise" : 40.e-6
+                "noise" : 38.e-6
             }
         }
     },
@@ -77,7 +77,7 @@ _data = {
         "sigma" : 0.5,  # normal std
         "kN" : 20,
         "gain_reset" : 1.5,
-        "gain_rhythm" : 0.8, # nA
+        "gain_rhythm" : 0.3, # nA
         "offset" : -0*pi/2
     },
 
@@ -95,19 +95,19 @@ _data = {
         },
         "inter_custom" : {
             "EC" : {
-                "E" : [[0., 0.], [0.45, 0.45], [0.3, 0.3], [0.3, 0.3]],
+                "E" : [[0., 0.], [4., 4.], [.1, .1], [1.5, 1.5]],
                 "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
             },
             "DG" : {
-                "E" : [[0., 0.], [0., 0.], [0.45, 0.45], [0., 0.]],
+                "E" : [[0., 0.], [0., 0.], [.25, .25], [0., 0.]],
                 "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
             },
             "CA3" : {
-                "E" : [[0., 0.], [0., 0.], [0., 0.], [0.45, 0.45]],
+                "E" : [[0., 0.], [0., 0.], [0., 0.], [1.5, 1.5]],
                 "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
             },
             "CA1" : {
-                "E" : [[0.4, 0.4], [0., 0.], [0., 0.], [0., 0.]],
+                "E" : [[.2, .2], [0., 0.], [0., 0.], [0., 0.]],
                 "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
             }
         }
@@ -126,7 +126,7 @@ _data = {
         "rho" : 1.,                         # resistivity of homogeneous conductive medium [Ω/cm]
         "duration" : 2.,                    # [sec]
         "dt" : .1e-3,                       # [sec]
-        "onset" : 0.67,                     # [sec]
+        "onset" : 0.66,                     # [sec]
         "I" : [10.],                        # stimulation amplitude [nA]
         "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
         "stim_freq" : 5,                    # stimulation frequency [Hz]

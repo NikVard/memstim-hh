@@ -239,7 +239,7 @@ inh_inp_eqs = '''
         dhi/dt = -hi/(10.*ms) : siemens
 
 
-    noise = sigma * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
@@ -285,7 +285,7 @@ inh_eqs = '''
         dhi/dt = - hi / (10.*ms) : siemens
 
 
-    noise = sigma * (2. * (0.1e-3*siemens ) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
