@@ -371,8 +371,8 @@ G_flat = make_flat(G_all)
 # initialize the groups, set initial conditions
 for ngroup in G_flat:
     #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
-    ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
-    #ngroup.v = -60.*mV
+    # ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
+    ngroup.v = -60.*mV
 
     # CA1 populations get stimulated
     if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
@@ -617,6 +617,8 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
 # avoid linking when using a fixed theta input sin : TESTING
 # G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 # G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
@@ -703,7 +705,7 @@ start = time.time()
 net.run(settings.duration, report='text', report_period=10*second, profile=True)
 end = time.time()
 print('-'*32)
-print(bcolors.GREEN + '[+]' + 'Simulation ended' + bcolors.ENDC)
+print(bcolors.GREEN + '[+]' + ' Simulation ended' + bcolors.ENDC)
 print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Simulation ran for '+str((end-start)/60)+' minutes')
 print()
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
