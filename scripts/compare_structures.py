@@ -20,11 +20,13 @@ def parse_coords(fname):
 
     x_tmp = []
     y_tmp = []
+    z_tmp = []
     with open(fname, 'r') as fin:
         for line in fin:
             tok = re.sub(pattern, '', line).split()
             x_tmp.append(float(tok[0]))
             y_tmp.append(float(tok[1]))
+            z_tmp.append(float(tok[2]))
 
     return array([x_tmp,y_tmp]).T
 
@@ -38,13 +40,13 @@ adj = []
 # ============
 ## E
 tmp1 = parse_coords(fname='positions/EC_exc.txt')
-tmp2 = load('../neuron_positions/full/EC_E-stipple-10000.npy')
+tmp2 = load('neuron_positions/full/EC_E-stipple-10000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
 ## I
 tmp1 = parse_coords(fname='positions/EC_inh.txt')
-tmp2 = load('../neuron_positions/full/EC_I-stipple-1000.npy')
+tmp2 = load('neuron_positions/full/EC_I-stipple-1000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
@@ -52,13 +54,13 @@ adj.append(tmp2)
 # ============
 ## E
 tmp1 = parse_coords(fname='positions/DG_exc.txt')
-tmp2 = load('../neuron_positions/full/DG_E-stipple-10000.npy')
+tmp2 = load('neuron_positions/full/DG_E-stipple-10000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
 ## I
 tmp1 = parse_coords(fname='positions/DG_inh.txt')
-tmp2 = load('../neuron_positions/full/DG_I-stipple-100.npy')
+tmp2 = load('neuron_positions/full/DG_I-stipple-100.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
@@ -66,13 +68,13 @@ adj.append(tmp2)
 # ============
 ## E
 tmp1 = parse_coords(fname='positions/CA3_exc.txt')
-tmp2 = load('../neuron_positions/full/CA3_E-stipple-1000.npy')
+tmp2 = load('neuron_positions/full/CA3_E-stipple-1000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
 ##I
 tmp1 = parse_coords(fname='positions/CA3_inh.txt')
-tmp2 = load('../neuron_positions/full/CA3_I-stipple-100.npy')
+tmp2 = load('neuron_positions/full/CA3_I-stipple-100.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
@@ -80,13 +82,13 @@ adj.append(tmp2)
 # ============
 ## E
 tmp1 = parse_coords(fname='positions/CA1_exc.txt')
-tmp2 = np.load('../neuron_positions/full/CA1_E-stipple-10000.npy')
+tmp2 = np.load('neuron_positions/full/CA1_E-stipple-10000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 
 ## I
 tmp1 = parse_coords(fname='positions/CA1_inh.txt')
-tmp2 = load('../neuron_positions/full/CA1_I-stipple-1000.npy')
+tmp2 = load('neuron_positions/full/CA1_I-stipple-1000.npy')
 ref.append(tmp1)
 adj.append(tmp2)
 # ============

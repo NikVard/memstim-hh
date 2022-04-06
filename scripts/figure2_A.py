@@ -136,8 +136,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
-    t_stim = 0.73*second
-    t_lims = [495*ms, 1005*ms] # ms
+    t_stim = 660*ms
+    t_lims = [505*ms, 1015*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     # Set theta rhythm limits
     # xlims_rhythm = [t for t in t_lims]
     xlims_rhythm = [t for t in t_lims]
-    ylims_rhythm = [-0.1, 1]
+    ylims_rhythm = [-0.1, 0.4]
 
     # Set raster limits
     xlims_raster = [t for t in t_lims]
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
-    specg_freq_majors = [0.5, 1., 1.5]
+    specg_freq_majors = np.arange(0.5, 1.6, 0.1) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
     ax_specg_exc.xaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.xaxis.set_minor_locator(ticker.NullLocator())
 
@@ -404,10 +404,10 @@ if __name__ == "__main__":
     for area_idx in range(len(areas)):
         # load t-i arrays for this area
         print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
-        i_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0]))
-        t_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0]))
-        i_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1]))
-        t_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1]))
+        i_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/gen/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0]))
+        t_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/gen/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0]))
+        i_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/gen/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1]))
+        t_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/gen/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1]))
 
         t_exc = t_exc/1000
         t_inh = t_inh/1000
@@ -482,7 +482,7 @@ if __name__ == "__main__":
     # ==================
     print('[+] Plotting rhythm...')
 
-    rhythm = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/data/order_param_mon_rhythm.txt')
+    rhythm = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/gen/data/order_param_mon_rhythm.txt')
     ax_rhythm.plot(np.arange(0.,duration,dt), rhythm, ls='-', c='k', linewidth=1., rasterized=True, zorder=1)
 
     # vertical lines at x-points
@@ -494,13 +494,13 @@ if __name__ == "__main__":
             # ax_rhythm.plot(peak*dt, rhythm[peak], 'C1x', markersize=12, zorder=10, clip_on=False)
 
             # trace the treasure
-            ax_rhythm.axvline(x=peak*dt, ymin=-11.5, ymax=rhythm[peak], c='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
+            ax_rhythm.vlines(x=peak*dt, ymin=-5.35, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
-    ax_rhythm.axvline(x=t_stim, ymin=-11.5, ymax=1., c='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
+    ax_rhythm.vlines(x=t_stim, ymin=-5.6, ymax=0.5, color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
 
     # add a sizebar for the y-axis
-    add_sizebar(ax_rhythm, [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 0.5], 'black', '0.5nA')
+    add_sizebar(ax_rhythm, [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 0.1], 'black', '0.1nA')
 
 
     # ==================
@@ -530,8 +530,8 @@ if __name__ == "__main__":
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')
     # ax_rate_exc.set_title('Excitatory', color=c_exc, loc='left')
 
-    ax_rate_inh.text(x=t_lims[0]-10*ms, y=ylims_rates[1]+50, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
-    ax_rate_exc.text(x=t_lims[0]-10*ms, y=ylims_rates[1]+50, s='Excitatory', ha='center', color=c_exc, clip_on=False)
+    ax_rate_inh.text(x=t_lims[0]-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
+    ax_rate_exc.text(x=t_lims[0]-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
     add_sizebar(ax_rate_exc, [t_lims[1]+20*ms, t_lims[1]+20*ms], [50, 80], 'black', '30Hz')
@@ -540,8 +540,8 @@ if __name__ == "__main__":
     FR_inh_mean = (len(t_inh)/duration)/N_inh
     FR_exc_mean = (len(t_exc)/duration)/N_exc
 
-    ax_rate_inh.text(x=t_lims[1]+10*ms, y=ylims_rates[1]+50, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
-    ax_rate_exc.text(x=t_lims[1]+10*ms, y=ylims_rates[1]+50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
+    ax_rate_inh.text(x=t_lims[1]+50*ms, y=ylims_rates[1]//2, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
+    ax_rate_exc.text(x=t_lims[1]+50*ms, y=ylims_rates[1]//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
 
 
     # ==================
