@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results"
+RESBASE="./results_opt"
 RESDIR="$RESBASE"_"$CURRDATE"
 
 ### Check and make directory for saving results
@@ -27,7 +27,7 @@ fi
 
 CNT=0
 RESULT=""
-for FN_CONF in ./configs/*;
+for FN_CONF in ./configs/opt_noise_EC/*;
 	do
 		### Print current simulation start time [24H format] ###
 		CURRTIME=$(date +"%T")

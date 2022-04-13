@@ -75,7 +75,7 @@ settings.init(data)
 print('\n[00] Making directories...')
 print('-'*32)
 dirs = {}
-dirs['results'] = 'results'
+dirs['results'] = 'results_opt'
 if not os.path.isdir(dirs['results']):
     print('[+] Creating directory', dirs['results'])
     os.makedirs(dirs['results'])
