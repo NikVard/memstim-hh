@@ -199,10 +199,13 @@ def cost_func(data, duration=1, fs=10000, areasizes={"EC":[10000, 1000], "DG":[1
 
     # Goal vector [mu_FR_E mu_FR_I ... max_FR_CA1_E, fout]
     # ----------------------------------------------------
+    # Defaults
     mu_FR_E = 5
     mu_FR_I = 50
     max_FR_CA1_E = 10
     fout = 6
+
+    # make the goal vector
     goal = [mu_FR_E, mu_FR_I]*4
     goal.append(max_FR_CA1_E)
     goal.append(fout)
