@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results"
+RESBASE="./results_opt"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
