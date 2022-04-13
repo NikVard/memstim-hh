@@ -63,7 +63,7 @@ for DIR in $CONF_DIRS;
 
                 let "CNT+=1"
 
-                sleep 5
+                sleep 1
 
                 ### Copy the config file used to results dir
                 cp $FN_CONF $BACKCONF
