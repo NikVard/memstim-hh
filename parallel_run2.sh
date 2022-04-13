@@ -19,8 +19,9 @@ fi
 
 ### Get all config directories
 #CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
-ISTIM=$1
-CONF_DIRS="configs/${ISTIM}_nA"
+# ISTIM=$1
+# CONF_DIRS="configs/${ISTIM}_nA"
+CONF_DIRS="configs/opt_noise_EC"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
@@ -28,7 +29,6 @@ for DIR in $CONF_DIRS;
         ### Store the basename for the parameters i.e. 10nA
         PNAME=$(basename $DIR)
         echo "In $PNAME"
-
 
         ### 1. Make a subdirectory to store the used configuration files for this parameter set i.e. results_{date}/10nA/...
         CURRRES="$RESDIRTOT/$PNAME"
