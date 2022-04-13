@@ -58,7 +58,8 @@ for DIR in $CONF_DIRS;
                 echo $FN_CONF
 
                 ### Queue the simulation
-                sbatch --job-name="SIM_${ISTIM}_${FN_CONF}" --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
+                let DELAY="CNT*10"
+                sbatch --job-name="SIM_${ISTIM}_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
 
                 let "CNT+=1"
 
