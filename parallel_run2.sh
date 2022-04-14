@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results_opt"
+RESBASE="./results_opt_$1"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
@@ -18,10 +18,10 @@ fi
 
 
 ### Get all config directories
-#CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
+# CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/opt_noise_EC"
+CONF_DIRS="configs/opt_noise_$1"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
@@ -60,7 +60,7 @@ for DIR in $CONF_DIRS;
                 ### Queue the simulation
                 let DELAY="CNT*30"
 		echo "Delayed: $DELAY seconds"
-                sbatch --job-name="SIM_${ISTIM}_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
+                sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT run_sim.sh
 
                 let "CNT+=1"
 
