@@ -47,6 +47,13 @@ def parse_positions(fname):
 # -------------------------------------------------------------#
 # Use C++ standalone code generation TODO: Experimental!
 #set_device('cpp_standalone')
+
+# Parallel w/ Cython - independent caches
+cache_dir = os.path.expanduser(f'~/.cython/brian-pid-{os.getpid()}')
+prefs.codegen.runtime.cython.cache_dir = cache_dir
+prefs.codegen.runtime.cython.multiprocess_safe = False
+
+# Parse arguments
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
 parser.add_argument('-p', '--parameters',
                     nargs='?',
