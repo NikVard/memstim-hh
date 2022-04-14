@@ -5,12 +5,12 @@
             "E": {
                 "N": 10000,
                 "type": "PyCAN",
-                "noise": 0.0015
+                "noise": 0.0039
             },
             "I": {
                 "N": 1000,
                 "type": "Inh",
-                "noise": 1.5e-05
+                "noise": 3.9e-05
             }
         },
         "DG": {
