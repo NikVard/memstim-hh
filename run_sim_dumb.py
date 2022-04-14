@@ -869,6 +869,6 @@ for G in G_flat:
         print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
         continue
 
-print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
-clear_cache('cython')
+# print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
+# clear_cache('cython')
 exit(0)
