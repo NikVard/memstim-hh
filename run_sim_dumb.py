@@ -55,14 +55,24 @@ prefs.codegen.runtime.cython.multiprocess_safe = False
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='MemStim using HH neurons')
+
 parser.add_argument('-p', '--parameters',
                     nargs='?',
                     metavar='-p',
                     type=str,
                     default=os.path.join('configs', 'default.json'),
                     help='Parameters file (json format)')
+
+parser.add_argument('-sd', '--save_dir',
+                    nargs='?',
+                    metavar='-sd',
+                    type=str,
+                    default='results',
+                    help='Destination directory to save the results')
+
 args = parser.parse_args()
 filename = args.parameters
+resdir = args.save_dir
 
 try:
     data = parameters.load(filename)
@@ -82,7 +92,8 @@ settings.init(data)
 print('\n[00] Making directories...')
 print('-'*32)
 dirs = {}
-dirs['results'] = 'results_opt_DG'
+# dirs['results'] = 'results_opt_DG'
+dirs['results'] = resdir
 if not os.path.isdir(dirs['results']):
     print('[+] Creating directory', dirs['results'])
     os.makedirs(dirs['results'])
