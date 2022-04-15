@@ -683,10 +683,10 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
         g.I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 '''
 # avoid linking when using a fixed theta input sin : TESTING
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
+G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 
