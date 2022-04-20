@@ -237,49 +237,39 @@ if __name__  == "__main__":
 
     args = parser.parse_args()
 
-    # Fix the parameters
-    cnt=0
-    noise_vals = [30, 35, 40, 45, 50]
-    for val in noise_vals:
-        _data["areas"]["EC"]["E"]["noise"] = np.around(val*100.e-06, 6)
-        _data["areas"]["EC"]["I"]["noise"] = np.around(val*10.e-06, 6)
+    # Make directories
+    basedir = args.output_directory
+    if not os.path.isdir(basedir):
+        print('[+] Creating directory', basedir)
+        os.makedirs(basedir)
 
-        # Define the filename
-        filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-        print('Saving file "{0}"'.format(filename))
-        save(filename, _data)
-        cnt += 1
+    # dir_EC = os.path.join(basedir, 'opt_noise_EC')
+    # dir_DG = os.path.join(basedir, 'opt_noise_DG')
+    # dir_CA3 = os.path.join(basedir, 'opt_noise_CA3')
+    # dir_CA1 = os.path.join(basedir, 'opt_noise_CA1')
 
-    for val in noise_vals:
-        _data["areas"]["DG"]["E"]["noise"] = np.around(val*100.e-06, 6)
-        _data["areas"]["DG"]["I"]["noise"] = np.around(val*10.e-06, 6)
+    vmin,vmax = 30,45
+    noise_vals = np.arange(vmin, vmax)
 
-        # Define the filename
-        filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-        print('Saving file "{0}"'.format(filename))
-        save(filename, _data)
-        cnt += 1
+    areas = ['EC', 'DG', 'CA3', 'CA1']
+    for area in areas:
+        currdir = os.path.join(basedir, 'opt_noise_'+area)
+        if not os.path.isdir(currdir):
+            print('[+] Creating directory', currdir)
+            os.makedirs(currdir)
 
-    for val in noise_vals:
-        _data["areas"]["CA3"]["E"]["noise"] = np.around(val*100.e-06, 6)
-        _data["areas"]["CA3"]["I"]["noise"] = np.around(val*10.e-06, 6)
+        # Fix the parameters
+        cnt=0
+        for val in noise_vals:
+            _data["areas"][area]["E"]["noise"] = np.around(val*100.e-06, 6)
+            _data["areas"][area]["I"]["noise"] = np.around(val*10.e-06, 6)
 
-        # Define the filename
-        filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-        print('Saving file "{0}"'.format(filename))
-        save(filename, _data)
-        cnt += 1
-
-    for val in noise_vals:
-        _data["areas"]["CA1"]["E"]["noise"] = np.around(val*100.e-06, 6)
-        _data["areas"]["CA1"]["I"]["noise"] = np.around(val*10.e-06, 6)
-
-        # Define the filename
-        filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-        print('Saving file "{0}"'.format(filename))
-        save(filename, _data)
-        cnt += 1
-
+            # Define the filename
+            # filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
+            filename = os.path.join(currdir, (args.filename+'{0:02d}').format(cnt))
+            print('Saving file "{0}"'.format(filename))
+            save(filename, _data)
+            cnt += 1
 
     # _data["connectivity"]["inter_custom"]["EC"]["E"][1] = np.around([a, a], decimals=1).tolist()
     # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = np.around([b, b], decimals=1).tolist()
