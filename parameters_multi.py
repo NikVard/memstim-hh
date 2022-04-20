@@ -13,7 +13,7 @@ import numpy as np
 from numpy import pi
 
 # Default parameters
-noise_EC = noise_DG = noise_CA3 = noise_CA1 = 1.
+noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
 
 _data = {
@@ -270,6 +270,10 @@ if __name__  == "__main__":
             print('Saving file "{0}"'.format(filename))
             save(filename, _data)
             cnt += 1
+
+            _data["areas"][area]["E"]["noise"] = 0.
+            _data["areas"][area]["I"]["noise"] = 0.
+
 
     # _data["connectivity"]["inter_custom"]["EC"]["E"][1] = np.around([a, a], decimals=1).tolist()
     # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = np.around([b, b], decimals=1).tolist()
