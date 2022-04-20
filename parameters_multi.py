@@ -266,7 +266,7 @@ if __name__  == "__main__":
 
             # Define the filename
             # filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-            filename = os.path.join(currdir, (args.filename+'{0:02d}').format(cnt))
+            filename = os.path.join(currdir, (args.filename+'{0:02d}.json').format(cnt))
             print('Saving file "{0}"'.format(filename))
             save(filename, _data)
             cnt += 1
