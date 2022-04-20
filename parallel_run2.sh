@@ -21,7 +21,7 @@ fi
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/opt_$1"
+CONF_DIRS="configs/opt_noise_$1"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
