@@ -78,7 +78,7 @@ _data = {
         "sigma" : 0.5,  # normal std
         "kN" : 20,
         "gain_reset" : 1.5,
-        "gain_rhythm" : .4, # nA
+        "gain_rhythm" : 0., # nA
         "offset" : -0*pi/2
     },
 
@@ -128,7 +128,7 @@ _data = {
         "duration" : 2.,                    # [sec]
         "dt" : .1e-3,                       # [sec]
         "onset" : 0.50,                     # [sec]
-        "I" : [10.],                         # stimulation amplitude [nA]
+        "I" : [0.],                         # stimulation amplitude [nA]
         "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
         "stim_freq" : 5,                    # stimulation frequency [Hz]
         "pulse_freq" : 100,                 # pulse frequency, determines ON duration [Hz]
