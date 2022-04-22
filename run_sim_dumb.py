@@ -201,7 +201,7 @@ idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 # pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 G_E = NeuronGroup(N=settings.N_EC[0],
-    model=py_CAN_inp_eqs,
+    model=py_CAN_eqs,
     threshold='v>V_th',
     reset=reset_eqs,
     refractory=refractory_time,
@@ -227,7 +227,7 @@ idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 # pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 G_I = NeuronGroup(N=settings.N_EC[1],
-    model=inh_inp_eqs,
+    model=inh_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
@@ -384,7 +384,7 @@ idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 # pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 G_E = NeuronGroup(N=settings.N_CA1[0],
-    model=py_CAN_eqs,
+    model=py_CAN_inp_eqs,
     threshold='v>V_th',
     reset=reset_eqs,
     refractory=refractory_time,
@@ -410,7 +410,7 @@ idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 # pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 G_I = NeuronGroup(N=settings.N_CA1[1],
-    model=inh_eqs,
+    model=inh_inp_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
@@ -685,8 +685,8 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
 # avoid linking when using a fixed theta input sin : TESTING
 # G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 # G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[6].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+G_flat[7].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 

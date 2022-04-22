@@ -15,6 +15,7 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
+I_in = 0. # input
 
 _data = {
     "seed_val"  : 42,       # Reproducibility
@@ -78,7 +79,7 @@ _data = {
         "sigma" : 0.5,  # normal std
         "kN" : 20,
         "gain_reset" : 1.5,
-        "gain_rhythm" : 0., # nA
+        "gain_rhythm" : np.around(I_in, 2), # nA
         "offset" : -0*pi/2
     },
 
@@ -252,27 +253,39 @@ if __name__  == "__main__":
     noise_vals = np.arange(vmin, vmax)
 
     areas = ['EC', 'DG', 'CA3', 'CA1']
-    for area in areas:
-        currdir = os.path.join(basedir, 'opt_noise_'+area)
-        if not os.path.isdir(currdir):
-            print('[+] Creating directory', currdir)
-            os.makedirs(currdir)
+    # for area in areas:
+    #     currdir = os.path.join(basedir, 'opt_noise_'+area)
+    #     if not os.path.isdir(currdir):
+    #         print('[+] Creating directory', currdir)
+    #         os.makedirs(currdir)
+    #
+    #     # Fix the parameters
+    #     cnt=0
+    #     for val in noise_vals:
+    #         _data["areas"][area]["E"]["noise"] = np.around(val*100.e-06, 6)
+    #         _data["areas"][area]["I"]["noise"] = np.around(val*10.e-06, 6)
+    #
+    #         # Define the filename
+    #         # filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
+    #         filename = os.path.join(currdir, (args.filename+'{0:02d}.json').format(cnt))
+    #         print('Saving file "{0}"'.format(filename))
+    #         save(filename, _data)
+    #         cnt += 1
+    #
+    #         _data["areas"][area]["E"]["noise"] = 0.
+    #         _data["areas"][area]["I"]["noise"] = 0.
 
-        # Fix the parameters
-        cnt=0
-        for val in noise_vals:
-            _data["areas"][area]["E"]["noise"] = np.around(val*100.e-06, 6)
-            _data["areas"][area]["I"]["noise"] = np.around(val*10.e-06, 6)
+    Imin,Imax = 0.1, 0.4
+    inp_vals = np.arange(Imin, Imax, 0.05)
+    cnt = 0
+    for val in inp_vals:
+        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
 
-            # Define the filename
-            # filename = "./{0}/{1}_{2:02d}.json".format(args.output_directory, args.filename, cnt)
-            filename = os.path.join(currdir, (args.filename+'{0:02d}.json').format(cnt))
-            print('Saving file "{0}"'.format(filename))
-            save(filename, _data)
-            cnt += 1
-
-            _data["areas"][area]["E"]["noise"] = 0.
-            _data["areas"][area]["I"]["noise"] = 0.
+        # Define the filename
+        filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
+        print('Saving file "{0}"'.format(filename))
+        save(filename, _data)
+        cnt += 1
 
 
     # _data["connectivity"]["inter_custom"]["EC"]["E"][1] = np.around([a, a], decimals=1).tolist()
