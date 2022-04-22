@@ -53,14 +53,14 @@ for DIR in $CONF_DIRS;
         ### Set the variables used as arguments
         CNT=0
         RESDIR=$CURRRES
-        for FN_CONF in "$DIR/*.json";
+        for FN_CONF in $DIR/*.json
             do
                 echo $FN_CONF
 
                 ### Queue the simulation
                 let DELAY="CNT*30"
-		echo "Delayed: $DELAY seconds"
-                sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT,OUTDIR=$RESBASE run_sim.sh
+        		echo "Delayed: $DELAY seconds"
+                # sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT,OUTDIR=$RESBASE run_sim.sh
 
                 let "CNT+=1"
 
