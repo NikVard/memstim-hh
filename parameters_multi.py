@@ -15,7 +15,7 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-I_in = 0. # input
+I_in = 0.3 # input
 
 _data = {
     "seed_val"  : 42,       # Reproducibility
@@ -275,11 +275,11 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    Imin,Imax = 0.1, 0.4
-    inp_vals = np.arange(Imin, Imax, 0.05)
+    cmin,cmax = 0.1, 0.8
+    conn_vals = np.arange(cmin, cmax, 0.05)
     cnt = 0
-    for val in inp_vals:
-        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+    for val in conn_vals:
+        _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
