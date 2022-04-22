@@ -275,7 +275,7 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    cmin,cmax = 0.1, 0.8
+    cmin,cmax = 0.8, 1.6
     conn_vals = np.arange(cmin, cmax, 0.05)
     cnt = 0
     for val in conn_vals:
