@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results_opt_inp_CA1"
+RESBASE="./results_opt_conn_CA1"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
@@ -21,7 +21,7 @@ fi
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/opt_inp_CA1"
+CONF_DIRS="configs/opt_conn_CA1"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
