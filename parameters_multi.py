@@ -82,7 +82,7 @@ _data = {
         "f0" : 6.,
         "sigma" : 0.5,  # normal std
         "kN" : 20,
-        "gain_reset" : 1.5,
+        "gain_reset" : 0,
         "gain_rhythm" : np.around(I_in, 2), # nA
         "offset" : -0*pi/2
     },
@@ -279,8 +279,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.1,0.5
-    vals = np.arange(vmin, vmax, 0.05)
+    vmin,vmax = 0.2,0.4
+    vals = np.arange(vmin, vmax, 0.01)
     cnt = 0
     for val in vals:
         _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
