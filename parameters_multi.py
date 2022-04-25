@@ -15,10 +15,10 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-a = 4.0
-b = 0.2
-c = 1.5
-d = 0.45
+a = 0.
+b = 0.
+c = 0.
+d = 0.
 I_in = 0.0 # input
 
 _data = {
@@ -279,11 +279,12 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.2,0.4
-    vals = np.arange(vmin, vmax, 0.01)
+    vmin,vmax = 0.1, 4.1
+    vals = np.arange(vmin, vmax, 0.1)
     cnt = 0
     for val in vals:
-        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        _data["connectivity"]["inter_custom"]["EC"]["E"][1] = [np.around(val, 1)]*2
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
