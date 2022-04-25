@@ -15,7 +15,7 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-a = 0.
+a = 1.5
 b = 0.
 c = 0.
 d = 0.
@@ -284,7 +284,8 @@ if __name__  == "__main__":
     cnt = 0
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
-        _data["connectivity"]["inter_custom"]["EC"]["E"][1] = [np.around(val, 1)]*2
+        _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
+        _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 1)]*2
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
