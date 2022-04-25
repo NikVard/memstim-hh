@@ -15,10 +15,10 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-a = 0. # 1.5
-b = 0. # 0.2
-c = 0. # 1.5
-d = 0. # ?
+a = 1.5 # 1.5
+b = 0.2 # 0.2
+c = 1.5 # 1.5
+d = 0. # 25
 I_in = 0.3 # input
 
 _data = {
@@ -279,8 +279,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.1, 4.1
-    vals = np.arange(vmin, vmax, 0.1)
+    vmin,vmax = 0.05, 0.5
+    vals = np.arange(vmin, vmax, 0.05)
     cnt = 0
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
