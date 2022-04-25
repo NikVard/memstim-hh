@@ -279,12 +279,12 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.1, 4.1
+    vmin,vmax = 0.1, 1.3
     vals = np.arange(vmin, vmax, 0.1)
     cnt = 0
     for val in vals:
-        # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
-        _data["connectivity"]["inter_custom"]["EC"]["E"][1] = [np.around(val, 1)]*2
+        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        # _data["connectivity"]["inter_custom"]["EC"]["E"][1] = [np.around(val, 1)]*2
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
