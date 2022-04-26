@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results_opt_EC_inh_noise"
+RESBASE="./results_opt_DG_exc_noise"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
@@ -21,7 +21,7 @@ fi
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/opt_EC_inh_noise"
+CONF_DIRS="configs/opt_DG_exc_noise"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
