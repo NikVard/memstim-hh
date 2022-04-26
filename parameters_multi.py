@@ -290,8 +290,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.02, 0.041
-    vals = np.arange(vmin, vmax, 0.001)
+    vmin,vmax = 0.002, 0.0041
+    vals = np.arange(vmin, vmax, 0.0001)
     cnt = 0
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
