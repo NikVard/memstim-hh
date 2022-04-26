@@ -281,7 +281,7 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.1*10e-06, 2.*10e-06
+    vmin,vmax = 10*10e-06, 20.*10e-06
     vals = np.arange(vmin, vmax, 1e-06)
     cnt = 0
     for val in vals:
