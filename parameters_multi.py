@@ -24,7 +24,7 @@ I_in = 0.0 # input
 noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
 noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
 noise_EC_exc = 0. # 0.031
-noise_EC_inh = 0. #
+noise_EC_inh = 0. # 0.0017
 noise_DG_exc = 0. #
 noise_DG_inh = 0. #
 noise_CA3_exc = 0. #
@@ -290,8 +290,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 10.*10e-06, 200.*10e-06
-    vals = np.arange(vmin, vmax, 10e-06)
+    vmin,vmax = 0.02, 0.041
+    vals = np.arange(vmin, vmax, 0.001)
     cnt = 0
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
@@ -302,7 +302,9 @@ if __name__  == "__main__":
         # _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
 
         # _data["areas"]["EC"]["E"]["noise"] = np.around(val, 6)
-        _data["areas"]["EC"]["I"]["noise"] = np.around(val, 6)
+        # _data["areas"]["EC"]["I"]["noise"] = np.around(val, 6)
+        _data["areas"]["DG"]["E"]["noise"] = np.around(val, 6)
+        # _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
 
 
 
