@@ -18,7 +18,7 @@ a = b = c = d = 0. # connections
 a = 1.5 # 1.5
 b = 0.2 # 0.2
 c = 1.5 # 1.5
-d = 0. # 25
+d = 0.25 # 25
 I_in = 0.3 # input
 
 _data = {
@@ -279,16 +279,16 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.05, 0.5
-    vals = np.arange(vmin, vmax, 0.05)
+    vmin,vmax = 0.15, 0.3
+    vals = np.arange(vmin, vmax, 0.01)
     cnt = 0
     for val in vals:
-        # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
         # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["CA3"]["E"][3] = [np.around(val, 1)]*2
-        _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 1)]*2
+        # _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
