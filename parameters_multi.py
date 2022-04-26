@@ -291,7 +291,7 @@ if __name__  == "__main__":
         # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["CA3"]["E"][3] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
-        _data["EC"]["E"]["noise"] = np.around(val, 6)
+        _data["areas"]["EC"]["E"]["noise"] = np.around(val, 6)
 
 
 
