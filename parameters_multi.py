@@ -15,11 +15,13 @@ from numpy import pi
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-a = 1.5 # 1.5
-b = 0.2 # 0.2
-c = 1.5 # 1.5
-d = 0.25 # 25
-I_in = 0.3 # input
+# a = 1.5 # 1.5
+# b = 0.2 # 0.2
+# c = 1.5 # 1.5
+# d = 0.25 # 25
+I_in = 0.0 # input
+noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
+noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
 
 _data = {
     "seed_val"  : 42,       # Reproducibility
@@ -30,48 +32,48 @@ _data = {
             "E" : {
                 "N" : int(10e3),
                 "type" : "PyCAN",
-                "noise" : np.around(noise_EC * 100.e-06, 6)        # Volts
+                "noise" : np.around(noise_EC_exc, 6)        # Volts
             },
             "I" : {
                 "N" : int(1e3),
                 "type" : "Inh",
-                "noise" : np.around(noise_EC * 10.e-06, 6)
+                "noise" : np.around(noise_EC_inh, 6)
             }
         },
         "DG"    : {
             "E" : {
                 "N" : int(10e3),
                 "type" : "Py",
-                "noise" : np.around(noise_DG * 100.e-06, 6)
+                "noise" : np.around(noise_DG_exc, 6)
             },
             "I" : {
                 "N" : int(0.1e3),
                 "type" : "Inh",
-                "noise" : np.around(noise_DG * 10.e-06, 6)
+                "noise" : np.around(noise_DG_inh, 6)
             }
         },
         "CA3"   : {
             "E" : {
                 "N" : int(1e3),
                 "type" : "PyCAN",
-                "noise" : np.around(noise_CA3 * 100.e-06, 6)
+                "noise" : np.around(noise_CA3_exc, 6)
             },
             "I" : {
                 "N" : int(0.1e3),
                 "type" : "Inh",
-                "noise" : np.around(noise_CA3 * 10.e-06, 6)
+                "noise" : np.around(noise_CA3_inh, 6)
             }
         },
         "CA1"   : {
             "E" : {
                 "N" : int(10e3),
                 "type" : "PyCAN",
-                "noise" : np.around(noise_CA1 * 100.e-06, 6)
+                "noise" : np.around(noise_CA1_exc, 6)
             },
             "I" : {
                 "N" : int(1e3),
                 "type" : "Inh",
-                "noise" : np.around(noise_CA1 * 10.e-06, 6)
+                "noise" : np.around(noise_CA1_inh, 6)
             }
         }
     },
@@ -279,16 +281,19 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.15, 0.3
+    vmin,vmax = 0.1*10e-06, 1.*10e-06
     vals = np.arange(vmin, vmax, 0.01)
     cnt = 0
     for val in vals:
-        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
         # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["CA3"]["E"][3] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
+        _data["EC"]["E"]["noise"] = np.around(val, 6)
+
+
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
