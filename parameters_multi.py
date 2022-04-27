@@ -305,8 +305,10 @@ if __name__  == "__main__":
         # _data["areas"]["EC"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["DG"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
-        _data["areas"]["CA3"]["E"]["noise"] = np.around(val, 6)
+        # _data["areas"]["CA3"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA3"]["I"]["noise"] = np.around(val, 6)
+        _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
+        # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
 
 
