@@ -27,9 +27,9 @@ noise_EC_exc = 0. # 0.0031
 noise_EC_inh = 0. # 0.0017
 noise_DG_exc = 0. # 0.003
 noise_DG_inh = 0. #
-noise_CA3_exc = 0. #
+noise_CA3_exc = 0. # 0.003
 noise_CA3_inh = 0. #
-noise_CA1_exc = 0. #
+noise_CA1_exc = 0. # 0.0031
 noise_CA1_inh = 0. #
 
 _data = {
@@ -290,7 +290,7 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.001, 0.0041
+    vmin,vmax = 0.0005, 0.0021
     vals = np.arange(vmin, vmax, 0.0001)
     cnt = 0
     for val in vals:
@@ -304,10 +304,10 @@ if __name__  == "__main__":
         # _data["areas"]["EC"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["EC"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["DG"]["E"]["noise"] = np.around(val, 6)
-        # _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
+        _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA3"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA3"]["I"]["noise"] = np.around(val, 6)
-        _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
+        # _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
 
