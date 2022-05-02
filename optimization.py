@@ -17,20 +17,34 @@ if __name__ == "__main__":
 
     # Parse arguments
     parser = argparse.ArgumentParser(description='Parameter optimization based on simulated spike data')
-    parser.add_argument('-a', '--area',
+    parser.add_argument('-d', '--directory',
                         nargs='?',
                         metavar='-a',
                         type=str,
-                        default=None,
-                        help='Default area to load the data from')
+                        default='results_opt',
+                        help='Default directory to load the data from')
 
+    parser.add_argument('-t', '--target',
+                        nargs='+',
+                        metavar='-t',
+                        type=float,
+                        default=[5,50,5,50,5,50,5,50,6],
+                        help='Target vector for the optimization; mean FR per area, max FR @ CA1, output frequency')
+
+    parser.add_argument('-o', '--output',
+                        nargs='?',
+                        metavar='-o',
+                        type=str,
+                        default='optimization_test.csv',
+                        help='Output file name')
     args = parser.parse_args()
 
-    if (args.area is not None):
-        basedir = os.path.join('results_opt_'+args.area, 'None')
-    else:
-        basedir= os.path.join('results_opt', 'None')
+    if len(args.target) != 9:
+        print("Wrong target length. Try again.")
+        exit(-1)
 
+    # Base directory
+    basedir = os.path.join(args.directory, 'None')
     print('Base directory "{0}"'.format(basedir))
 
     # Parameters
@@ -42,15 +56,18 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    # target for EC firing rate w/ noise
-    # target_vals = [1., 1., 0., 0., 0., 0., 0., 0., 0., 6.]
-    target_vals = [int(args.area == "EC")]*2 + [int(args.area == "DG")]*2 + [int(args.area == "CA3")]*2 + [int(args.area == "CA1")]*2 + [int(args.area == "CA1")] + [6.]
+    settling_time = 0.3 # 300ms
 
-    with open('optimization_' + args.area + '.csv', 'w', encoding='UTF8', newline='') as fout:
+    # target for EC firing rate w/ noise
+    # target_vals = [6., 60., 6., 60., 6., 60., 6., 60., 10., 6.]
+    # target_vals = [int(args.area == "EC")]*2 + [int(args.area == "DG")]*2 + [int(args.area == "CA3")]*2 + [int(args.area == "CA1")]*2 + [int(args.area == "CA1")] + [6.]
+    target_vals = args.target
+
+    with open(args.output, 'w', encoding='UTF8', newline='') as fout:
         writer = csv.writer(fout)
 
         # Write the header to the CSV file
-        csv_header = ['noise E', 'noise I', 'J', 'vector']
+        csv_header = ['fname', 'J', 'input' ,'a', 'b', 'c', 'd', 'vector']
         writer.writerow(csv_header)
 
         for item in os.listdir(basedir):
@@ -82,15 +99,25 @@ if __name__ == "__main__":
                         warnings.simplefilter("ignore")
 
                         if tokens[1] == "inh":
-                            data[area]["I"]["t"] = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
-                            data[area]["I"]["i"] = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
-                        else:
-                            data[area]["E"]["t"] = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
-                            data[area]["E"]["i"] = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
+                            t = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
+                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
 
-                        # Output rhythm
-                        data["rhythm"] = np.loadtxt(datadir + '/' + 'order_param_mon_rhythm.txt')
-                        duration = len(data["rhythm"])/fs
+                            idx_crop = np.where(t <= settling_time)
+                            data[area]["I"]["t"] = np.delete(t, idx_crop)
+                            data[area]["I"]["i"] = np.delete(i, idx_crop)
+                        else:
+                            t = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
+                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
+
+                            idx_crop = np.where(t <= settling_time)
+                            data[area]["E"]["t"] = np.delete(t, idx_crop)
+                            data[area]["E"]["i"] = np.delete(i, idx_crop)
+
+                # Output rhythm
+                r = np.loadtxt(datadir + '/' + 'order_param_mon_rhythm.txt')
+                data["rhythm"] = r[int(settling_time*fs):]
+
+                duration = len(data["rhythm"])/fs
 
                 # Run the cost function
                 params_FR = {"winsize":winsize_FR, "overlap":overlap_FR}
@@ -101,7 +128,21 @@ if __name__ == "__main__":
                 print(vec)
 
                 # Write to a CSV file
-                csv_data = [params['areas'][args.area]["E"]["noise"], params['areas'][args.area]["I"]["noise"], J] + vec
+                # csv_data = [os.path.join(currdir, 'parameters_bak.json'), params['areas'][args.area]["E"]["noise"], params['areas'][args.area]["I"]["noise"], J] + vec
+                inp_val =  params["Kuramoto"]["gain_rhythm"]
+                a = params["connectivity"]["inter_custom"]["EC"]["E"][1][0]
+                b = params["connectivity"]["inter_custom"]["EC"]["E"][2][0]
+                c = params["connectivity"]["inter_custom"]["EC"]["E"][3][0]
+                d = params["connectivity"]["inter_custom"]["CA1"]["E"][0][0]
+                noise_EC_exc = params["areas"]["EC"]["E"]["noise"]
+                noise_EC_inh = params["areas"]["EC"]["I"]["noise"]
+                noise_DG_exc = params["areas"]["DG"]["E"]["noise"]
+                noise_DG_inh = params["areas"]["DG"]["I"]["noise"]
+                noise_CA3_exc = params["areas"]["CA3"]["E"]["noise"]
+                noise_CA3_inh = params["areas"]["CA3"]["I"]["noise"]
+                noise_CA1_exc = params["areas"]["CA1"]["E"]["noise"]
+                noise_CA1_inh = params["areas"]["CA1"]["I"]["noise"]
+                csv_data = [os.path.join(currdir, 'parameters_bak.json'), J, inp_val, a, b, c, d, noise_EC_exc, noise_EC_inh, noise_DG_exc, noise_DG_inh, noise_CA3_exc, noise_CA3_inh, noise_CA1_exc, noise_CA1_inh] + vec
 
                 print(csv_data)
 

@@ -275,12 +275,13 @@ def cost_func(data, target=None, duration=1, fs=10000, areasizes={"EC":[10000, 1
 
     FR_CA1_exc_max = np.max(FR_CA1_exc)
     FR_CA1_inh_max = np.max(FR_CA1_inh)
-    vals.append(FR_CA1_exc_max)
+    # vals.append(FR_CA1_exc_max)
     # vals.append(FR_EC_inh_mean)
 
     # Output Frequency
     pks, _ = sig.find_peaks(data["rhythm"], distance=int(0.100*fs))
-    fval = 1/(max(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    # fval = 1/(max(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    fval = 6
     vals.append(fval)
 
     # Periodogram (PSD)
