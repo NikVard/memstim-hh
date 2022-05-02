@@ -12,7 +12,8 @@ import subprocess
 from numpy import pi
 
 # Constants
-
+noise_exc = 10e-06
+noise_inh = 1e-06
 
 # Default parameters
 _data = {
@@ -22,118 +23,100 @@ _data = {
     "areas": {
         "EC"    : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "PyCAN",
-                "noise" : 0.       # Volts
+                "N"     : int(10e3),
+                "type"  : "PyCAN",
+                "noise" : noise_exc     # Volts
             },
             "I" : {
-                "N" : int(1e3),
-                "type" : "Inh",
-                "noise" : 0.
+                "N"     : int(1e3),
+                "type"  : "Inh",
+                "noise" : noise_inh
             }
         },
         "DG"    : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "Py",
-                "noise" : 0.
+                "N"     : int(10e3),
+                "type"  : "Py",
+                "noise" : noise_exc
             },
             "I" : {
-                "N" : int(0.1e3),
-                "type" : "Inh",
-                "noise" : 0.
+                "N"     : int(0.1e3),
+                "type"  : "Inh",
+                "noise" : noise_inh
             }
         },
         "CA3"   : {
             "E" : {
-                "N" : int(1e3),
-                "type" : "PyCAN",
-                "noise" : 0.
+                "N"     : int(1e3),
+                "type"  : "PyCAN",
+                "noise" : noise_exc
             },
             "I" : {
-                "N" : int(0.1e3),
-                "type" : "Inh",
-                "noise" : 0.
+                "N"     : int(0.1e3),
+                "type"  : "Inh",
+                "noise" : noise_inh
             }
         },
         "CA1"   : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "PyCAN",
-                "noise" : 0.
+                "N"     : int(10e3),
+                "type"  : "PyCAN",
+                "noise" : noise_exc
             },
             "I" : {
-                "N" : int(1e3),
-                "type" : "Inh",
-                "noise" : 0.
+                "N"     : int(1e3),
+                "type"  : "Inh",
+                "noise" : noise_inh
             }
         }
     },
 
     # Kuramoto oscillator parameters
     "Kuramoto" : {
-        "N" : 200,
-        "f0" : 6.,
-        "sigma" : 0.5,  # normal std
-        "kN" : 20,
-        "gain_reset" : 1.5,
-        "gain_rhythm" : .4, # nA
-        "offset" : -0*pi/2
+        "N"             : 200,
+        "f0"            : 6.,
+        "sigma"         : 0.5,  # normal std
+        "kN"            : 20,
+        "gain_reset"    : 1.5,
+        "gain_rhythm"   : 0.01, # nA
+        "offset"        : -0*pi/2
     },
 
     # connectivity parameters
     "connectivity" : {
         "intra" : { # intra-area conn. probabilities per area |
-            "EC" : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
-            "DG" : [[0., 0.06], [0.14, 0.]],
-            "CA3" : [[0.56, 0.75], [0.75, 0.]],
-            "CA1" : [[0., 0.28], [0.3, 0.7]]
+            "EC"    : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
+            "DG"    : [[0., 0.06], [0.14, 0.]],
+            "CA3"   : [[0.56, 0.75], [0.75, 0.]],
+            "CA1"   : [[0., 0.28], [0.3, 0.7]]
         },
         "inter" : { # inter-area conn. probabilities
-            "p_tri" : 0.45, # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
-            "p_mono" : 0.3  # mono: [EC->CA3, EC->CA1]
-        },
-        "inter_custom" : {
-            "EC" : {
-                "E" : [[0., 0.], [3., 3.], [0.15, 0.15], [1.4, 1.4]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "DG" : {
-                "E" : [[0., 0.], [0., 0.], [0.15, 0.15], [0., 0.]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "CA3" : {
-                "E" : [[0., 0.], [0., 0.], [0., 0.], [1.4, 1.4]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "CA1" : {
-                "E" : [[0.2, 0.2], [0., 0.], [0., 0.], [0., 0.]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            }
+            "p_tri"     : 0.0,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
+            "p_mono"    : 0.0       # mono: [EC->CA3, EC->CA1]
         }
     },
 
     # synapses
-    "synapses" : {
-        "gmax_e" : 600.,    # pSiemens
-        "gmax_i" : 60.
-    },
+    # "synapses" : {
+    #     "gmax_e"    : 60.,    # pSiemens
+    #     "gmax_i"    : 600.
+    # },
 
     # stimulation parameters
     "stimulation" : {
-        "target" : "CA1",                   # target area [EC | DG | CA3 | CA1]
-        "coordinates" : (5.0, -8., 7.5),    # point electrode coordinates (x,y,z) [mm]
-        "rho" : 1.,                         # resistivity of homogeneous conductive medium [Ω/cm]
-        "duration" : 2.,                    # [sec]
-        "dt" : .1e-3,                       # [sec]
-        "onset" : 0.50,                     # [sec]
-        "I" : [10.],                         # stimulation amplitude [nA]
-        "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
-        "stim_freq" : 5,                    # stimulation frequency [Hz]
-        "pulse_freq" : 100,                 # pulse frequency, determines ON duration [Hz]
-        "nr_of_trains" : 1,                 # number of pulse trains
-        "nr_of_pulses" : 1,                 # number of pulses per train
-        "ipi" : .1e-3                       # inter-pulse interval [sec]
+        "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
+        "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
+        "rho"           : 1.,               # resistivity of homogeneous conductive medium [Ω/cm]
+        "duration"      : 2.,               # [sec]
+        "dt"            : .1e-3,            # [sec]
+        "onset"         : 0.50,             # [sec]
+        "I"             : [0.],             # stimulation amplitude [nA]
+        "pulse_width"   : [1.e-3],          # width (in time) of pulse ON phase [sec]
+        "stim_freq"     : 5,                # stimulation frequency [Hz]
+        "pulse_freq"    : 100,              # pulse frequency, determines ON duration [Hz]
+        "nr_of_trains"  : 1,                # number of pulse trains
+        "nr_of_pulses"  : 1,                # number of pulses per train
+        "ipi"           : .1e-3             # inter-pulse interval [sec]
         },
 
     # simulation parameters

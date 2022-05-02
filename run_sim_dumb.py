@@ -14,7 +14,7 @@ import parameters
 import re # regular expressions
 
 from model.globals import *
-from model.HH_equations import *
+from model.HH_equations2 import *
 from model.kuramoto_equations import *
 from model.filter_equations import *
 from model import settings
@@ -87,6 +87,8 @@ print()
 
 # Settings initialization
 settings.init(data)
+
+# exit(-1)
 
 # Create the necessary directories
 print('\n[00] Making directories...')
@@ -192,14 +194,14 @@ def parse_coords(fname, NG):
 print('[+] Groups:')
 # EC -> receives theta input from MS
 # E
-pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
-pos = hstack((pos, zeros((settings.N_EC[0], 1))))
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_EC[0])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
+# pos = hstack((pos, zeros((settings.N_EC[0], 1))))
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_EC[0])
+pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 G_E = NeuronGroup(N=settings.N_EC[0],
     model=py_CAN_inp_eqs,
     threshold='v>V_th',
@@ -210,36 +212,36 @@ G_E = NeuronGroup(N=settings.N_EC[0],
 G_E.size = cell_size_py
 G_E.glu = 1
 G_E.sigma = settings.sigma_EC[0]*volt
-G_E.x_soma = pos[:,0]*metre
-G_E.y_soma = pos[:,1]*metre
-G_E.z_soma = pos[:,2]*metre
-# G_E.x_soma = pos[:,0]*scale_aussel
-# G_E.y_soma = pos[:,1]*scale_aussel
-# G_E.z_soma = pos[:,2]*scale_aussel
+# G_E.x_soma = pos[:,0]*metre
+# G_E.y_soma = pos[:,1]*metre
+# G_E.z_soma = pos[:,2]*metre
+G_E.x_soma = pos[:,0]*scale_aussel
+G_E.y_soma = pos[:,1]*scale_aussel
+G_E.z_soma = pos[:,2]*scale_aussel
 
 # I
-pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
-pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_EC[1])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
+# pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_EC[1])
+pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 G_I = NeuronGroup(N=settings.N_EC[1],
-    model=inh_inp_eqs,
+    model=inh_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
 G_I.sigma = settings.sigma_EC[1]*volt
-G_I.x_soma = pos[:,0]*metre
-G_I.y_soma = pos[:,1]*metre
-G_I.z_soma = pos[:,2]*metre
-# G_I.x_soma = pos[:,0]*scale_aussel
-# G_I.y_soma = pos[:,1]*scale_aussel
-# G_I.z_soma = pos[:,2]*scale_aussel
+# G_I.x_soma = pos[:,0]*metre
+# G_I.y_soma = pos[:,1]*metre
+# G_I.z_soma = pos[:,2]*metre
+G_I.x_soma = pos[:,0]*scale_aussel
+G_I.y_soma = pos[:,1]*scale_aussel
+G_I.z_soma = pos[:,2]*scale_aussel
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
@@ -253,14 +255,14 @@ print('[\u2022]\tEC: done')
 
 # DG
 # E
-pos = np.load(os.path.join('neuron_positions', 'full', 'DG_E-stipple-10000.npy'))
-pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_DG[0])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'DG_E-stipple-10000.npy'))
+# pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_DG[0])
+pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 G_E = NeuronGroup(N=settings.N_DG[0],
     model=py_eqs,
     threshold='v>V_th',
@@ -271,22 +273,22 @@ G_E = NeuronGroup(N=settings.N_DG[0],
 G_E.size = cell_size_py
 G_E.glu = 1
 G_E.sigma = settings.sigma_DG[0]*volt
-G_E.x_soma = pos[:,0]*metre
-G_E.y_soma = pos[:,1]*metre
-G_E.z_soma = pos[:,2]*metre
-# G_E.x_soma = pos[:,0]*scale_aussel
-# G_E.y_soma = pos[:,1]*scale_aussel
-# G_E.z_soma = pos[:,2]*scale_aussel
+# G_E.x_soma = pos[:,0]*metre
+# G_E.y_soma = pos[:,1]*metre
+# G_E.z_soma = pos[:,2]*metre
+G_E.x_soma = pos[:,0]*scale_aussel
+G_E.y_soma = pos[:,1]*scale_aussel
+G_E.z_soma = pos[:,2]*scale_aussel
 
 # I
-pos = np.load(os.path.join('neuron_positions', 'full', 'DG_I-stipple-100.npy'))
-pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_DG[1])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'DG_I-stipple-100.npy'))
+# pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_DG[1])
+pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 G_I = NeuronGroup(N=settings.N_DG[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -295,12 +297,12 @@ G_I = NeuronGroup(N=settings.N_DG[1],
     name='DG_inh')
 G_I.size = cell_size_inh
 G_I.sigma = settings.sigma_DG[1]*volt
-G_I.x_soma = pos[:,0]*metre
-G_I.y_soma = pos[:,1]*metre
-G_I.z_soma = pos[:,2]*metre
-# G_I.x_soma = pos[:,0]*scale_aussel
-# G_I.y_soma = pos[:,1]*scale_aussel
-# G_I.z_soma = pos[:,2]*scale_aussel
+# G_I.x_soma = pos[:,0]*metre
+# G_I.y_soma = pos[:,1]*metre
+# G_I.z_soma = pos[:,2]*metre
+G_I.x_soma = pos[:,0]*scale_aussel
+G_I.y_soma = pos[:,1]*scale_aussel
+G_I.z_soma = pos[:,2]*scale_aussel
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='green')
@@ -314,14 +316,14 @@ print('[\u2022]\tDG: done')
 
 # CA3
 # E
-pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_E-stipple-1000.npy'))
-pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_CA3[0])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_E-stipple-1000.npy'))
+# pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_CA3[0])
+pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 G_E = NeuronGroup(N=settings.N_CA3[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -332,22 +334,22 @@ G_E = NeuronGroup(N=settings.N_CA3[0],
 G_E.size = cell_size_py
 G_E.glu = 1
 G_E.sigma = settings.sigma_CA3[0]*volt
-G_E.x_soma = pos[:,0]*metre
-G_E.y_soma = pos[:,1]*metre
-G_E.z_soma = pos[:,2]*metre
-# G_E.x_soma = pos[:,0]*scale_aussel
-# G_E.y_soma = pos[:,1]*scale_aussel
-# G_E.z_soma = pos[:,2]*scale_aussel
+# G_E.x_soma = pos[:,0]*metre
+# G_E.y_soma = pos[:,1]*metre
+# G_E.z_soma = pos[:,2]*metre
+G_E.x_soma = pos[:,0]*scale_aussel
+G_E.y_soma = pos[:,1]*scale_aussel
+G_E.z_soma = pos[:,2]*scale_aussel
 
 # I
-pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_I-stipple-100.npy'))
-pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_CA3[1])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'CA3_I-stipple-100.npy'))
+# pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_CA3[1])
+pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 G_I = NeuronGroup(N=settings.N_CA3[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -356,12 +358,12 @@ G_I = NeuronGroup(N=settings.N_CA3[1],
     name='CA3_inh')
 G_I.size = cell_size_inh
 G_I.sigma = settings.sigma_CA3[1]*volt
-G_I.x_soma = pos[:,0]*metre
-G_I.y_soma = pos[:,1]*metre
-G_I.z_soma = pos[:,2]*metre
-# G_I.x_soma = pos[:,0]*scale_aussel
-# G_I.y_soma = pos[:,1]*scale_aussel
-# G_I.z_soma = pos[:,2]*scale_aussel
+# G_I.x_soma = pos[:,0]*metre
+# G_I.y_soma = pos[:,1]*metre
+# G_I.z_soma = pos[:,2]*metre
+G_I.x_soma = pos[:,0]*scale_aussel
+G_I.y_soma = pos[:,1]*scale_aussel
+G_I.z_soma = pos[:,2]*scale_aussel
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
@@ -375,14 +377,14 @@ print('[\u2022]\tCA3: done')
 
 # CA1
 # E
-pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_E-stipple-10000.npy'))
-pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_CA1[0])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_E-stipple-10000.npy'))
+# pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_CA1[0])
+pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 G_E = NeuronGroup(N=settings.N_CA1[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -393,22 +395,22 @@ G_E = NeuronGroup(N=settings.N_CA1[0],
 G_E.size = cell_size_py
 G_E.glu = 1
 G_E.sigma = settings.sigma_CA1[0]*volt
-G_E.x_soma = pos[:,0]*metre
-G_E.y_soma = pos[:,1]*metre
-G_E.z_soma = pos[:,2]*metre
-# G_E.x_soma = pos[:,0]*scale_aussel
-# G_E.y_soma = pos[:,1]*scale_aussel
-# G_E.z_soma = pos[:,2]*scale_aussel
+# G_E.x_soma = pos[:,0]*metre
+# G_E.y_soma = pos[:,1]*metre
+# G_E.z_soma = pos[:,2]*metre
+G_E.x_soma = pos[:,0]*scale_aussel
+G_E.y_soma = pos[:,1]*scale_aussel
+G_E.z_soma = pos[:,2]*scale_aussel
 
 # I
-pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_I-stipple-1000.npy'))
-pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
-pos = r.apply(pos)
-pos *= scale
-pos[:,2] += 15*mm*rand(settings.N_CA1[1])
+# pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_I-stipple-1000.npy'))
+# pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
+# pos = r.apply(pos)
+# pos *= scale
+# pos[:,2] += 15*mm*rand(settings.N_CA1[1])
+pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 G_I = NeuronGroup(N=settings.N_CA1[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -417,12 +419,12 @@ G_I = NeuronGroup(N=settings.N_CA1[1],
     name='CA1_inh')
 G_I.size = cell_size_inh
 G_I.sigma = settings.sigma_CA1[1]*volt
-G_I.x_soma = pos[:,0]*metre
-G_I.y_soma = pos[:,1]*metre
-G_I.z_soma = pos[:,2]*metre
-# G_I.x_soma = pos[:,0]*scale_aussel
-# G_I.y_soma = pos[:,1]*scale_aussel
-# G_I.z_soma = pos[:,2]*scale_aussel
+# G_I.x_soma = pos[:,0]*metre
+# G_I.y_soma = pos[:,1]*metre
+# G_I.z_soma = pos[:,2]*metre
+G_I.x_soma = pos[:,0]*scale_aussel
+G_I.y_soma = pos[:,1]*scale_aussel
+G_I.z_soma = pos[:,2]*scale_aussel
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
@@ -440,7 +442,7 @@ G_flat = make_flat(G_all)
 for ngroup in G_flat:
     #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
     # ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
-    ngroup.v = -60.*mV
+    ngroup.v = '-60*mvolt-rand()*10*mvolt'
 
     # CA1 populations get stimulated
     if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
@@ -454,7 +456,8 @@ for ngroup in G_flat:
         neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
         elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
         d0 = dst.cdist(elec_pos, neuron_pos)
-        ngroup.r = 100/(4*pi*d0)
+        # ngroup.r = 100/(4*pi*d0)
+        ngroup.r = 0
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
@@ -475,7 +478,6 @@ for group in G_flat:
     # calculate intra-area distance boundaries
     min_dist, max_dist = (dist_res.min(), dist_res.max())
 
-    '''
     print('{:10} pdist: ({:20} , {:20})\n\tx ---> ({:28}, {:28})\n\ty ---> ({:28}, {:28})\n\tz ---> ({:28}, {:28})\n'.format(
     '{}'.format(group.name),
     '{}'.format(min_dist),
@@ -486,7 +488,7 @@ for group in G_flat:
     '{}'.format(group.y_soma[:].max()),
     '{}'.format(group.z_soma[:].min()),
     '{}'.format(group.z_soma[:].max())))
-    '''
+
 
 
 # Make the synapses
@@ -494,7 +496,9 @@ for group in G_flat:
 print('\n[12] Making the synapses...')
 
 # gains
-gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
+# gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
+gains_all =  [[0, 0], [0, 0], [0, 0], [0, 0]]
+print("[!] Gains:", gains_all)
 
 # intra
 print('[+] Intra-region')
@@ -551,6 +555,20 @@ print('[\u2022]\tRate monitors: done')
 
 state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
 
+N_EC_exc = settings.N_EC[0]
+N_EC_inh = settings.N_EC[1]
+N_CA1_exc = settings.N_CA1[0]
+N_CA1_inh = settings.N_CA1[1]
+
+state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_EC_exc//2, N_EC_exc//2 + 10), np.arange(N_EC_exc-200, N_EC_exc-190))))
+
+state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_EC_inh//2, N_EC_exc//2 + 10), np.arange(N_EC_inh-200, N_EC_inh-190))))
+
+state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_CA1_exc//2, N_CA1_exc//2 + 10), np.arange(N_CA1_exc-200, N_CA1_exc-190))))
+
+state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_CA1_inh//2, N_CA1_exc//2 + 10), np.arange(N_CA1_inh-200, N_CA1_inh-190))))
+print('[\u2022]\tVm monitors: done')
+
 
 
 # Stimulation and other inputs
@@ -582,9 +600,10 @@ else:
 inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 
 
-inp_theta_sin = 1*sin(2*pi*4*tv)
-inp_theta_rect = (-cos(2*pi*4*tv)+1)/2
-trail_zeros = zeros(int(250*ms/(settings.stim_dt*second)))
+f_tmp = 6
+inp_theta_sin = 1*sin(2*pi*f_tmp*tv)
+inp_theta_rect = (-cos(2*pi*f_tmp*tv)+1)/2
+trail_zeros = zeros(int(200*ms/(settings.stim_dt*second)))
 inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
 inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.stim_dt*second) # external theta (TESTING)
 
@@ -685,8 +704,8 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
 # avoid linking when using a fixed theta input sin : TESTING
 # G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 # G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
+# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
 
 
@@ -757,6 +776,9 @@ net.add(s2r_mon)
 net.add(state_mon_noise_all)
 print('[\u2022]\tNetwork monitors: done')
 
+net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
+print('[\u2022]\tVm monitors: done')
+
 
 
 # Run the simulation
@@ -826,8 +848,14 @@ fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 # Plot the 3D shape
 fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
 
-tight_layout()
+# Plot the non-Kuramoto theta drive
+fig_theta, ax_theta = subplots(1,1, figsize=(12,9))
+ax_theta.plot(tv, inp_theta_slow[:len(tv)])
+fig_theta.savefig(os.path.join(dirs['figures'], 'theta_inp.png'))
+
+# tight_layout()
 #show()
+
 
 
 # Save the results as .txt files (rows: time | cols: data)
@@ -886,6 +914,17 @@ for G in G_flat:
     except AttributeError:
         print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
         continue
+
+# Save the membrane voltages for EC/CA1 in npy files
+# -------------------------------------------------------------#
+# np.save(os.path.join(dirs['data'], 'Vm_EC_E'), state_mon_Vm_EC_exc.v)
+# np.save(os.path.join(dirs['data'], 'Vm_EC_I'), state_mon_Vm_EC_inh.v)
+# np.save(os.path.join(dirs['data'], 'Vm_CA1_E'), state_mon_Vm_CA1_exc.v)
+# np.save(os.path.join(dirs['data'], 'Vm_CA1_I'), state_mon_Vm_CA1_inh.v)
+
+# Save the alternative theta input
+# -------------------------------------------------------------#
+np.save(os.path.join(dirs['data'], 'inp_theta'), inp_theta_slow)
 
 # print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
 # clear_cache('cython')
