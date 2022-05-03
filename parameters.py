@@ -76,9 +76,9 @@ _data = {
         "N"             : 200,
         "f0"            : 6.,
         "sigma"         : 0.5,  # normal std
-        "kN"            : 20,
+        "kN"            : 25,
         "gain_reset"    : 1.5,
-        "gain_rhythm"   : 0.01, # nA
+        "gain_rhythm"   : 1.,   # nA
         "offset"        : -0*pi/2
     },
 
@@ -91,8 +91,8 @@ _data = {
             "CA1"   : [[0., 0.28], [0.3, 0.7]]
         },
         "inter" : { # inter-area conn. probabilities
-            "p_tri"     : 0.0,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
-            "p_mono"    : 0.0       # mono: [EC->CA3, EC->CA1]
+            "p_tri"     : 0.45,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
+            "p_mono"    : 0.2       # mono: [EC->CA3, EC->CA1]
         }
     },
 

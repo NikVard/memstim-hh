@@ -24,6 +24,7 @@ from src.annex_funcs import make_flat
 from src.myplot import *
 from src import stimulation
 
+
 # Reading Amelie's locations
 def parse_positions(fname):
     """ Opens file and parses coordinates """
@@ -88,7 +89,6 @@ print()
 # Settings initialization
 settings.init(data)
 
-# exit(-1)
 
 # Create the necessary directories
 print('\n[00] Making directories...')
@@ -229,7 +229,7 @@ pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
 G_I = NeuronGroup(N=settings.N_EC[1],
-    model=inh_eqs,
+    model=inh_inp_eqs,
     threshold='v>V_th',
     refractory=refractory_time,
     method=integ_method,
@@ -496,8 +496,7 @@ for group in G_flat:
 print('\n[12] Making the synapses...')
 
 # gains
-# gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
-gains_all =  [[0, 0], [0, 0], [0, 0], [0, 0]]
+gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
 print("[!] Gains:", gains_all)
 
 # intra
@@ -505,18 +504,21 @@ print('[+] Intra-region')
 
 syn_EC_all = setup.connect_intra(G_all[0][0], G_all[0][1], settings.p_EC_all, gains_all[0])
 print('[\u2022]\tEC-to-EC: done')
+
 syn_DG_all = setup.connect_intra(G_all[1][0], G_all[1][1], settings.p_DG_all, gains_all[1])
 print('[\u2022]\tDG-to-DG: done')
+
 syn_CA3_all = setup.connect_intra(G_all[2][0], G_all[2][1], settings.p_CA3_all, gains_all[2])
 print('[\u2022]\tCA3-to-CA3: done')
+
 syn_CA1_all = setup.connect_intra(G_all[3][0], G_all[3][1], settings.p_CA1_all, gains_all[3])
 print('[\u2022]\tCA1-to-CA1: done')
+
 syn_intra_all = [syn_EC_all, syn_DG_all, syn_CA3_all, syn_CA1_all]
 
 # inter
 print('[+] Inter-region')
 
-# syn_EC_EC_all = setup.connect_all()
 syn_EC_DG_all = setup.connect_inter(G_all[0][0], G_all[1][0], G_all[1][1], settings.p_inter_all[0][1], gains_all[0])
 syn_EC_CA3_all = setup.connect_inter(G_all[0][0], G_all[2][0], G_all[2][1], settings.p_inter_all[0][2], gains_all[0])
 syn_EC_CA1_all = setup.connect_inter(G_all[0][0], G_all[3][0], G_all[3][1], settings.p_inter_all[0][3], gains_all[0])
@@ -530,6 +532,7 @@ print('[\u2022]\tCA3-to-CA1: done')
 
 syn_CA1_EC_all = setup.connect_inter(G_all[3][0], G_all[0][0], G_all[0][1], settings.p_inter_all[3][0], gains_all[3])
 print('[\u2022]\tCA1-to-EC: done')
+
 syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, syn_CA3_CA1_all, syn_CA1_EC_all]
 
 
@@ -554,20 +557,16 @@ rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_in
 print('[\u2022]\tRate monitors: done')
 
 state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
+print('[\u2022]\tNoise monitors: done')
 
-N_EC_exc = settings.N_EC[0]
-N_EC_inh = settings.N_EC[1]
-N_CA1_exc = settings.N_CA1[0]
-N_CA1_inh = settings.N_CA1[1]
-
-state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_EC_exc//2, N_EC_exc//2 + 10), np.arange(N_EC_exc-200, N_EC_exc-190))))
-
-state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_EC_inh//2, N_EC_exc//2 + 10), np.arange(N_EC_inh-200, N_EC_inh-190))))
-
-state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_CA1_exc//2, N_CA1_exc//2 + 10), np.arange(N_CA1_exc-200, N_CA1_exc-190))))
-
-state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(N_CA1_inh//2, N_CA1_exc//2 + 10), np.arange(N_CA1_inh-200, N_CA1_inh-190))))
+state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
+state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
+state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
 print('[\u2022]\tVm monitors: done')
+
+state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
+print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -600,9 +599,9 @@ else:
 inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 
 
-f_tmp = 6
-inp_theta_sin = 1*sin(2*pi*f_tmp*tv)
-inp_theta_rect = (-cos(2*pi*f_tmp*tv)+1)/2
+f_rhythm = 6
+inp_theta_sin = 1*sin(2*pi*f_rhythm*tv)
+inp_theta_rect = (-cos(2*pi*f_rhythm*tv)+1)/2
 trail_zeros = zeros(int(200*ms/(settings.stim_dt*second)))
 inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
 inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.stim_dt*second) # external theta (TESTING)
@@ -752,11 +751,11 @@ net.add(G_S2R)
 print('[\u2022]\tNetwork groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
-    if syn_intra_curr!=0:
+    if syn_intra_curr != 0:
         net.add(syn_intra_curr)
 
 for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
-    if syn_inter_curr!=0:
+    if syn_inter_curr != 0:
         net.add(syn_inter_curr)
 
 net.add(syn_kuramoto) # kuramoto intra-synapses
@@ -778,6 +777,9 @@ print('[\u2022]\tNetwork monitors: done')
 
 net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
 print('[\u2022]\tVm monitors: done')
+
+net.add(state_mon_EC_ICAN)
+print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -917,10 +919,12 @@ for G in G_flat:
 
 # Save the membrane voltages for EC/CA1 in npy files
 # -------------------------------------------------------------#
-# np.save(os.path.join(dirs['data'], 'Vm_EC_E'), state_mon_Vm_EC_exc.v)
-# np.save(os.path.join(dirs['data'], 'Vm_EC_I'), state_mon_Vm_EC_inh.v)
+np.save(os.path.join(dirs['data'], 'Vm_EC_E'), state_mon_Vm_EC_exc.v)
+np.save(os.path.join(dirs['data'], 'Vm_EC_I'), state_mon_Vm_EC_inh.v)
 # np.save(os.path.join(dirs['data'], 'Vm_CA1_E'), state_mon_Vm_CA1_exc.v)
 # np.save(os.path.join(dirs['data'], 'Vm_CA1_I'), state_mon_Vm_CA1_inh.v)
+
+np.save(os.path.join(dirs['data'], 'EC_I_CAN'), state_mon_EC_ICAN.I_CAN)
 
 # Save the alternative theta input
 # -------------------------------------------------------------#
