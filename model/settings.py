@@ -128,7 +128,6 @@ def init(data):
         p_inter_all[1][2][0] = [p_tri for ii in range(2)] # DG_E to CA3_E | CA3_I
         p_inter_all[2][3][0] = [p_tri for ii in range(2)] # CA3_E to CA1_E | CA1_I
         p_inter_all[3][0][0] = [p_tri for ii in range(2)] # CA1_E to EC_E | EC_I
-        print(p_inter_all)
 
     global duration, dt, debugging
     duration = data['simulation']['duration']*second

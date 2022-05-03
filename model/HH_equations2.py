@@ -18,7 +18,7 @@ Implementation Notes
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
 py_CAN_inp_eqs = '''
-    dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
+    dv/dt = ( - I_CAN - I_M - I_leak - I_K - I_Na - I_Ca + I_exc + r*I_stim) / ((1 * ufarad * cm ** -2) * (size)) + noise: volt
     I_CAN =  ((gCAN) * (size)) * mCAN ** 2 * (v - (-20 * mV)) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
         mCANInf = alpha2 / (alpha2 + (0.0002 * ms ** -1)) : 1

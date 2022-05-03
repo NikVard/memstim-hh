@@ -7,18 +7,18 @@ Ek = -100.*mV                   # resting potential of potassium channels in exc
 
 # gains and global conductances
 gM = 90*usiemens*cmetre**-2     # conductance for M-current
-gCAN = 0.25*usiemens*cmeter**-2 # wakefulness -> table 3.6, page 59, Aussel
+gCAN = 25*usiemens*cmeter**-2   # wakefulness -> table 3.6, page 59, Aussel
 
 """ Model fixed parameters """
 areas = ['EC', 'DG', 'CA3', 'CA1']
 types = ['exc', 'inh']
 
-G = 1.                          # G for wakefulness // var coeff
-g_max_e = 60.*psiemens
-g_max_i = 600.*psiemens
+G = 3                           # G for wakefulness // var coeff
+g_max_e = 60*psiemens
+g_max_i = 600*psiemens
 
 V_th = -20.*mvolt               # spiking threshold
-refractory_time = 3.*ms         # refractory time after a spike
+refractory_time = 3*ms          # refractory time after a spike
 
 cell_size_py = 29.e3*umetre**2  # single cell type
 cell_size_inh = 14.e3*umetre**2
