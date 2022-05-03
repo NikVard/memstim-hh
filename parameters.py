@@ -73,10 +73,10 @@ _data = {
 
     # Kuramoto oscillator parameters
     "Kuramoto" : {
-        "N"             : 200,
+        "N"             : 250,
         "f0"            : 6.,
         "sigma"         : 0.5,  # normal std
-        "kN"            : 25,
+        "kN"            : 100,
         "gain_reset"    : 1.5,
         "gain_rhythm"   : 1.,   # nA
         "offset"        : -0*pi/2
