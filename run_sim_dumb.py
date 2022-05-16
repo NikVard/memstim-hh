@@ -224,6 +224,7 @@ G_E.z_soma = pos[:,2]*metre
 # G_E[idx2].G_sin = 1.
 # G_E[setdiff1d(idx,idx2)].G_sin = 0.
 # exit()
+G_E.G_sin = 1.*(np.random.rand(settings.N_EC[0])>0.5)
 
 # I
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
@@ -248,6 +249,7 @@ G_I.z_soma = pos[:,2]*metre
 # G_I.x_soma = pos[:,0]*scale_aussel
 # G_I.y_soma = pos[:,1]*scale_aussel
 # G_I.z_soma = pos[:,2]*scale_aussel
+G_I.G_sin = 1.*(np.random.rand(settings.N_EC[1])>0.5)
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
