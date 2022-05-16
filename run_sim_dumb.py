@@ -14,7 +14,7 @@ import parameters
 import re # regular expressions
 
 from model.globals import *
-from model.HH_equations2 import *
+from model.HH_equations import *
 from model.kuramoto_equations import *
 from model.filter_equations import *
 from model import settings
