@@ -19,7 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Parameter optimization based on simulated spike data')
     parser.add_argument('-d', '--directory',
                         nargs='?',
-                        metavar='-a',
+                        metavar='-d',
                         type=str,
                         default='results_opt',
                         help='Default directory to load the data from')
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                         nargs='+',
                         metavar='-t',
                         type=float,
-                        default=[5,50,5,50,5,50,5,50,6],
+                        default=[5,5,5,5,6],
                         help='Target vector for the optimization; mean FR per area, max FR @ CA1, output frequency')
 
     parser.add_argument('-o', '--output',
@@ -39,7 +39,7 @@ if __name__ == "__main__":
                         help='Output file name')
     args = parser.parse_args()
 
-    if len(args.target) != 9:
+    if len(args.target) != 5:
         print("Wrong target length. Try again.")
         exit(-1)
 
@@ -56,7 +56,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    settling_time = 0.3 # 300ms
+    settling_time = 1.0 # 600ms
+    ending_time = 2.0 # 2000ms
 
     # target for EC firing rate w/ noise
     # target_vals = [6., 60., 6., 60., 6., 60., 6., 60., 10., 6.]
@@ -105,6 +106,9 @@ if __name__ == "__main__":
                             idx_crop = np.where(t <= settling_time)
                             data[area]["I"]["t"] = np.delete(t, idx_crop)
                             data[area]["I"]["i"] = np.delete(i, idx_crop)
+                            idx_crop = np.where(t >= ending_time)
+                            data[area]["I"]["t"] = np.delete(t, idx_crop)
+                            data[area]["I"]["i"] = np.delete(i, idx_crop)
                         else:
                             t = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
                             i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
@@ -112,12 +116,15 @@ if __name__ == "__main__":
                             idx_crop = np.where(t <= settling_time)
                             data[area]["E"]["t"] = np.delete(t, idx_crop)
                             data[area]["E"]["i"] = np.delete(i, idx_crop)
+                            idx_crop = np.where(t >= ending_time)
+                            data[area]["E"]["t"] = np.delete(t, idx_crop)
+                            data[area]["E"]["i"] = np.delete(i, idx_crop)
 
                 # Output rhythm
                 r = np.loadtxt(datadir + '/' + 'order_param_mon_rhythm.txt')
-                data["rhythm"] = r[int(settling_time*fs):]
-
+                data["rhythm"] = r[int(settling_time*fs):int(ending_time*fs)]
                 duration = len(data["rhythm"])/fs
+                duration0 = (ending_time-settling_time)
 
                 # Run the cost function
                 params_FR = {"winsize":winsize_FR, "overlap":overlap_FR}

@@ -215,6 +215,7 @@ def cost_func(data, target=None, duration=1, fs=10000, areasizes={"EC":[10000, 1
 
     # Initialize values vector
     # ------------------------
+    vals0 = []
     vals = []
 
     # Firing rates
@@ -245,21 +246,25 @@ def cost_func(data, target=None, duration=1, fs=10000, areasizes={"EC":[10000, 1
     # Mean FR per area
     FR_EC_exc_mean = (len(data["EC"]["E"]["t"])/duration)/N_EC_exc
     FR_EC_inh_mean = (len(data["EC"]["I"]["t"])/duration)/N_EC_inh
+    vals0.append(FR_EC_exc_mean)
     vals.append(FR_EC_exc_mean)
     vals.append(FR_EC_inh_mean)
 
     FR_DG_exc_mean = (len(data["DG"]["E"]["t"])/duration)/N_DG_exc
     FR_DG_inh_mean = (len(data["DG"]["I"]["t"])/duration)/N_DG_inh
+    vals0.append(FR_DG_exc_mean)
     vals.append(FR_DG_exc_mean)
     vals.append(FR_DG_inh_mean)
 
     FR_CA3_exc_mean = (len(data["CA3"]["E"]["t"])/duration)/N_CA3_exc
     FR_CA3_inh_mean = (len(data["CA3"]["I"]["t"])/duration)/N_CA3_inh
+    vals0.append(FR_CA3_exc_mean)
     vals.append(FR_CA3_exc_mean)
     vals.append(FR_CA3_inh_mean)
 
     FR_CA1_exc_mean = (len(data["CA1"]["E"]["t"])/duration)/N_CA1_exc
     FR_CA1_inh_mean = (len(data["CA1"]["I"]["t"])/duration)/N_CA1_inh
+    vals0.append(FR_CA1_exc_mean)
     vals.append(FR_CA1_exc_mean)
     vals.append(FR_CA1_inh_mean)
 
@@ -280,15 +285,16 @@ def cost_func(data, target=None, duration=1, fs=10000, areasizes={"EC":[10000, 1
 
     # Output Frequency
     pks, _ = sig.find_peaks(data["rhythm"], distance=int(0.100*fs))
-    # fval = 1/(max(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
-    fval = 6
+    fval = 1/(max(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    # fval = 6
+    vals0.append(fval)
     vals.append(fval)
 
     # Periodogram (PSD)
     # f, PSD = my_PSD()
 
     # J = g0*A +g1*B + g2*C + g3*D
-    J = dst.euclidean(goal, vals)
+    J = dst.euclidean(goal, vals0)
 
     return J, vals
 
