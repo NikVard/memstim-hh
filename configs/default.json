@@ -131,12 +131,12 @@
         "ipi": 0.0001
     },
     "simulation": {
-        "duration": 1.0,
+        "duration": 2.0,
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "17606555",
-    "timestamp": "Tue May  3 17:26:56 2022",
-    "git_branch": "test",
-    "git_hash": "176065555673ac38ac3809d60e5e7cdd153c99da"
+    "git_short_hash": "8bf60cf0",
+    "timestamp": "Fri May 20 17:23:02 2022",
+    "git_branch": "master",
+    "git_hash": "8bf60cf09ff1a9d72d721f26c158d2c461b7ffc2"
 }
