@@ -192,7 +192,7 @@ def parse_coords(fname, NG):
             idx += 1
 
 print('[+] Groups:')
-# EC -> receives theta input from MS :  50% of cells (uniformly)
+# EC -> receives theta input from MS
 # E
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[0], 1))))
@@ -219,14 +219,6 @@ G_E.z_soma = pos[:,2]*metre
 # G_E.y_soma = pos[:,1]*scale_aussel
 # G_E.z_soma = pos[:,2]*scale_aussel
 
-# idx = np.arange(0,settings.N_EC[0])
-# idx2 = np.random.permutation(idx)[:int(0.5*settings.N_EC[0])]
-# G_E[idx2].G_sin = 1.
-# G_E[setdiff1d(idx,idx2)].G_sin = 0.
-# exit()
-# G_E.G_sin = 1.*(np.random.rand(settings.N_EC[0])>0.5)
-G_E.G_sin = 1.
-
 # I
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_I-stipple-1000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
@@ -250,8 +242,6 @@ G_I.z_soma = pos[:,2]*metre
 # G_I.x_soma = pos[:,0]*scale_aussel
 # G_I.y_soma = pos[:,1]*scale_aussel
 # G_I.z_soma = pos[:,2]*scale_aussel
-G_I.G_sin = 1.*(np.random.rand(settings.N_EC[1])>0.5)
-G_I.G_sin = 1.
 
 # Plot X,Y,Z
 ax_anat.scatter(G_E.x_soma, G_E.y_soma, G_E.z_soma, c='blue')
