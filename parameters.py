@@ -76,9 +76,9 @@ _data = {
         "N"             : 250,
         "f0"            : 6.,
         "sigma"         : 0.5,  # normal std
-        "kN"            : 100,
-        "gain_reset"    : 1.5,
-        "gain_rhythm"   : 1.,   # nA
+        "kN"            : 15,
+        "gain_reset"    : 1.75,
+        "gain_rhythm"   : 1.0,  # nA
         "offset"        : -0*pi/2
     },
 
@@ -106,11 +106,11 @@ _data = {
     "stimulation" : {
         "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
-        "rho"           : 1.,               # conductivity of homogeneous conductive medium [S/m]
+        "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 2.,               # [sec]
         "dt"            : .1e-3,            # [sec]
-        "onset"         : 0.50,             # [sec]
-        "I"             : [0.],             # stimulation amplitude [nA]
+        "onset"         : 1.525,            # [sec]
+        "I"             : [10.],            # stimulation amplitude [nA]
         "pulse_width"   : [1.e-3],          # width (in time) of pulse ON phase [sec]
         "stim_freq"     : 5,                # stimulation frequency [Hz]
         "pulse_freq"    : 100,              # pulse frequency, determines ON duration [Hz]
@@ -121,7 +121,7 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration"  : 2.0,                  # second
+        "duration"  : 3.0,                  # second
         "dt"        : .1e-3,                # second
         "debugging" : False
     },

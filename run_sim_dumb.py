@@ -448,14 +448,14 @@ for ngroup in G_flat:
 
         # calculate the distance
         # ngroup.r = 1 # 1 means on
-        # d1 = '{rho}*mm/(4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
+        # d1 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
 
         # alternatively, calculate distances like so:
         neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
         elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
         d0 = dst.cdist(elec_pos, neuron_pos)
         # ngroup.r = 100/(4*pi*d0)
-        ngroup.r = 0
+        ngroup.r = 1
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 

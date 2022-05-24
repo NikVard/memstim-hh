@@ -21,7 +21,7 @@ kuramoto_eqs_stim = '''
     omega : 1 (constant)
     kN : 1 (shared)         # k/N ratio, affects sync.
     G_in : 1 (shared)       # input gain, affects the phase reset aggressiveness
-    offset : 1 (shared)     # range [0, 2*pi], controls phase reset PRC
+    offset : 1 (shared)     # range [0, 2*pi], controls phase reset curve
     X : 1 (linked)          # this is linked to the firing rates
 '''
 
