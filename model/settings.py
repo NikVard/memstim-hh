@@ -45,7 +45,7 @@ r_gain = 0.*nA # output sin rhythm gain (scaling, in nA)
 # Stimulation settings - stimulation module is not brian2-dependent!
 stim_target = "" # [EC | DG | CA1 | CA3]
 stim_coordinates = (0., 0., 0.) # (x,y,z) [mm]
-stim_rho = 0. # [Ω/cm]
+stim_sigma = 0. # [S/m]
 I_stim = [1.] # [nA]
 pulse_width = [.2e-3]
 stim_freq = 5. # [Hz]
@@ -147,7 +147,7 @@ def init(data):
     global stim_target, stim_coordinates, stim_rho, stim_duration, stim_dt, stim_onset, I_stim, pulse_width, stim_freq, pulse_freq, nr_of_trains, nr_of_pulses, stim_ipi
     stim_target = data['stimulation']['target']
     stim_coordinates = tuple(data['stimulation']['coordinates']) # immutable
-    stim_rho = data['stimulation']['rho']
+    stim_sigma = data['stimulation']['sigma']
     stim_duration = data['stimulation']['duration']
     stim_dt = data['stimulation']['dt']
     stim_onset = data['stimulation']['onset']
