@@ -248,6 +248,8 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
 
 
 def plot_structure_3D(neuron_groups):
+    """ Plot neuron positions in 3D. """
+
     # make a figure
     fig = figure(figsize=(8,8))
 
@@ -305,3 +307,128 @@ def plot_structure_3D(neuron_groups):
     camera.connect(ax, scatter.update)
 
     show()
+
+
+
+
+def plot_network_output2(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv, stim_inp):
+    """ Print CA1 rasters, rhythm, phase reset using Nord theme colors. """
+
+    # color selection
+    c_inh = '#bf616a'
+    c_exc = '#5e81ac'
+    c_inh_RGB = np.array([191, 97, 106])/255
+    c_exc_RGB = np.array([94, 129, 172])/255
+
+    # create the figure
+    fig, axs = subplots(nrows=6, ncols=1)
+    fig.set_figheight(18)
+    fig.set_figwidth(16)
+
+    # axes aliases
+    ax_rhythm = axs[0]
+    ax_CA1_E_raster = axs[1]
+    ax_CA1_I_raster = axs[2]
+    ax_CA1_E_FR = axs[3]
+    ax_order_param = axs[4]
+    ax_phase = axs[5]
+
+    # axes parameterizations
+    # spines
+    # rhythm
+    ax_rhythm.spines['top'].set_visible(False)
+    # ax_rhythm.spines['bottom'].set_visible(False)
+    # ax_rhythm.spines['left'].set_visible(False)
+    ax_rhythm.spines['right'].set_visible(False)
+    ax_rhythm.xaxis.set_ticklabels([])
+
+    # CA1
+    # E / I
+    ax_CA1_E_raster.spines['top'].set_visible(False)
+    # ax_CA1_E_raster.spines['bottom'].set_visible(False)
+    # ax_CA1_E_raster.spines['left'].set_visible(False)
+    ax_CA1_E_raster.spines['right'].set_visible(False)
+    ax_CA1_E_raster.xaxis.set_ticklabels([])
+
+    ax_CA1_I_raster.spines['top'].set_visible(False)
+    # ax_CA1_I_raster.spines['bottom'].set_visible(False)
+    # ax_CA1_I_raster.spines['left'].set_visible(False)
+    ax_CA1_I_raster.spines['right'].set_visible(False)
+    ax_CA1_I_raster.xaxis.set_ticklabels([])
+
+    # FR
+    ax_CA1_E_FR.spines['top'].set_visible(False)
+    # ax_CA1_E_FR.spines['bottom'].set_visible(False)
+    # ax_CA1_E_FR.spines['left'].set_visible(False)
+    ax_CA1_E_FR.spines['right'].set_visible(False)
+    ax_CA1_E_FR.xaxis.set_ticklabels([])
+
+    # Phase and order parameter
+    ax_phase.spines['top'].set_visible(False)
+    # ax_phase.spines['bottom'].set_visible(False)
+    # ax_phase.spines['left'].set_visible(False)
+    ax_phase.spines['right'].set_visible(False)
+    ax_CA1_E_FR.xaxis.set_ticklabels([])
+
+    ax_order_param.spines['top'].set_visible(False)
+    # ax_order_param.spines['bottom'].set_visible(False)
+    ax_order_param.spines['left'].set_visible(False)
+    ax_order_param.spines['right'].set_visible(False)
+
+    ax_phase.set_xlabel('Time [s]')
+
+
+    # Data plotting
+    ax_rhythm.plot(order_param_mon.t/second, order_param_mon.rhythm_rect[0]/nA, '-', label='Theta Rhythm (Ensemble)')
+    ax_rhythm.set_title('Generated Theta Rhythm')
+    ax_rhythm.set_xlim(0, settings.duration/second)
+    # ax_rhythm.set_ylabel('Theta rhythm (corr)')
+    # ax_rhythm.legend()
+    ax_rhythm.grid()
+
+    # ax_CA1_E_raster.plot(spike_mon_E.t/second, spike_mon_E.i, '.g', markersize=.5,alpha=0.5)
+    ax_CA1_E_raster.scatter(spike_mon_E.t/second, spike_mon_E.i, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.5, zorder=1, rasterized=False)
+    ax_CA1_E_raster.set_title('CA1 Excitatory Neurons')
+    ax_CA1_E_raster.set_xlim(0, settings.duration/second)
+    ax_CA1_E_raster.set_ylim(0, settings.N_CA1[0])
+    ax_CA1_E_raster.set_ylabel('Neuron index')
+
+    # ax_CA1_I_raster.plot(spike_mon_I.t/second, spike_mon_I.i, '.r', markersize=.5,alpha=0.5)
+    ax_CA1_I_raster.scatter(spike_mon_I.t/second, spike_mon_I.i, s=1, marker='o', c=c_inh, edgecolors=None, alpha=.5, zorder=1, rasterized=False)
+    ax_CA1_I_raster.set_title('CA1 Inhibitory Neurons')
+    ax_CA1_I_raster.set_xlim(0, settings.duration/second)
+    ax_CA1_I_raster.set_ylim(0, settings.N_CA1[1])
+    ax_CA1_I_raster.set_ylabel('Neuron index')
+
+    ax_CA1_E_FR.plot(rate_mon.t/second, rate_mon.drive[0], label='LPF Output')
+    ax_CA1_E_FR.set_title('CA1 Population Firing Rates')
+    ax_CA1_E_FR.set_ylabel('Rate [Hz]')
+    ax_CA1_E_FR.set_xlim(0, settings.duration/second)
+    ax_CA1_E_FR.grid()
+
+    ax_order_param.plot(order_param_mon.t/second, order_param_mon.coherence[0], '-', label='Order Param')
+    ax_order_param.set_title('Synchronization level')
+    ax_order_param.set_xlim(0, settings.duration/second)
+    # ax_rhythm.set_ylabel('Theta rhythm (corr)')
+    # ax_rhythm.legend()
+    ax_order_param.grid()
+
+
+    ax_phase.plot(order_param_mon.t/second, order_param_mon.phase[0], '-', label='Ensemble phase')
+    ax_phase.set_title('Oscillators\' phase')
+    ax_phase.set_xlim(0, settings.duration/second)
+    ax_phase.grid()
+
+    # stim pulse
+    if settings.I_stim[0]:
+        axs[0].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[1].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[2].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[3].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
+        axs[4].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=True)
+
+
+    # Generate the figure's name
+    fig_name = generate_fig_name('Kuramoto_extra_new_')
+
+    return fig, axs, fig_name
