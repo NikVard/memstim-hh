@@ -85,10 +85,10 @@ _data = {
     # connectivity parameters
     "connectivity" : {
         "intra" : { # intra-area conn. probabilities per area |
-            "EC"    : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
-            "DG"    : [[0., 0.06], [0.14, 0.]],
-            "CA3"   : [[0.56, 0.75], [0.75, 0.]],
-            "CA1"   : [[0., 0.28], [0.3, 0.7]]
+            "EC"        : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
+            "DG"        : [[0., 0.06], [0.14, 0.]],
+            "CA3"       : [[0.56, 0.75], [0.75, 0.]],
+            "CA1"       : [[0., 0.28], [0.3, 0.7]]
         },
         "inter" : { # inter-area conn. probabilities
             "p_tri"     : 0.45,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
@@ -121,9 +121,9 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration"  : 3.0,                  # second
-        "dt"        : .1e-3,                # second
-        "debugging" : False
+        "duration"      : 3.0,              # second
+        "dt"            : .1e-3,            # second
+        "debugging"     : False
     },
 
     # git stuff

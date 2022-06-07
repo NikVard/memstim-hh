@@ -20,6 +20,8 @@ a = b = c = d = 0. # connections
 # c = 1.5 # 1.5
 # d = 0.25 # 25
 I_in = 0.0 # input
+stim_amplitude = [10.] # nA
+stim_onset = 1.5 # sec
 
 noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
 noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
@@ -39,49 +41,49 @@ _data = {
     "areas": {
         "EC"    : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "PyCAN",
+                "N"     : int(10e3),
+                "type"  : "PyCAN",
                 "noise" : np.around(noise_EC_exc, 6)        # Volts
             },
             "I" : {
-                "N" : int(1e3),
-                "type" : "Inh",
+                "N"     : int(1e3),
+                "type"  : "Inh",
                 "noise" : np.around(noise_EC_inh, 6)
             }
         },
         "DG"    : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "Py",
+                "N"     : int(10e3),
+                "type"  : "Py",
                 "noise" : np.around(noise_DG_exc, 6)
             },
             "I" : {
-                "N" : int(0.1e3),
-                "type" : "Inh",
+                "N"     : int(0.1e3),
+                "type"  : "Inh",
                 "noise" : np.around(noise_DG_inh, 6)
             }
         },
         "CA3"   : {
             "E" : {
-                "N" : int(1e3),
-                "type" : "PyCAN",
+                "N"     : int(1e3),
+                "type"  : "PyCAN",
                 "noise" : np.around(noise_CA3_exc, 6)
             },
             "I" : {
-                "N" : int(0.1e3),
-                "type" : "Inh",
+                "N"     : int(0.1e3),
+                "type"  : "Inh",
                 "noise" : np.around(noise_CA3_inh, 6)
             }
         },
         "CA1"   : {
             "E" : {
-                "N" : int(10e3),
-                "type" : "PyCAN",
+                "N"     : int(10e3),
+                "type"  : "PyCAN",
                 "noise" : np.around(noise_CA1_exc, 6)
             },
             "I" : {
-                "N" : int(1e3),
-                "type" : "Inh",
+                "N"     : int(1e3),
+                "type"  : "Inh",
                 "noise" : np.around(noise_CA1_inh, 6)
             }
         }
@@ -89,78 +91,60 @@ _data = {
 
     # Kuramoto oscillator parameters
     "Kuramoto" : {
-        "N" : 200,
-        "f0" : 6.,
-        "sigma" : 0.5,  # normal std
-        "kN" : 20,
-        "gain_reset" : 0,
-        "gain_rhythm" : np.around(I_in, 2), # nA
-        "offset" : -0*pi/2
+        "N"             : 250,
+        "f0"            : 6.,
+        "sigma"         : 0.5,  # normal std
+        "kN"            : 15,
+        "gain_reset"    : 1.75,
+        "gain_rhythm"   : np.around(I_in, 2), # nA
+        "offset"        : -0*pi/2
     },
 
     # connectivity parameters
     "connectivity" : {
         "intra" : { # intra-area conn. probabilities per area |
-            "EC" : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
-            "DG" : [[0., 0.06], [0.14, 0.]],
-            "CA3" : [[0.56, 0.75], [0.75, 0.]],
-            "CA1" : [[0., 0.28], [0.3, 0.7]]
+            "EC"        : [[0., 0.37], [0.54, 0.]], # [[E-E, E-I], [I-E, I-I]]
+            "DG"        : [[0., 0.06], [0.14, 0.]],
+            "CA3"       : [[0.56, 0.75], [0.75, 0.]],
+            "CA1"       : [[0., 0.28], [0.3, 0.7]]
         },
         "inter" : { # inter-area conn. probabilities
-            "p_tri" : 0.45, # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
-            "p_mono" : 0.3  # mono: [EC->CA3, EC->CA1]
-        },
-        "inter_custom" : {
-            "EC" : {
-                "E" : [[0., 0.], [a, a], [b, b], [c, c]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "DG" : {
-                "E" : [[0., 0.], [0., 0.], [b, b], [0., 0.]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "CA3" : {
-                "E" : [[0., 0.], [0., 0.], [0., 0.], [c, c]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            },
-            "CA1" : {
-                "E" : [[d, d], [0., 0.], [0., 0.], [0., 0.]],
-                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
-            }
+            "p_tri"     : 0.45,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
+            "p_mono"    : 0.2       # mono: [EC->CA3, EC->CA1]
         }
     },
 
     # synapses
-    "synapses" : {
-        "gmax_e" : 600.,    # pSiemens
-        "gmax_i" : 60.
-    },
+    # "synapses" : {
+    #     "gmax_e" : 600.,    # pSiemens
+    #     "gmax_i" : 60.
+    # },
 
     # stimulation parameters
     "stimulation" : {
-        "target" : "CA1",                   # target area [EC | DG | CA3 | CA1]
-        "coordinates" : (5.0, -8., 7.5),    # point electrode coordinates (x,y,z) [mm]
-        "rho" : 1.,                         # resistivity of homogeneous conductive medium [Ω/cm]
-        "duration" : 2.,                    # [sec]
-        "dt" : .1e-3,                       # [sec]
-        "onset" : 0.50,                     # [sec]
-        "I" : [0.],                         # stimulation amplitude [nA]
-        "pulse_width" : [1.e-3],            # width (in time) of pulse ON phase [sec]
-        "stim_freq" : 5,                    # stimulation frequency [Hz]
-        "pulse_freq" : 100,                 # pulse frequency, determines ON duration [Hz]
-        "nr_of_trains" : 1,                 # number of pulse trains
-        "nr_of_pulses" : 1,                 # number of pulses per train
-        "ipi" : .1e-3                       # inter-pulse interval [sec]
+        "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
+        "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
+        "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
+        "duration"      : 2.,               # [sec]
+        "dt"            : .1e-3,            # [sec]
+        "onset"         : stim_onset,       # [sec]
+        "I"             : stim_amplitude,   # stimulation amplitude [nA]
+        "pulse_width"   : [1.e-3],          # width (in time) of pulse ON phase [sec]
+        "stim_freq"     : 5,                # stimulation frequency [Hz]
+        "pulse_freq"    : 100,              # pulse frequency, determines ON duration [Hz]
+        "nr_of_trains"  : 1,                # number of pulse trains
+        "nr_of_pulses"  : 1,                # number of pulses per train
+        "ipi"           : .1e-3             # inter-pulse interval [sec]
         },
 
     # simulation parameters
     "simulation" : {
-        "duration"  : 1.0,                  # second
+        "duration"  : 3.0,                  # second
         "dt"        : .1e-3,                # second
         "debugging" : False
     },
 
-    # git stuffsubprocess
+    # git stuff
     "timestamp"         : None,
     "git_branch"        : None,
     "git_hash"          : None,
@@ -290,9 +274,10 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.0005, 0.0021
-    vals = np.arange(vmin, vmax, 0.0001)
+    vmin,vmax = 0.0, 0.21
+    vals = np.arange(vmin, vmax, 0.01)
     cnt = 0
+    stim_t_off = 1.0
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
         # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
@@ -304,13 +289,13 @@ if __name__  == "__main__":
         # _data["areas"]["EC"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["EC"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["DG"]["E"]["noise"] = np.around(val, 6)
-        _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
+        # _data["areas"]["DG"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA3"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA3"]["I"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
-
+        _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))

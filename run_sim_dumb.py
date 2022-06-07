@@ -818,6 +818,8 @@ print('\n[60] Post-simulation actions')
 print('-'*32)
 
 print('\n[61] Plotting results...')
+tight_layout()
+
 # raster plot of all regions
 # raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
@@ -845,6 +847,12 @@ plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_bra
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
+# newer version
+fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+print("[+] Saving figure 'figures/%s'" %fig_name)
+fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
+
 # Plot the 3D shape
 fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
 
@@ -864,7 +872,7 @@ print('\n[62] Saving results...')
 
 # Kuramoto monitors
 print("[+] Saving Kuramoto monitor data")
-np.savetxt(os.path.join(dirs['data'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['datas'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), order_param_mon.phase.T, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), order_param_mon.coherence.T, fmt='%.8f')
@@ -909,7 +917,7 @@ for G in G_flat:
         print("[+] Saving group ", G.name)
         fname = '{group}'.format(group=G.name)
         pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
-        np.save(dirs['positions'] + fname, pos)
+        np.save(os.path.join(dirs['positions'], fname), pos)
 
     except AttributeError:
         print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
