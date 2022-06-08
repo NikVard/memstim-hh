@@ -853,6 +853,13 @@ plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_bra
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
+# Fig2 version
+fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, s2r_mon, order_param_mon, tv, xstim)
+plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+print("[+] Saving figure 'figures/%s'" %fig_name)
+fig2.savefig(os.path.join(dirs['figures'], fig_name))
+
+
 # Plot the 3D shape
 fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
 
