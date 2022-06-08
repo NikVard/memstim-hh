@@ -943,7 +943,8 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
             # ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
-    ax_rhythm.vlines(x=t_stim, ymin=-15.85, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
+    if settings.I_stim[0]:
+        ax_rhythm.vlines(x=t_stim, ymin=-15.85, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
 
     # text frequency label
     ax_rhythm.text(x=duration+100*ms, y=1.1, s=r"$f_\theta={0:.2f}$Hz".format(fval), ha='left', color='k', clip_on=False)
