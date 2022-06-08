@@ -28,7 +28,7 @@ if __name__ == "__main__":
                         nargs='+',
                         metavar='-t',
                         type=float,
-                        default=[5,5,5,5,6],
+                        default=[6,6,6,6,6],
                         help='Target vector for the optimization; mean FR per area, max FR @ CA1, output frequency')
 
     parser.add_argument('-o', '--output',
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    settling_time = 1.0 # 600ms
-    ending_time = 2.0 # 2000ms
+    settling_time = 1.5 # 600ms
+    ending_time = 2.5 # 2000ms
 
     # target for EC firing rate w/ noise
     # target_vals = [6., 60., 6., 60., 6., 60., 6., 60., 10., 6.]
