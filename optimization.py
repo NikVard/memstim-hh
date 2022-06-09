@@ -56,8 +56,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    settling_time = 1.5 # 600ms
-    ending_time = 2.5 # 2000ms
+    settling_time = 2 # s
+    ending_time = 3 # s
 
     # target for EC firing rate w/ noise
     # target_vals = [6., 60., 6., 60., 6., 60., 6., 60., 10., 6.]
@@ -101,24 +101,35 @@ if __name__ == "__main__":
 
                         if tokens[1] == "inh":
                             t = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
-                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
+                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)
 
                             idx_crop = np.where(t <= settling_time)
-                            data[area]["I"]["t"] = np.delete(t, idx_crop)
-                            data[area]["I"]["i"] = np.delete(i, idx_crop)
-                            idx_crop = np.where(t >= ending_time)
-                            data[area]["I"]["t"] = np.delete(t, idx_crop)
-                            data[area]["I"]["i"] = np.delete(i, idx_crop)
+                            t_tmp = np.delete(t, idx_crop)
+                            i_tmp = np.delete(i, idx_crop)
+                            data[area]["I"]["t"] = t_tmp
+                            data[area]["I"]["i"] = i_tmp
+
+                            idx_crop = np.where(t_tmp >= ending_time)
+                            t_tmp = np.delete(t_tmp, idx_crop)
+                            i_tmp = np.delete(i_tmp, idx_crop)
+                            data[area]["I"]["t"] = t_tmp
+                            data[area]["I"]["i"] = i_tmp
+
                         else:
                             t = np.loadtxt(spikesdir + '/' + f + '_spikemon_t.txt', ndmin=1)/1000
-                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)/1000
+                            i = np.loadtxt(spikesdir + '/' + f + '_spikemon_i.txt', ndmin=1)
 
                             idx_crop = np.where(t <= settling_time)
-                            data[area]["E"]["t"] = np.delete(t, idx_crop)
-                            data[area]["E"]["i"] = np.delete(i, idx_crop)
-                            idx_crop = np.where(t >= ending_time)
-                            data[area]["E"]["t"] = np.delete(t, idx_crop)
-                            data[area]["E"]["i"] = np.delete(i, idx_crop)
+                            t_tmp = np.delete(t, idx_crop)
+                            i_tmp = np.delete(i, idx_crop)
+                            data[area]["E"]["t"] = t_tmp
+                            data[area]["E"]["i"] = i_tmp
+
+                            idx_crop = np.where(t_tmp >= ending_time)
+                            t_tmp = np.delete(t_tmp, idx_crop)
+                            i_tmp = np.delete(i_tmp, idx_crop)
+                            data[area]["E"]["t"] = t_tmp
+                            data[area]["E"]["i"] = i_tmp
 
                 # Output rhythm
                 r = np.loadtxt(datadir + '/' + 'order_param_mon_rhythm.txt')
