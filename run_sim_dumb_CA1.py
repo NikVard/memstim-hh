@@ -24,6 +24,7 @@ from src.annex_funcs import make_flat
 from src.myplot import *
 from src import stimulation
 
+
 # Reading Amelie's locations
 def parse_positions(fname):
     """ Opens file and parses coordinates """
@@ -87,6 +88,7 @@ print()
 
 # Settings initialization
 settings.init(data)
+
 
 # Create the necessary directories
 print('\n[00] Making directories...')
@@ -190,16 +192,16 @@ def parse_coords(fname, NG):
             idx += 1
 
 print('[+] Groups:')
-# EC -> receives theta input from MS
+# EC
 # E
 pos = np.load(os.path.join('neuron_positions', 'full', 'EC_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_EC[0], 1))))
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_EC[0])
+# pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 G_E = NeuronGroup(N=settings.N_EC[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -223,9 +225,9 @@ pos = hstack((pos, zeros((settings.N_EC[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_EC[1])
+# pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 G_I = NeuronGroup(N=settings.N_EC[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -258,9 +260,9 @@ pos = hstack((pos, zeros((settings.N_DG[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_DG[0])
+# pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 G_E = NeuronGroup(N=settings.N_DG[0],
     model=py_eqs,
     threshold='v>V_th',
@@ -284,9 +286,9 @@ pos = hstack((pos, zeros((settings.N_DG[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_DG[1])
+# pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 G_I = NeuronGroup(N=settings.N_DG[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -319,9 +321,9 @@ pos = hstack((pos, zeros((settings.N_CA3[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA3[0])
+# pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 G_E = NeuronGroup(N=settings.N_CA3[0],
     model=py_CAN_eqs,
     threshold='v>V_th',
@@ -345,9 +347,9 @@ pos = hstack((pos, zeros((settings.N_CA3[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA3[1])
+# pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 G_I = NeuronGroup(N=settings.N_CA3[1],
     model=inh_eqs,
     threshold='v>V_th',
@@ -373,16 +375,16 @@ G_all[2][1].append(G_I)
 print('[\u2022]\tCA3: done')
 
 
-# CA1
+# CA1 -> Receives theta input from MS
 # E
 pos = np.load(os.path.join('neuron_positions', 'full', 'CA1_E-stipple-10000.npy'))
 pos = hstack((pos, zeros((settings.N_CA1[0], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA1[0])
+# pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 G_E = NeuronGroup(N=settings.N_CA1[0],
     model=py_CAN_inp_eqs,
     threshold='v>V_th',
@@ -406,9 +408,9 @@ pos = hstack((pos, zeros((settings.N_CA1[1], 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(settings.N_CA1[1])
+# pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
-# pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 G_I = NeuronGroup(N=settings.N_CA1[1],
     model=inh_inp_eqs,
     threshold='v>V_th',
@@ -438,9 +440,7 @@ G_flat = make_flat(G_all)
 
 # initialize the groups, set initial conditions
 for ngroup in G_flat:
-    #ngroup.z_soma = '15*mm*rand()' # add a third dimension to the structures
-    # ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
-    ngroup.v = -60.*mV
+    ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
 
     # CA1 populations get stimulated
     if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
@@ -448,13 +448,14 @@ for ngroup in G_flat:
 
         # calculate the distance
         # ngroup.r = 1 # 1 means on
-        # d1 = '{rho}*mm/(4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
+        # d1 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
 
         # alternatively, calculate distances like so:
         neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
         elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
         d0 = dst.cdist(elec_pos, neuron_pos)
-        ngroup.r = 100/(4*pi*d0)
+        # ngroup.r = 100/(4*pi*d0)
+        ngroup.r = 1
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
@@ -475,7 +476,6 @@ for group in G_flat:
     # calculate intra-area distance boundaries
     min_dist, max_dist = (dist_res.min(), dist_res.max())
 
-    '''
     print('{:10} pdist: ({:20} , {:20})\n\tx ---> ({:28}, {:28})\n\ty ---> ({:28}, {:28})\n\tz ---> ({:28}, {:28})\n'.format(
     '{}'.format(group.name),
     '{}'.format(min_dist),
@@ -486,7 +486,7 @@ for group in G_flat:
     '{}'.format(group.y_soma[:].max()),
     '{}'.format(group.z_soma[:].min()),
     '{}'.format(group.z_soma[:].max())))
-    '''
+
 
 
 # Make the synapses
@@ -495,24 +495,28 @@ print('\n[12] Making the synapses...')
 
 # gains
 gains_all =  [[1./G, 1.], [G, G], [1./G, 1.], [1., G]]
+print("[!] Gains:", gains_all)
 
 # intra
 print('[+] Intra-region')
 
 syn_EC_all = setup.connect_intra(G_all[0][0], G_all[0][1], settings.p_EC_all, gains_all[0])
 print('[\u2022]\tEC-to-EC: done')
+
 syn_DG_all = setup.connect_intra(G_all[1][0], G_all[1][1], settings.p_DG_all, gains_all[1])
 print('[\u2022]\tDG-to-DG: done')
+
 syn_CA3_all = setup.connect_intra(G_all[2][0], G_all[2][1], settings.p_CA3_all, gains_all[2])
 print('[\u2022]\tCA3-to-CA3: done')
+
 syn_CA1_all = setup.connect_intra(G_all[3][0], G_all[3][1], settings.p_CA1_all, gains_all[3])
 print('[\u2022]\tCA1-to-CA1: done')
+
 syn_intra_all = [syn_EC_all, syn_DG_all, syn_CA3_all, syn_CA1_all]
 
 # inter
 print('[+] Inter-region')
 
-# syn_EC_EC_all = setup.connect_all()
 syn_EC_DG_all = setup.connect_inter(G_all[0][0], G_all[1][0], G_all[1][1], settings.p_inter_all[0][1], gains_all[0])
 syn_EC_CA3_all = setup.connect_inter(G_all[0][0], G_all[2][0], G_all[2][1], settings.p_inter_all[0][2], gains_all[0])
 syn_EC_CA1_all = setup.connect_inter(G_all[0][0], G_all[3][0], G_all[3][1], settings.p_inter_all[0][3], gains_all[0])
@@ -526,6 +530,7 @@ print('[\u2022]\tCA3-to-CA1: done')
 
 syn_CA1_EC_all = setup.connect_inter(G_all[3][0], G_all[0][0], G_all[0][1], settings.p_inter_all[3][0], gains_all[3])
 print('[\u2022]\tCA1-to-EC: done')
+
 syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, syn_CA3_CA1_all, syn_CA1_EC_all]
 
 
@@ -550,6 +555,16 @@ rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_in
 print('[\u2022]\tRate monitors: done')
 
 state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
+print('[\u2022]\tNoise monitors: done')
+
+state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
+state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
+state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+print('[\u2022]\tVm monitors: done')
+
+state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
+print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -582,9 +597,10 @@ else:
 inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 
 
-inp_theta_sin = 1*sin(2*pi*4*tv)
-inp_theta_rect = (-cos(2*pi*4*tv)+1)/2
-trail_zeros = zeros(int(250*ms/(settings.stim_dt*second)))
+f_rhythm = 6
+inp_theta_sin = 1*sin(2*pi*f_rhythm*tv)
+inp_theta_rect = (-cos(2*pi*f_rhythm*tv)+1)/2
+trail_zeros = zeros(int(200*ms/(settings.stim_dt*second)))
 inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
 inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.stim_dt*second) # external theta (TESTING)
 
@@ -685,8 +701,6 @@ print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
 # avoid linking when using a fixed theta input sin : TESTING
 # G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
 # G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 G_flat[6].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 G_flat[7].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 
@@ -735,11 +749,11 @@ net.add(G_S2R)
 print('[\u2022]\tNetwork groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
-    if syn_intra_curr!=0:
+    if syn_intra_curr != 0:
         net.add(syn_intra_curr)
 
 for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
-    if syn_inter_curr!=0:
+    if syn_inter_curr != 0:
         net.add(syn_inter_curr)
 
 net.add(syn_kuramoto) # kuramoto intra-synapses
@@ -758,6 +772,12 @@ net.add(order_param_mon)
 net.add(s2r_mon)
 net.add(state_mon_noise_all)
 print('[\u2022]\tNetwork monitors: done')
+
+net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
+print('[\u2022]\tVm monitors: done')
+
+net.add(state_mon_EC_ICAN)
+print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -798,6 +818,8 @@ print('\n[60] Post-simulation actions')
 print('-'*32)
 
 print('\n[61] Plotting results...')
+tight_layout()
+
 # raster plot of all regions
 # raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
 raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
@@ -825,11 +847,30 @@ plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_bra
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
+# newer version
+fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+print("[+] Saving figure 'figures/%s'" %fig_name)
+fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
+
+# Fig2 version
+fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, s2r_mon, order_param_mon, tv, xstim)
+plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+print("[+] Saving figure 'figures/%s'" %fig_name)
+fig2.savefig(os.path.join(dirs['figures'], fig_name))
+
+
 # Plot the 3D shape
 fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
 
-tight_layout()
+# Plot the non-Kuramoto theta drive
+fig_theta, ax_theta = subplots(1,1, figsize=(12,9))
+ax_theta.plot(tv, inp_theta_slow[:len(tv)])
+fig_theta.savefig(os.path.join(dirs['figures'], 'theta_inp.png'))
+
+# tight_layout()
 #show()
+
 
 
 # Save the results as .txt files (rows: time | cols: data)
@@ -838,7 +879,7 @@ print('\n[62] Saving results...')
 
 # Kuramoto monitors
 print("[+] Saving Kuramoto monitor data")
-np.savetxt(os.path.join(dirs['data'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['datas'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), order_param_mon.phase.T, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
 np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), order_param_mon.coherence.T, fmt='%.8f')
@@ -883,14 +924,26 @@ for G in G_flat:
         print("[+] Saving group ", G.name)
         fname = '{group}'.format(group=G.name)
         pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
-        np.save(dirs['positions'] + fname, pos)
+        np.save(os.path.join(dirs['positions'], fname), pos)
 
     except AttributeError:
         print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
         continue
 
+# Save the membrane voltages for EC/CA1 in npy files
+# -------------------------------------------------------------#
+# np.save(os.path.join(dirs['data'], 'Vm_EC_E'), state_mon_Vm_EC_exc.v)
+# np.save(os.path.join(dirs['data'], 'Vm_EC_I'), state_mon_Vm_EC_inh.v)
+# np.save(os.path.join(dirs['data'], 'Vm_CA1_E'), state_mon_Vm_CA1_exc.v)
+# np.save(os.path.join(dirs['data'], 'Vm_CA1_I'), state_mon_Vm_CA1_inh.v)
+
+# np.save(os.path.join(dirs['data'], 'EC_I_CAN'), state_mon_EC_ICAN.I_CAN)
+
+# Save the alternative theta input
+# -------------------------------------------------------------#
+# np.save(os.path.join(dirs['data'], 'inp_theta'), inp_theta_slow)
+
 # print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
 # clear_cache('cython')
 
 exit(0)
-s
