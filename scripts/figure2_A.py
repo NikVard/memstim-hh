@@ -5,6 +5,7 @@ import json
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from scipy import signal as sig
 from matplotlib import colors
 from matplotlib import ticker
@@ -136,8 +137,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
-    t_stim = 1525*ms
-    t_lims = [1025*ms, 1950*ms] # ms
+    t_stim = 1615*ms
+    t_lims = [0*ms, 3000*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -178,6 +179,9 @@ if __name__ == "__main__":
     N_scaling = 100
     N_gap = 1
 
+    # Firing rates plotting gap
+    rates_gap = 115 # Hz
+
     # Power spectra parameters
     fs2 = int(1/winstep_FR)
     window_size = 100*ms
@@ -217,7 +221,7 @@ if __name__ == "__main__":
                         wspace=0.05, hspace=0.2, height_ratios=(0.1, 0.4, 0.2, 0.3), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[0,0])
     G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[1,0])
-    G_rates = GridSpecFromSubplotSpec(2, 1, hspace=0.6, subplot_spec=G_outer[2,0])
+    G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[2,0])
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,0])
     G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,1])
 
@@ -301,37 +305,50 @@ if __name__ == "__main__":
 
     # Firing Rates
     # ------------------------
-    print('[>] Firing rates')
-    ax_rate_inh = fig.add_subplot(G_rates[0], sharex=ax0)
-    ax_rate_exc = fig.add_subplot(G_rates[1], sharex=ax0, sharey=ax_rate_inh)
-    axs.append([ax_rate_exc, ax_rate_inh])
+    # ax_rate_inh = fig.add_subplot(G_rates[0], sharex=ax0)
+    # ax_rate_exc = fig.add_subplot(G_rates[1], sharex=ax0, sharey=ax_rate_inh)
+    # axs.append([ax_rate_exc, ax_rate_inh])
+    ax_rates = fig.add_subplot(G_rates[0], sharex=ax0)
+    axs.append([ax_rates])
 
     # Set the title
     # ax_rate_exc.set_title('CA1 Firing Rate')
 
     # Set the x-y limits
-    ax_rate_exc.set_ylim(ylims_rates)
+    # ax_rate_exc.set_ylim(ylims_rates)
+    ax_rates.set_ylim([0, 300])
+
+    # Set the ticks
+    ax_rate_majors = np.arange(0., duration/second, .5) #[0.5, 1.0, 1.5...]
+    # ax_rate_exc.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
+    # ax_rate_exc.xaxis.set_minor_locator(ticker.NullLocator())
+    ax_rates.xaxis.set_major_locator(ticker.NullLocator())
+    ax_rates.xaxis.set_minor_locator(ticker.NullLocator())
 
     # Hide x-y axes
-    ax_rate_exc.xaxis.set_visible(False)
-    ax_rate_exc.yaxis.set_visible(False)
-    ax_rate_inh.xaxis.set_visible(False)
-    ax_rate_inh.yaxis.set_visible(False)
+    # # ax_rate_exc.xaxis.set_visible(False)
+    # ax_rate_exc.yaxis.set_visible(False)
+    # ax_rate_inh.xaxis.set_visible(False)
+    # ax_rate_inh.yaxis.set_visible(False)
+    ax_rates.yaxis.set_visible(False)
 
     # Hide some spines
-    ax_rate_exc.spines['top'].set_visible(False)
-    ax_rate_exc.spines['bottom'].set_visible(False)
-    ax_rate_exc.spines['left'].set_visible(False)
-    ax_rate_exc.spines['right'].set_visible(False)
-    ax_rate_inh.spines['top'].set_visible(False)
-    ax_rate_inh.spines['bottom'].set_visible(False)
-    ax_rate_inh.spines['left'].set_visible(False)
-    ax_rate_inh.spines['right'].set_visible(False)
+    # ax_rate_exc.spines['top'].set_visible(False)
+    # # ax_rate_exc.spines['bottom'].set_visible(False)
+    # ax_rate_exc.spines['left'].set_visible(False)
+    # ax_rate_exc.spines['right'].set_visible(False)
+    # ax_rate_inh.spines['top'].set_visible(False)
+    # ax_rate_inh.spines['bottom'].set_visible(False)
+    # ax_rate_inh.spines['left'].set_visible(False)
+    # ax_rate_inh.spines['right'].set_visible(False)
+    ax_rates.spines['top'].set_visible(False)
+    ax_rates.spines['bottom'].set_visible(False)
+    ax_rates.spines['left'].set_visible(False)
+    ax_rates.spines['right'].set_visible(False)
 
 
     # Spectrograms
     # ------------------------
-    print('[>] Spectrogams')
     ax_specg_inh = fig.add_subplot(G_specg[0])
     ax_specg_exc = fig.add_subplot(G_specg[1])
     axs.append([ax_specg_exc, ax_specg_inh])
@@ -346,20 +363,29 @@ if __name__ == "__main__":
     ax_specg_exc.set_ylim(ylims_freq)
 
     # Set the ticks
-    specg_freq_majors = [10, 30, 100]
+    specg_freq_majors = [10, 40, 100]
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
-    specg_freq_majors = np.arange(0.5, 5., 0.1) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
+    specg_freq_majors = np.arange(0., duration/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
     ax_specg_exc.xaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.xaxis.set_minor_locator(ticker.NullLocator())
 
-
     # Hide x axis for inh
-    # ax_specg_inh.xaxis.set_visible(False)
+    ax_specg_inh.xaxis.set_visible(False)
 
     # Set xlabel
     ax_specg_exc.set_xlabel('Time [s]')
+
+    # Hide some spines
+    ax_specg_exc.spines['top'].set_visible(False)
+    # ax_specg_exc.spines['bottom'].set_visible(False)
+    # ax_specg_exc.spines['left'].set_visible(False)
+    ax_specg_exc.spines['right'].set_visible(False)
+    ax_specg_inh.spines['top'].set_visible(False)
+    # ax_specg_inh.spines['bottom'].set_visible(False)
+    # ax_specg_inh.spines['left'].set_visible(False)
+    ax_specg_inh.spines['right'].set_visible(False)
 
 
     # Rhythm
@@ -466,15 +492,20 @@ if __name__ == "__main__":
         ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
 
         # Calculate mean firing rates
-        FR_inh_mean = (len(t_inh)/duration)/N_inh
-        FR_exc_mean = (len(t_exc)/duration)/N_exc
+        t_lims_adj = [2000*ms, 3000*ms]
+        duration_adj = t_lims_adj[1] - t_lims_adj[0]
 
-        # ax_curr.text(x=t_lims[1]+50*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
-        # ax_curr.text(x=t_lims[1]+50*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
+        # FR_inh_mean = (len(t_inh)/duration)/N_inh
+        # FR_exc_mean = (len(t_exc)/duration)/N_exc
+        FR_inh_mean = (sum((t_inh>=t_lims_adj[0]) & (t_inh<t_lims_adj[1]))/duration_adj)/N_inh
+        FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
+        # add it as a text
+        ax_curr.text(x=duration+200*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=duration+200*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
 
-    # add a sizebar for the y-axis
-    add_sizebar(axs[0][3], [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 100], 'black', '100pts')
+    # # add a sizebar for the y-axis
+    # add_sizebar(axs[0][3], [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 100], 'black', '100pts')
 
 
     # ==================
@@ -486,69 +517,58 @@ if __name__ == "__main__":
     ax_rhythm.plot(np.arange(0.,duration,dt), rhythm, ls='-', c='k', linewidth=1., rasterized=True, zorder=1)
 
     # vertical lines at x-points
-    pks, _ = sig.find_peaks(rhythm, distance=int(125*ms*fs))
+    pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
+    fval = 1/(np.mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
 
-    for peak in pks:
-        if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
+    # for peak in pks:
+        # if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
             # "X" marks the spot
             # ax_rhythm.plot(peak*dt, rhythm[peak], 'C1x', markersize=12, zorder=10, clip_on=False)
 
             # trace the treasure
-            ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
+            # ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
     ax_rhythm.vlines(x=t_stim, ymin=-15.85, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
 
+    # text frequency label
+    ax_rhythm.text(x=duration+100*ms, y=1.1, s=r"$f_\theta={0:.2f}$Hz".format(fval), ha='left', color='k', clip_on=False)
+
     # add a sizebar for the y-axis
-    add_sizebar(ax_rhythm, [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 0.5], 'black', '0.5nA')
+    add_sizebar(ax_rhythm, [duration+100*ms, duration+100*ms], [0, 0.5], 'black', '0.5nA')
 
 
     # ==================
     # Plot CA1 FRs
     # ==================
-    print('[+] Plotting CA1 firing rates...')
-
-    # bins = duration/dt
-    # FR_exc, bin_edges_exc = np.histogram(t_exc, bins=binnum, range=(0,duration), density=False)
-    # FR_inh, bin_edges_inh = np.histogram(t_inh, bins=binnum, range=(0,duration), density=False)
-
     tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_exc
 
-    ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-
-    # ax_rate_inh.plot(bin_edges_inh[0:-1], FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    # ax_rate_exc.plot(bin_edges_exc[0:-1], FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-    # ax_rate_exc.fill_between(bin_edges[0:-1], (FR_exc/winsize)/N_exc, 0, alpha=0.30, zorder=11)
-    # ax_rate_inh.fill_between(bin_edges[0:-1], (FR_inh/winsize)/N_inh, 0, alpha=0.30, zorder=11)
+    # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
+    # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
+    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
+    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
 
     # add labels
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')
     # ax_rate_exc.set_title('Excitatory', color=c_exc, loc='left')
 
-    # ax_rate_inh.text(x=t_lims[0]-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
-    # ax_rate_exc.text(x=t_lims[0]-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
+    # ax_rate_inh.text(x=-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
+    # ax_rate_exc.text(x=-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
+    ax_rates.text(x=-100*ms, y=ylims_rates[1]-50, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=-100*ms, y=ylims_rates[0]+50, s='Excitatory', ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
-    add_sizebar(ax_rate_exc, [t_lims[1]+20*ms, t_lims[1]+20*ms], [50, 100], 'black', '50Hz')
-
-    # Calculate mean firing rates
-    FR_inh_mean = (len(t_inh)/duration)/N_inh
-    FR_exc_mean = (len(t_exc)/duration)/N_exc
-
-    # ax_rate_inh.text(x=t_lims[1]+50*ms, y=ylims_rates[1]//2, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
-    # ax_rate_exc.text(x=t_lims[1]+50*ms, y=ylims_rates[1]//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
+    # add_sizebar(ax_rate_exc, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
+    add_sizebar(ax_rates, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
 
 
     # ==================
     # Plot the spectrograms
     # ==================
-    print('[+] Plotting CA1 spectrograms...')
-
     fv_inh, tv_inh, pspec_inh = my_specgram(signal=FR_inh_norm,
                                 fs=fs2,
                                 window_width=window_width,
@@ -558,28 +578,6 @@ if __name__ == "__main__":
                                 fs=fs2,
                                 window_width=window_width,
                                 window_overlap=noverlap)
-
-    # fv_inh, tv_inh, pspec_inh, im_exc = ax_specg_inh.specgram(FR_inh_norm,
-    #                                                         NFFT=window_width,
-    #                                                         window=sig.windows.hann(M=window_width, sym=False),
-    #                                                         noverlap=noverlap,
-    #                                                         mode='magnitude',
-    #                                                         scale='dB',
-    #                                                         cmap=newcmp_exc
-    #                                                         # interpolation='none',
-    #                                                         # origin='lower'
-    #                                                         )
-
-    # fv_exc, tv_exc, pspec_exc, im_inh = ax_specg_exc.specgram(FR_exc_norm,
-    #                                                     NFFT=window_width,
-    #                                                     window=sig.windows.hann(M=window_width, sym=False),
-    #                                                     noverlap=noverlap,
-    #                                                     mode='magnitude',
-    #                                                     scale='dB',
-    #                                                     cmap=newcmp_inh
-    #                                                     # interpolation='none',
-    #                                                     # origin='lower'
-    #                                                     )
 
     # avoid division by zero in log transform
     pspec_inh[np.where(pspec_inh<1e-10)] = 1e-10
@@ -601,7 +599,6 @@ if __name__ == "__main__":
     # im_inh = ax_specg_inh.imshow(pspec_inh_dB, cmap=newcmp_inh, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
     # im_exc = ax_specg_exc.imshow(pspec_exc_dB, cmap=newcmp_exc, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
 
-
     # pcm_inh= ax_specg_inh.specgram(FR_exc_norm, NFFT=window_width, detrend='none', Fs=fs2, window=sig.windows.hann(M=window_width, sym=False), noverlap=noverlap, scale_by_freq=False, mode='magnitude', scale='dB', sides='onesided')
 
     # Colorbars
@@ -621,6 +618,35 @@ if __name__ == "__main__":
     # fig.savefig('figures/fig2_A.svg', dpi=200, format='svg')
     # fig.savefig('figures/fig2_A.pdf', dpi=200, format='pdf')
     fig.savefig('figures/fig2_A.png', dpi=200, format='png')
+
+
+    # Also make an animation
+    # ------------------------
+    x_min = 0
+    x_max = int(duration/dt)
+    x_vals = range(x_min, x_max+1) # possible x values for the line
+
+    animation_time = 5*second
+    framerate = 60
+    F = animation_time*framerate
+    t_step = int(x_max/F)
+
+    moving_line = ax_rhythm.axvline(x=[0], ymin=-11., ymax=1., color='red', ls='-', linewidth=1.5, zorder=12, clip_on=False)
+
+    def update_line(i):
+        t_val = x_vals[i*t_step]
+        moving_line.set_xdata([t_val*dt, t_val*dt])
+        # moving_line.set_ydata([-15.85, 1.])
+        return moving_line,
+
+    # create animation using the animate() function
+    print('[+] Making animation...')
+    line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
+
+    print('[+] Saving the video...')
+    # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.mp4', fps=framerate, extra_args=['-vcodec', 'libx264'])
+    # save animation at 30 frames per second
+    line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
     print('[!] Done')
 
     # fig.tight_layout()
