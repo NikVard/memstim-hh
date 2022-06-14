@@ -55,7 +55,7 @@
         "f0": 6.0,
         "sigma": 0.5,
         "kN": 15,
-        "gain_reset": 1.75,
+        "gain_reset": 4.0,
         "gain_rhythm": 1.0,
         "offset": 0.0
     },
@@ -115,9 +115,9 @@
             7.5
         ],
         "sigma": 0.33,
-        "duration": 2.0,
+        "duration": 3.0,
         "dt": 0.0001,
-        "onset": 1.525,
+        "onset": 1.615,
         "I": [
             10.0
         ],
@@ -135,8 +135,8 @@
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "c2eb178f",
-    "timestamp": "Tue May 24 13:15:22 2022",
-    "git_branch": "master",
-    "git_hash": "c2eb178fc51275263054cc89f94024d096763e63"
+    "git_short_hash": "3b492100",
+    "timestamp": "Tue Jun 14 12:28:11 2022",
+    "git_branch": "Animate",
+    "git_hash": "3b49210059bdec99c263e93463cd14b504fa17b0"
 }
