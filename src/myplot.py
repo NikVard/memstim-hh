@@ -904,7 +904,6 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
         # excitatory
         ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
 
-
         # Calculate mean firing rates
         t_lims_adj = [2000*ms, 3000*ms]
         duration_adj = t_lims_adj[1] - t_lims_adj[0]
