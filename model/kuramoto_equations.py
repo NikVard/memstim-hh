@@ -14,7 +14,7 @@ Implementation Notes
 
 # Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - G_in*X*sin(Theta - pi/2 + offset)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - G_in*X*sin(Theta + offset)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
 
     ThetaPreInput : 1
@@ -35,7 +35,7 @@ pop_avg_eqs = '''
     coherence = sqrt(x**2 + y**2) : 1
     phase = arctan(y/x) + int(x<0 and y>0)*pi - int(x<0 and y<0)*pi: 1
     rhythm = coherence * sin(phase) : 1
-    rhythm_pos = coherence * (sin(phase)+1)/2 : 1
+    rhythm_pos = coherence * (cos(phase)+1)/2 : 1
     rhythm_simple = G_out*rhythm : amp
     rhythm_abs = G_out*abs(rhythm) : amp
     rhythm_rect = G_out*rhythm_pos : amp
