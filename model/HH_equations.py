@@ -18,7 +18,7 @@ Implementation Notes
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
 py_CAN_inp_eqs = '''
-    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise: volt
+    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_CAN = ((gCAN) * (size)) * mCAN**2 * (v + 20.*mV) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
             mCANInf = alpha2 / (alpha2 + (0.0002*ms**-1)) : 1
@@ -84,7 +84,7 @@ py_CAN_inp_eqs = '''
 '''
 
 py_CAN_eqs = '''
-    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise: volt
+    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     Vm = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca) / ((1.*ufarad*cm**-2) * (size))*tstep : volt
     I_CAN = ((gCAN) * (size)) * mCAN**2 * (v + 20.*mV) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
@@ -149,7 +149,7 @@ py_CAN_eqs = '''
 
 #Pyramidal non CAN :
 py_eqs = '''
-    dv/dt = ( - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise: volt
+    dv/dt = ( - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     Vm = (- I_M - I_leak - I_K - I_Na - I_Ca) / ((1.*ufarad*cm**-2) * (size)) * tstep : volt
     I_M = ((gM) * (size)) * p * (v - Ek) : amp
         dp/dt = (pInf - p) / pTau : 1
@@ -211,7 +211,7 @@ py_eqs = '''
 """ Inhibitory Neuron Types """
 """ ------------------------------------------------------------------------ """
 inh_inp_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise: volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     Vm = (- I_leak - I_K - I_Na) / ((1*ufarad*cm**-2) * (size))*tstep : volt
     I_leak = ((0.1e-3*siemens*cm**-2) * (size)) * (v - (-65.*mV)) : amp
     I_K = ((9e-3*siemens*cm**-2) * (size)) * (n**4) * (v - (-90.*mV)) : amp
@@ -257,7 +257,7 @@ inh_inp_eqs = '''
 
 
 inh_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise: volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     Vm = (- I_leak - I_K - I_Na) / ((1.*ufarad*cm**-2) * (size))*tstep : volt
     I_leak = ((0.1e-3*siemens*cm**-2) * (size)) * (v - (-65.*mV)) : amp
     I_K = ((9e-3*siemens*cm**-2) * (size)) * (n**4) * (v - (-90.*mV)) : amp

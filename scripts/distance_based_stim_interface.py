@@ -318,8 +318,8 @@ class GUI(tk.Tk):
         stimLabel.grid(row=0, column=0, sticky="", padx=2, pady=5)
         self.stimSlider.grid(row=1, column=0, sticky="", padx=2, pady=5)
 
-        # Rho [Ohm/mm]
-        condLabel = tk.Label(__controlsFrame1, text=r'Medium resistivity ρ [Ω/mm]')
+        # Sigma [S/cm]
+        condLabel = tk.Label(__controlsFrame1, text=r'Medium conductivity $\sigma$ [S/cm]')
         self.condEntry = tk.Entry(__controlsFrame1, width=5, textvariable=self.rho)
 
         condLabel.grid(row=0, column=1, sticky="", padx=2, pady=5)
