@@ -598,7 +598,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     N_gap = 1
 
     # Firing rates plotting gap
-    rates_gap = 115*Hz
+    rates_gap = 125*Hz
 
     # Power spectra parameters
     fs2 = int(1/winstep_FR)
@@ -609,22 +609,22 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
 
     # Set theta rhythm limits
     # xlims_rhythm = [t for t in t_lims]
-    xlims_rhythm = [0*ms, duration]
+    xlims_rhythm = [0*ms, duration+50*ms]
     ylims_rhythm = [-0.1, 1.1]
 
     # Set raster limits
     # xlims_raster = [t for t in t_lims]
-    xlims_raster = [0*ms, duration]
+    xlims_raster = [0*ms, duration+50*ms]
     ylims_raster = [0, 2*N_scaling]
 
     # Set firing rate limits
     # xlims_rates = [t for t in t_lims]
-    xlims_rates = [0*ms, duration]
+    xlims_rates = [0*ms, duration+50*ms]
     ylims_rates = [-1, 200]
 
     # Set spectrogram limits
     # xlims_freq = [t for t in t_lims]
-    xlims_freq = [0*ms, duration]
+    xlims_freq = [0*ms, duration+50*ms]
     ylims_freq = [0, 120] # Hz
     zlims_freq = [0.1, 10] # cmap limits [vmin vmax]
 
@@ -633,12 +633,15 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
 
     # Use gridspecs
     G_outer = GridSpec(4, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
-                        wspace=0.05, hspace=0.2, height_ratios=(0.1, 0.4, 0.2, 0.3), width_ratios=(0.99,0.01))
+                        wspace=0.05, hspace=0.2, height_ratios=(0.15, 0.4, 0.2, 0.25), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[0,0])
     G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[1,0])
     G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[2,0])
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,0])
     G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,1])
+
+    G_outer.tight_layout(fig)
+
 
     # Organize axes
     #------------------------
@@ -664,7 +667,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     ax0.set_ylim(ylims_raster)
 
     # Set the ticks
-    ax_raster_majors = np.arange(0., duration/second, .5) #[0.5, 1.0, 1.5...]
+    ax_raster_majors = np.arange(0., (duration+50*ms)/second, .5) #[0.5, 1.0, 1.5...]
     ax3.xaxis.set_major_locator(ticker.FixedLocator(ax_raster_majors))
     ax3.xaxis.set_minor_locator(ticker.NullLocator())
 
@@ -733,7 +736,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     ax_rates.set_ylim([0, 300])
 
     # Set the ticks
-    ax_rate_majors = np.arange(0., duration/second, .5) #[0.5, 1.0, 1.5...]
+    ax_rate_majors = np.arange(0., (duration+50*ms)/second, .5) #[0.5, 1.0, 1.5...]
     # ax_rate_exc.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
     # ax_rate_exc.xaxis.set_minor_locator(ticker.NullLocator())
     ax_rates.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
@@ -781,7 +784,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
-    specg_freq_majors = np.arange(0., duration/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
+    specg_freq_majors = np.arange(0., (duration+50*ms)/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
     ax_specg_exc.xaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.xaxis.set_minor_locator(ticker.NullLocator())
 
@@ -815,7 +818,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     ax_rhythm.set_ylim(ylims_rhythm)
 
     # Set x-y ticks
-    ax_rhythm_majors = np.arange(0., duration/second, .5)
+    ax_rhythm_majors = np.arange(0., (duration+50*ms)/second, .5)
     ax_rhythm.xaxis.set_major_locator(ticker.FixedLocator(ax_rhythm_majors))
     ax_rhythm.xaxis.set_minor_locator(ticker.NullLocator())
 
@@ -924,7 +927,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
     rhythm = order_param_mon.rhythm_rect[0]/nA
 
     # Data plotting
-    ax_rhythm.plot(order_param_mon.t/second, rhythm, ls='-', c='k', linewidth=1., rasterized=True, zorder=1, label='Theta Rhythm (Ensemble)')
+    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=True, zorder=1)
     # ax_rhythm.set_ylabel('Theta rhythm (corr)')
     # ax_rhythm.legend()
     # ax_rhythm.grid()
@@ -962,8 +965,8 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, s
 
     # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
     # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
+    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=True)
+    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=True)
 
     # add labels
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')

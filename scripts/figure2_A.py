@@ -137,8 +137,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
-    t_stim = 1615*ms
-    t_lims = [0*ms, 3000*ms] # ms
+    t_stim = 1715*ms
+    t_lims = [0*ms, 3050*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     N_gap = 1
 
     # Firing rates plotting gap
-    rates_gap = 115 # Hz
+    rates_gap = 150 # Hz
 
     # Power spectra parameters
     fs2 = int(1/winstep_FR)
@@ -218,12 +218,15 @@ if __name__ == "__main__":
 
     # Use gridspecs
     G_outer = GridSpec(4, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
-                        wspace=0.05, hspace=0.2, height_ratios=(0.1, 0.4, 0.2, 0.3), width_ratios=(0.99,0.01))
+                        wspace=0.05, hspace=0.2, height_ratios=(0.15, 0.4, 0.2, 0.25), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[0,0])
     G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[1,0])
     G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[2,0])
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,0])
     G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,1])
+
+    G_outer.tight_layout(fig)
+
 
     # Organize axes
     #------------------------
@@ -316,10 +319,10 @@ if __name__ == "__main__":
 
     # Set the x-y limits
     # ax_rate_exc.set_ylim(ylims_rates)
-    ax_rates.set_ylim([0, 300])
+    ax_rates.set_ylim([0, 400])
 
     # Set the ticks
-    ax_rate_majors = np.arange(0., duration/second, .5) #[0.5, 1.0, 1.5...]
+    ax_rate_majors = np.arange(0., t_lims[1]/second, .5) #[0.5, 1.0, 1.5...]
     # ax_rate_exc.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
     # ax_rate_exc.xaxis.set_minor_locator(ticker.NullLocator())
     ax_rates.xaxis.set_major_locator(ticker.NullLocator())
@@ -367,7 +370,7 @@ if __name__ == "__main__":
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
-    specg_freq_majors = np.arange(0., duration/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
+    specg_freq_majors = np.arange(0., t_lims[1]/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
     ax_specg_exc.xaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.xaxis.set_minor_locator(ticker.NullLocator())
 
@@ -514,7 +517,7 @@ if __name__ == "__main__":
     print('[+] Plotting rhythm...')
 
     rhythm = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/order_param_mon_rhythm.txt')
-    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm, ls='-', c='k', linewidth=1., rasterized=True, zorder=1)
+    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=True, zorder=1)
 
     # vertical lines at x-points
     pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
@@ -529,13 +532,13 @@ if __name__ == "__main__":
             # ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
-    ax_rhythm.vlines(x=t_stim, ymin=-15.85, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
+    ax_rhythm.vlines(x=t_stim, ymin=-10.2, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
 
     # text frequency label
     ax_rhythm.text(x=duration+100*ms, y=1.1, s=r"$f_\theta={0:.2f}$Hz".format(fval), ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
-    add_sizebar(ax_rhythm, [duration+100*ms, duration+100*ms], [0, 0.5], 'black', '0.5nA')
+    # add_sizebar(ax_rhythm, [duration+100*ms, duration+100*ms], [0, 0.5], 'black', '0.5nA')
 
 
     # ==================
@@ -549,8 +552,8 @@ if __name__ == "__main__":
 
     # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
     # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
+    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=True)
+    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=True)
 
     # add labels
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')
@@ -640,13 +643,13 @@ if __name__ == "__main__":
         return moving_line,
 
     # create animation using the animate() function
-    print('[+] Making animation...')
-    line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
+    # print('[+] Making animation...')
+    # line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
 
-    print('[+] Saving the video...')
+    # print('[+] Saving the video...')
     # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.mp4', fps=framerate, extra_args=['-vcodec', 'libx264'])
     # save animation at 30 frames per second
-    line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
+    # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
     print('[!] Done')
 
     # fig.tight_layout()
