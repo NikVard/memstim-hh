@@ -17,6 +17,7 @@ from model.globals import *
 from model.HH_equations import *
 from model.kuramoto_equations import *
 from model.filter_equations import *
+from model.Vm_avg_eqs import *
 from model import settings
 from model import setup
 
@@ -448,12 +449,12 @@ for ngroup in G_flat:
 
         # calculate the distance
         # ngroup.r = 1 # 1 means on
-        # d1 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_rho, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
+        # d1 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_sigma, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
 
         # alternatively, calculate distances like so:
-        neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
-        elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
-        d0 = dst.cdist(elec_pos, neuron_pos)
+        # neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
+        # elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
+        # d0 = dst.cdist(elec_pos, neuron_pos)
         # ngroup.r = 100/(4*pi*d0)
         ngroup.r = 1
     else:
@@ -554,17 +555,17 @@ rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] 
 rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('[\u2022]\tRate monitors: done')
 
-state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
-print('[\u2022]\tNoise monitors: done')
+# state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
+# print('[\u2022]\tNoise monitors: done')
 
-state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
-state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
-state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
-state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
-print('[\u2022]\tVm monitors: done')
+# state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
+# state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+# state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
+# state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+# print('[\u2022]\tVm monitors: done')
 
-state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
-print('[\u2022]\tEC I_CAN monitor: done')
+# state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
+# print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -671,7 +672,7 @@ print('[\u2022]\tGroup: done')
 
 # Connections
 # -------------------------------------------------------------#
-print('\n[32] Connecting groups...')
+print('\n[32] Connecting oscillators and filters...')
 print('-'*32)
 
 # CA1 spikes-to-rates synapses
@@ -712,12 +713,12 @@ G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
 print('\n[33] Kuramoto and Filter Monitors...')
 print('-'*32)
 
-kuramoto_mon = StateMonitor(G_K, ['Theta'], record=True)
-order_param_mon = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
+state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True)
+state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
 print('[\u2022]\tState monitor [Theta]: done')
 
 # spikes2rates monitor (vout)
-s2r_mon = StateMonitor(G_S2R, ['drive'], record=True)
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
 print('[\u2022]\tState monitor [drive]: done')
 
 '''
@@ -736,6 +737,41 @@ mon_tmp_I = StateMonitor(G_CA1_I, [], record=True)
 
 
 
+# Add groups for monitoring the avg Vm
+# -------------------------------------------------------------#
+# Average Vm per group per area
+print('\n[34] Vm average groups...')
+print('-'*32)
+
+G_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
+syn_Vm_avg_all = [[[] for pops in range(2)] for areas in range(4)]
+state_mon_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
+
+for area_idx in range(4):
+    print('[+] {0}:'.format(areas[area_idx]))
+
+    G_E = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_E'.format(areas[area_idx]))
+    G_I = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_I'.format(areas[area_idx]))
+    G_Vm_avg[area_idx][0].append(G_E)
+    G_Vm_avg[area_idx][1].append(G_I)
+    print('[\u2022]\tNeuronGroups: done')
+
+    Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_synapses)
+    Syn_E.connect()
+    Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_synapses)
+    Syn_I.connect()
+    syn_Vm_avg_all[area_idx][0].append(Syn_E)
+    syn_Vm_avg_all[area_idx][1].append(Syn_I)
+    print('[\u2022]\tSynapses: done')
+
+    SM_Vm_avg_E = StateMonitor(G_E, ['sum_v'], record=True, name='Vm_avg_mon_{0}_E'.format(areas[area_idx]))
+    SM_Vm_avg_I = StateMonitor(G_I, ['sum_v'], record=True, name='Vm_avg_mon_{0}_I'.format(areas[area_idx]))
+    state_mon_Vm_avg[area_idx][0].append(SM_Vm_avg_E)
+    state_mon_Vm_avg[area_idx][1].append(SM_Vm_avg_I)
+    print('[\u2022]\tMonitors: done')
+
+
+
 # Create the Network
 # -------------------------------------------------------------#
 print('\n[40] Connecting the network...')
@@ -743,9 +779,11 @@ print('-'*32)
 
 net = Network()
 net.add(G_all) # add groups
+net.add(G_Vm_avg)
 net.add(G_K)
 net.add(G_pop_avg)
 net.add(G_S2R)
+net.add(G_Vm_avg)
 print('[\u2022]\tNetwork groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
@@ -756,9 +794,14 @@ for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
     if syn_inter_curr != 0:
         net.add(syn_inter_curr)
 
+for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
+    if syn_Vm_avg !=0:
+        net.add(syn_Vm_avg)
+
 net.add(syn_kuramoto) # kuramoto intra-synapses
 net.add(syn_avg) # kuramoto population average (order parameter) synapses
 net.add(syn_CA1_2_rates) # CA1 spikes2rates
+net.add(syn_Vm_avg_all) # Vm synapses
 print('[\u2022]\tNetwork connections: done')
 
 net.add(state_mon_E_all) # monitors
@@ -767,17 +810,18 @@ net.add(spike_mon_E_all)
 net.add(spike_mon_I_all)
 net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
-net.add(kuramoto_mon)
-net.add(order_param_mon)
-net.add(s2r_mon)
-net.add(state_mon_noise_all)
+net.add(state_mon_kuramoto)
+net.add(state_mon_order_param)
+net.add(state_mon_s2r)
+# net.add(state_mon_noise_all)
+net.add(state_mon_Vm_avg)
 print('[\u2022]\tNetwork monitors: done')
 
-net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
-print('[\u2022]\tVm monitors: done')
-
-net.add(state_mon_EC_ICAN)
-print('[\u2022]\tEC I_CAN monitor: done')
+# net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
+# print('[\u2022]\tVm monitors: done')
+#
+# net.add(state_mon_EC_ICAN)
+# print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -829,32 +873,32 @@ raster_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 '''
 # calculate order parameter in the end
-samples = len(kuramoto_mon.Theta[0])
+samples = len(state_mon_kuramoto.Theta[0])
 r = np.zeros(samples, dtype='complex')
 for s in range(samples):
-    r[s] = 1/N_Kur * sum(exp(1j*kuramoto_mon.Theta[:,s])) # order parameter r(t)
+    r[s] = 1/N_Kur * sum(exp(1j*state_mon_kuramoto.Theta[:,s])) # order parameter r(t)
 '''
 
 # kuramoto order parameter plots
-kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(order_param_mon)
+kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(state_mon_order_param)
 plot_watermark(kuramoto_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Plot more stuff
-fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # newer version
-fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], s2r_mon, order_param_mon, tv, xstim)
+fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Fig2 version
-fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, s2r_mon, order_param_mon, tv, xstim)
+fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv, xstim)
 plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig2.savefig(os.path.join(dirs['figures'], fig_name))
@@ -879,19 +923,25 @@ print('\n[62] Saving results...')
 
 # Kuramoto monitors
 print("[+] Saving Kuramoto monitor data")
-# np.savetxt(os.path.join(dirs['datas'], 'kuramoto_mon_Theta.txt'), kuramoto_mon.Theta.T, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), order_param_mon.phase.T, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), order_param_mon.rhythm_rect.T/nA, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), order_param_mon.coherence.T, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm_rect.T/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
 
 # CA1 firing rate
 print("[+] Saving CA1 firing rate")
 np.savetxt(os.path.join(dirs['data'], 'rate_mon_E_CA1.txt'), rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), s2r_mon.drive_.T, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), state_mon_s2r.drive_.T, fmt='%.8f')
 
 # External stimulus
 print("[+] Saving external stimulus")
 np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
+
+# Vm avgs
+print("[+] Saving Vm avgs")
+for StM in make_flat(state_mon_Vm_avg):
+    print("[\u2022]\tStateMon: ", StM.name)
+    np.savetxt(os.path.join(dirs['data'], StM.name+'.txt'), StM.sum_v, fmt='%.8f')
 
 
 
