@@ -80,9 +80,9 @@ try:
     data = parameters.load(filename)
     print('Using "{0}"'.format(filename))
 except Exception as e:
-    print(e)
-    print('Using "default.json"')
+    print(bcolors.RED + '[!]' + e + ' Using "default.json"' + bcolors.ENDC)
     data = parameters._data
+    filename = os.path.join('configs', 'default.json')
 parameters.dump(data)
 print()
 # locals().update(data)
@@ -898,7 +898,7 @@ print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Fig2 version
-fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv, xstim)
+fig2, axs2, fig_name = plot_fig2_all(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv, xstim)
 plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig2.savefig(os.path.join(dirs['figures'], fig_name))
