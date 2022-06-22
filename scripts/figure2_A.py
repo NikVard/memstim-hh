@@ -5,6 +5,7 @@ import os
 import json
 
 import numpy as np
+import matplotlib as mplb
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy import signal as sig
@@ -17,6 +18,10 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 fontprops = fm.FontProperties(size=12, family='monospace')
 
+
+# ILLUSTRATOR STUFF
+mplb.rcParams['pdf.fonttype'] = 42
+mplb.rcParams['ps.fonttype'] = 42
 
 def my_FR(spikes: np.ndarray,
             duration: int,
@@ -788,9 +793,9 @@ if __name__ == "__main__":
 
     # save the figure
     print('[+] Saving the figures...')
-    # fig.savefig('figures/fig2_A.svg', dpi=200, format='svg')
-    fig.savefig('figures/' + args.figure_name + '.pdf', dpi=200, format='pdf')
-    fig.savefig('figures/' + args.figure_name + '.png', dpi=200, format='png')
+    # fig.savefig('figures/' + args.figure_name + '.svg', transparent=True, dpi=200, format='svg')
+    fig.savefig('figures/' + args.figure_name + '.pdf', transparent=True, dpi=200, format='pdf')
+    fig.savefig('figures/' + args.figure_name + '.png', transparent=True, dpi=200, format='png')
 
 
     # Also make an animation
