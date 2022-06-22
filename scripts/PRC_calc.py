@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 import os
 import numpy as np
+import matplotlib as mplb
 import matplotlib.pyplot as plt
+
+# ILLUSTRATOR STUFF
+mplb.rcParams['pdf.fonttype'] = 42
+mplb.rcParams['ps.fonttype'] = 42
 
 dt = .1 # [msec]
 delay = 25 # [samples]
@@ -17,17 +22,18 @@ xvals_all = []
 # phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
 
 # Closed-loop results directory | no stim
-dir_cl = os.path.join('..', 'results', 'None', 'CL')
+dir_cl = os.path.join('results_PRC', 'None')
+dir_cl = os.path.join(dir_cl, os.listdir(dir_cl)[0])
 phase_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_phase.txt'))
 
 # Results directories
 dirs = []
-dirs.append(os.path.join('..', 'results', '5_nA'))
-dirs.append(os.path.join('..', 'results', '6_nA'))
-dirs.append(os.path.join('..', 'results', '7_nA'))
-dirs.append(os.path.join('..', 'results', '8_nA'))
-dirs.append(os.path.join('..', 'results', '9_nA'))
-dirs.append(os.path.join('..', 'results', '10_nA'))
+dirs.append(os.path.join('results_PRC', '2_nA'))
+dirs.append(os.path.join('results_PRC', '5_nA'))
+# dirs.append(os.path.join('..', 'results_PRC', '7_nA'))
+# dirs.append(os.path.join('..', 'results_PRC', '8_nA'))
+# dirs.append(os.path.join('..', 'results_PRC', '9_nA'))
+dirs.append(os.path.join('results_PRC', '10_nA'))
 
 # set default phase to compare against
 phase_def = phase_cl
@@ -53,8 +59,11 @@ for root in dirs:
             idx = int(t_on/dt)
 
             # load the data for the current simulation
-            frate = np.loadtxt(os.path.join(root, item, 'data', 's2r_mon_drive.txt'))
-            phase = np.loadtxt(os.path.join(root, item, 'data', 'order_param_mon_phase.txt'))
+            curr_path = os.path.join(root, item)
+            curr_path = os.path.join(curr_path, os.listdir(curr_path)[0])
+
+            frate = np.loadtxt(os.path.join(curr_path, 'data', 's2r_mon_drive.txt'))
+            phase = np.loadtxt(os.path.join(curr_path, 'data', 'order_param_mon_phase.txt'))
 
             # calculate d_phi
             # d_phi = np.mean(phase[idx-10:idx]) - np.mean(phase[idx:idx+10])
@@ -84,12 +93,12 @@ fig.set_figheight(12)
 fig.set_figwidth(16)
 
 # 5-15nA
-axs.plot(xvals_all[0], PRC_all[0], c='C0', ls='--', marker='^', markersize=11, label=r'5nA', zorder=10)
-axs.plot(xvals_all[1], PRC_all[1], c='C1', ls='--', marker='X', markersize=11, label=r'10nA', zorder=11)
-axs.plot(xvals_all[2], PRC_all[2], c='C2', ls='--', marker='D', markersize=11, label=r'12nA', zorder=12)
-axs.plot(xvals_all[3], PRC_all[3], c='C3', ls='--', marker='H', markersize=11, label=r'15nA', zorder=13)
-axs.plot(xvals_all[4], PRC_all[4], c='C4', ls='--', marker='*', markersize=11, label=r'20nA', zorder=14)
-axs.plot(xvals_all[5], PRC_all[5], c='C5', ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
+axs.plot(xvals_all[0], PRC_all[0], c='C0', ls='--', marker='^', markersize=11, label=r'2nA', zorder=10)
+axs.plot(xvals_all[1], PRC_all[1], c='C1', ls='--', marker='X', markersize=11, label=r'5nA', zorder=11)
+axs.plot(xvals_all[2], PRC_all[2], c='C2', ls='--', marker='D', markersize=11, label=r'10nA', zorder=12)
+# axs.plot(xvals_all[3], PRC_all[3], c='C3', ls='--', marker='H', markersize=11, label=r'15nA', zorder=13)
+# axs.plot(xvals_all[4], PRC_all[4], c='C4', ls='--', marker='*', markersize=11, label=r'20nA', zorder=14)
+# axs.plot(xvals_all[5], PRC_all[5], c='C5', ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
 
 # Horizontal line @ y=0
 axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
@@ -133,6 +142,12 @@ axs.xaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
 axs.xaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
 axs.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
 
+axs.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
+axs.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
+axs.yaxis.set_major_formatter(plt.FuncFormatter(format_func))
+
+axs.set_ylim([-1., 1.])
+
 # Labels
 axs.set_xlabel('Stim. Phase [rad]')
 axs.set_ylabel(r'PRC - $\Delta\phi$ [rad]')
@@ -146,6 +161,9 @@ axs.grid()
 # Legend
 axs.legend()
 
+# Save the figures
+fig.savefig('figures/PRC.pdf', transparent=True, dpi=200, format='pdf')
+fig.savefig('figures/PRC.png', transparent=True, dpi=200, format='png')
 
 # Show the figure
 plt.show()
