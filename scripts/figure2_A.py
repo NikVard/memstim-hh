@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import json
 
 import numpy as np
+import matplotlib as mplb
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy import signal as sig
@@ -16,6 +18,10 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 fontprops = fm.FontProperties(size=12, family='monospace')
 
+
+# ILLUSTRATOR STUFF
+mplb.rcParams['pdf.fonttype'] = 42
+mplb.rcParams['ps.fonttype'] = 42
 
 def my_FR(spikes: np.ndarray,
             duration: int,
@@ -103,16 +109,26 @@ def my_specgram(signal: np.ndarray,
                                 nperseg=window_width,
                                 noverlap=window_overlap,
                                 return_onesided=True,
-                                # scaling='spectrum',
+                                scaling='spectrum',
                                 mode='magnitude')
 
-    return f, t, (1.0 / window_width) * (Sxx ** 2)
+    return f, t, Sxx
+    # ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
 
 
 def add_sizebar(ax, xlocs, ylocs, bcolor, text):
     """ Add a sizebar to the provided axis """
-    ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=True, clip_on=False)
-    ax.text(x=xlocs[0]+10*ms, y=ylocs[0], s=text, va='center', ha='left', clip_on=False)
+    ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)
+
+    # add the text
+    if type(text) is list:
+        # bottom text
+        ax.text(x=xlocs[0]+40*ms, y=ylocs[0], s=text[0], fontsize=fsize, va='center', ha='left', clip_on=False)
+
+        # top text
+        ax.text(x=xlocs[0]+40*ms, y=ylocs[1], s=text[1], fontsize=fsize, va='center', ha='left', clip_on=False)
+    else:
+        ax.text(x=xlocs[0]+40*ms, y=ylocs[0], s=text, fontsize=fsize, va='center', ha='left', clip_on=False)
 
 
 def myround(x, base=100):
@@ -123,9 +139,36 @@ def myround(x, base=100):
 
 # main program
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Generate Figure_1A from paper')
+
+    parser.add_argument('-ra', '--rasters-all',
+                        action='store_true',
+                        default=False,
+                        help='Set to plot all rasters instead of only for CA1.')
+
+    parser.add_argument('-op', '--order-parameter',
+                        action='store_true',
+                        default=False,
+                        help='Set to plot order parameter instead of phase.')
+
+    parser.add_argument('--animate',
+                        action='store_true',
+                        default=False,
+                        help='Set to generate an animation at the end.')
+
+    parser.add_argument('-fn', '--figure-name',
+                        type=str,
+                        default='fig2_A',
+                        help='Name of the output figure [without extension].')
+
+    args = parser.parse_args()
+
 
     """ Parameters initialization """
     print('[+] Setting up parameters...')
+
     # Timing
     second = 1
     ms = 1e-3
@@ -137,8 +180,8 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
-    t_stim = 1715*ms
-    t_lims = [0*ms, 3050*ms] # ms
+    t_stim = 1615*ms
+    t_lims = [1000*ms, 3000*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -164,7 +207,7 @@ if __name__ == "__main__":
     cvals_inh[:,0] = reds[...]
     cvals_inh[:,1] = greens[...]
     cvals_inh[:,2] = blues[...]
-    newcmp_inh = ListedColormap(cvals_inh)
+    newcmap_inh = ListedColormap(cvals_inh)
 
     # excitatory cmap
     reds = np.linspace(1., c_exc_RGB[0], N)
@@ -173,19 +216,18 @@ if __name__ == "__main__":
     cvals_exc[:,0] = reds[...]
     cvals_exc[:,1] = greens[...]
     cvals_exc[:,2] = blues[...]
-    newcmp_exc = ListedColormap(cvals_exc)
+    newcmap_exc = ListedColormap(cvals_exc)
 
     # Raster downsampling
     N_scaling = 100
-    N_gap = 1
+    N_gap = 5
 
     # Firing rates plotting gap
-    rates_gap = 150 # Hz
+    rates_gap = 2 # Hz
 
     # Power spectra parameters
-    fs2 = int(1/winstep_FR)
     window_size = 100*ms
-    window_width = int(fs2*window_size) # samples
+    window_width = int(fs_FR*window_size) # samples
     overlap = 0.99 # percentage
     noverlap = int(overlap*window_width)
 
@@ -196,34 +238,44 @@ if __name__ == "__main__":
 
     # Set raster limits
     xlims_raster = [t for t in t_lims]
-    ylims_raster = [0, 2*N_scaling]
+    ylims_raster = [0, 2*N_scaling+N_gap]
 
     # Set firing rate limits
     xlims_rates = [t for t in t_lims]
-    ylims_rates = [-1, 250]
+    ylims_rates = [-1, 500]
 
     # Set spectrogram limits
     xlims_freq = [t for t in t_lims]
     # xlims_freq[0] += window_size/2
     # xlims_freq[1] += window_size/2
-    ylims_freq = [0, 150] # Hz
+    ylims_freq = [10, 150] # Hz
     zlims_freq = [0.1, 10] # cmap limits [vmin vmax]
 
+    # Text parameters
+    fsize = 10
 
     """ Plot Figure 2 of the paper """
     print('[+] Generating the figure...')
 
+    # Figure sizes
+    fig_width = 8
+    fig_height = 8
+
     # Make a figure
-    fig = plt.figure(figsize=(8,8))
+    fig = plt.figure(figsize=(fig_width,fig_height))
 
     # Use gridspecs
-    G_outer = GridSpec(4, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
-                        wspace=0.05, hspace=0.2, height_ratios=(0.15, 0.4, 0.2, 0.25), width_ratios=(0.99,0.01))
-    G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[0,0])
-    G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[1,0])
-    G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[2,0])
-    G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,0])
-    G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,1])
+    G_outer = GridSpec(5, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
+                        wspace=0.05, hspace=0.3, height_ratios=(0.1, 0.1, 0.35, 0.2, 0.25), width_ratios=(0.99,0.01))
+    G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[0,0])
+    G_order_param = G_phase = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[1,0])
+    if args.rasters_all:
+        G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[2,0])
+    else:
+        G_rasters = GridSpecFromSubplotSpec(1, 1, hspace=0.4, subplot_spec=G_outer[2,0])
+    G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[3,0])
+    G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[4,0])
+    G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.3, subplot_spec=G_outer[4,1])
 
     G_outer.tight_layout(fig)
 
@@ -235,75 +287,107 @@ if __name__ == "__main__":
     # Rasters
     # ------------------------
     print('[>] Rasters')
-    ax0 = fig.add_subplot(G_rasters[0]) # EC E/I rasters
-    ax1 = fig.add_subplot(G_rasters[1], sharex=ax0, sharey=ax0) # DG E/I rasters
-    ax2 = fig.add_subplot(G_rasters[2], sharex=ax0, sharey=ax0) # CA3 E/I rasters
-    ax3 = fig.add_subplot(G_rasters[3], sharex=ax0, sharey=ax0) # CA1 E/I rasters
-    axs.append([ax0, ax1, ax2, ax3])
 
-    # set label as area name
-    # ax0.set_title('Rasters')
-    # ax0.set_title(area_labels[0])
-    # ax1.set_title(area_labels[1])
-    # ax2.set_title(area_labels[2])
-    # ax3.set_title(area_labels[3])
-    ax0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=25.)
-    ax1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=25.)
-    ax2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=25.)
-    ax3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=25.)
+    if args.rasters_all:
+        ax0 = fig.add_subplot(G_rasters[0]) # EC E/I rasters
+        ax1 = fig.add_subplot(G_rasters[1], sharex=ax0, sharey=ax0) # DG E/I rasters
+        ax2 = fig.add_subplot(G_rasters[2], sharex=ax0, sharey=ax0) # CA3 E/I rasters
+        ax3 = fig.add_subplot(G_rasters[3], sharex=ax0, sharey=ax0) # CA1 E/I rasters
+        axs.append([ax0, ax1, ax2, ax3])
 
-    # set limits
-    # ax0.set_xlim([575, (duration-450*ms)/winsize])
-    ax0.set_xlim(xlims_raster)
-    ax0.set_ylim(ylims_raster)
+        # set label as area name
+        ax0.set_title('Rasters')
+        # ax0.set_title(area_labels[0])
+        # ax1.set_title(area_labels[1])
+        # ax2.set_title(area_labels[2])
+        # ax3.set_title(area_labels[3])
+        ax0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=25.)
+        ax1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=25.)
+        ax2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=25.)
+        ax3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=25.)
 
-    # Hide x-y axes
-    ax0.xaxis.set_visible(False)
-    # ax0.yaxis.set_visible(False)
-    ax1.xaxis.set_visible(False)
-    # ax1.yaxis.set_visible(False)
-    ax2.xaxis.set_visible(False)
-    # ax2.yaxis.set_visible(False)
-    ax3.xaxis.set_visible(False)
-    # ax3.yaxis.set_visible(False)
+        # set limits
+        # ax0.set_xlim([575, (duration-450*ms)/winsize])
+        ax0.set_xlim(xlims_raster)
+        ax0.set_ylim(ylims_raster)
 
-    # Hide some spines
-    ax0.spines['top'].set_visible(False)
-    ax0.spines['bottom'].set_visible(False)
-    ax0.spines['left'].set_visible(False)
-    ax0.spines['right'].set_visible(False)
-    ax1.spines['top'].set_visible(False)
-    ax1.spines['bottom'].set_visible(False)
-    ax1.spines['left'].set_visible(False)
-    ax1.spines['right'].set_visible(False)
-    ax2.spines['top'].set_visible(False)
-    ax2.spines['bottom'].set_visible(False)
-    ax2.spines['left'].set_visible(False)
-    ax2.spines['right'].set_visible(False)
-    ax3.spines['top'].set_visible(False)
-    ax3.spines['bottom'].set_visible(False)
-    ax3.spines['left'].set_visible(False)
-    ax3.spines['right'].set_visible(False)
+        # Hide x-y axes
+        ax0.xaxis.set_visible(False)
+        # ax0.yaxis.set_visible(False)
+        ax1.xaxis.set_visible(False)
+        # ax1.yaxis.set_visible(False)
+        ax2.xaxis.set_visible(False)
+        # ax2.yaxis.set_visible(False)
+        ax3.xaxis.set_visible(False)
+        # ax3.yaxis.set_visible(False)
 
-    # Fix the ytick locators
-    ax0.yaxis.set_major_locator(ticker.NullLocator())
-    ax0.yaxis.set_minor_locator(ticker.NullLocator())
-    ax1.yaxis.set_major_locator(ticker.NullLocator())
-    ax1.yaxis.set_minor_locator(ticker.NullLocator())
-    ax2.yaxis.set_major_locator(ticker.NullLocator())
-    ax2.yaxis.set_minor_locator(ticker.NullLocator())
-    ax3.yaxis.set_major_locator(ticker.NullLocator())
-    ax3.yaxis.set_minor_locator(ticker.NullLocator())
+        # Hide some spines
+        ax0.spines['top'].set_visible(False)
+        ax0.spines['bottom'].set_visible(False)
+        ax0.spines['left'].set_visible(False)
+        ax0.spines['right'].set_visible(False)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['bottom'].set_visible(False)
+        ax1.spines['left'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['bottom'].set_visible(False)
+        ax2.spines['left'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        ax3.spines['top'].set_visible(False)
+        ax3.spines['bottom'].set_visible(False)
+        ax3.spines['left'].set_visible(False)
+        ax3.spines['right'].set_visible(False)
 
-    # Remove tick labels
-    # ax0.xaxis.set_ticklabels([])
-    ax0.yaxis.set_ticklabels([])
-    # ax1.xaxis.set_ticklabels([])
-    ax1.yaxis.set_ticklabels([])
-    # ax2.xaxis.set_ticklabels([])
-    ax2.yaxis.set_ticklabels([])
-    # ax3.xaxis.set_ticklabels([])
-    ax3.yaxis.set_ticklabels([])
+        # Fix the ytick locators
+        ax0.yaxis.set_major_locator(ticker.NullLocator())
+        ax0.yaxis.set_minor_locator(ticker.NullLocator())
+        ax1.yaxis.set_major_locator(ticker.NullLocator())
+        ax1.yaxis.set_minor_locator(ticker.NullLocator())
+        ax2.yaxis.set_major_locator(ticker.NullLocator())
+        ax2.yaxis.set_minor_locator(ticker.NullLocator())
+        ax3.yaxis.set_major_locator(ticker.NullLocator())
+        ax3.yaxis.set_minor_locator(ticker.NullLocator())
+
+        # Remove tick labels
+        # ax0.xaxis.set_ticklabels([])
+        ax0.yaxis.set_ticklabels([])
+        # ax1.xaxis.set_ticklabels([])
+        ax1.yaxis.set_ticklabels([])
+        # ax2.xaxis.set_ticklabels([])
+        ax2.yaxis.set_ticklabels([])
+        # ax3.xaxis.set_ticklabels([])
+        ax3.yaxis.set_ticklabels([])
+
+    else:
+        ax0 = fig.add_subplot(G_rasters[0]) # CA1 E/I rasters
+        axs.append([ax0])
+
+        # set label as area name
+        ax0.set_title('Rasters')
+        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=25.)
+
+        # set limits
+        ax0.set_xlim(xlims_raster)
+        ax0.set_ylim(ylims_raster)
+
+        # Hide x-y axes
+        ax0.xaxis.set_visible(False)
+        # ax0.yaxis.set_visible(False)
+
+        # Hide some spines
+        ax0.spines['top'].set_visible(False)
+        ax0.spines['bottom'].set_visible(False)
+        ax0.spines['left'].set_visible(False)
+        ax0.spines['right'].set_visible(False)
+
+        # Fix the ytick locators
+        ax0.yaxis.set_major_locator(ticker.NullLocator())
+        ax0.yaxis.set_minor_locator(ticker.NullLocator())
+
+        # Remove tick labels
+        # ax0.xaxis.set_ticklabels([])
+        ax0.yaxis.set_ticklabels([])
 
 
     # Firing Rates
@@ -315,11 +399,11 @@ if __name__ == "__main__":
     axs.append([ax_rates])
 
     # Set the title
-    # ax_rate_exc.set_title('CA1 Firing Rate')
+    ax_rates.set_title('CA1 Firing Rates')
 
     # Set the x-y limits
-    # ax_rate_exc.set_ylim(ylims_rates)
-    ax_rates.set_ylim([0, 400])
+    ax_rates.set_ylim(ylims_rates)
+    # ax_rates.set_ylim([0, 400])
 
     # Set the ticks
     ax_rate_majors = np.arange(0., t_lims[1]/second, .5) #[0.5, 1.0, 1.5...]
@@ -352,12 +436,13 @@ if __name__ == "__main__":
 
     # Spectrograms
     # ------------------------
+    print('[>] Spectrograms')
     ax_specg_inh = fig.add_subplot(G_specg[0])
     ax_specg_exc = fig.add_subplot(G_specg[1])
     axs.append([ax_specg_exc, ax_specg_inh])
 
     # Set the title
-    # ax_specg_exc.set_title('Spectrogram')
+    ax_specg_inh.set_title('Spectrograms')
 
     # Set the x-y limits
     ax_specg_inh.set_xlim(xlims_freq)
@@ -366,7 +451,7 @@ if __name__ == "__main__":
     ax_specg_exc.set_ylim(ylims_freq)
 
     # Set the ticks
-    specg_freq_majors = [10, 40, 100]
+    specg_freq_majors = [10, 40, 120]
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
@@ -391,6 +476,49 @@ if __name__ == "__main__":
     ax_specg_inh.spines['right'].set_visible(False)
 
 
+    # Order Parameter / Phase
+    # ------------------------
+    if args.order_parameter:
+        print('[>] Order Parameter')
+        ax_common = fig.add_subplot(G_order_param[0])
+        xlims_common = xlims_rhythm
+        ylims_common = ylims_rhythm
+
+        # Set the title
+        ax_common.set_title('Order Parameter')
+
+    else:
+        print('[>] Phase')
+        ax_common = fig.add_subplot(G_phase[0])
+        xlims_common = xlims_rhythm
+        # ylims_common = [-np.pi-0.1, np.pi+0.1]
+        ylims_common = [-0.1, 2*np.pi+0.1]
+
+        # Set the title
+        ax_common.set_title('Phase')
+
+    axs.append(ax_common)
+
+    # Set the x-y limits
+    ax_common.set_xlim(xlims_common)
+    ax_common.set_ylim(ylims_common)
+
+    # Set x-y ticks
+    # ax_common_majors = np.arange(0., (duration+50*ms)/second, .5)
+    # ax_common.xaxis.set_major_locator(ticker.FixedLocator(ax_common_majors))
+    # ax_common.xaxis.set_minor_locator(ticker.NullLocator())
+
+    # Hide x-y axes
+    ax_common.xaxis.set_visible(False)
+    ax_common.yaxis.set_visible(False)
+
+    # Hide some spines
+    ax_common.spines['top'].set_visible(False)
+    ax_common.spines['bottom'].set_visible(False)
+    ax_common.spines['left'].set_visible(False)
+    ax_common.spines['right'].set_visible(False)
+
+
     # Rhythm
     # ------------------------
     print('[>] Input rhythm')
@@ -398,8 +526,7 @@ if __name__ == "__main__":
     axs.append(ax_rhythm)
 
     # Set the title
-    # ax_rhythm.set_title('Theta Input')
-
+    ax_rhythm.set_title('Theta Rhythm')
 
     # Set the x-y limits
     ax_rhythm.set_xlim(xlims_rhythm)
@@ -431,6 +558,9 @@ if __name__ == "__main__":
     print('[+] Actually plotting stuff...')
 
     for area_idx in range(len(areas)):
+        if not args.rasters_all and area_idx<3:
+            continue;
+
         # load t-i arrays for this area
         print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
         i_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0]))
@@ -475,6 +605,7 @@ if __name__ == "__main__":
             cnt += 1
 
         # cnt = 0
+        cnt += N_gap
         for jj in inh_mixed:
             idx_tmp = np.where(i_inh_sub == jj)
             i_inh_sub[idx_tmp] = cnt
@@ -484,15 +615,18 @@ if __name__ == "__main__":
         print('[>] Plotting spikes...')
 
         # select axis
-        ax_curr = axs[0][area_idx]
+        if args.rasters_all:
+            ax_curr = axs[0][area_idx]
+        else:
+            ax_curr = axs[0][0]
 
         # inhibitory
-        # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=False)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='o', c=c_inh, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
+        # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='o', c=c_inh, edgecolors=None, alpha=.25, zorder=1, rasterized=True)
 
         # excitatory
-        # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=False)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
+        # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=True)
 
         # Calculate mean firing rates
         t_lims_adj = [2000*ms, 3000*ms]
@@ -504,8 +638,12 @@ if __name__ == "__main__":
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=duration+200*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=duration+200*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+200*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+200*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+
+        # Shade the areas
+        ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
+        ax_curr.fill_betweenx(y=[N_scaling+N_gap, ylims_raster[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_inh, alpha=0.1)
 
     # # add a sizebar for the y-axis
     # add_sizebar(axs[0][3], [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 100], 'black', '100pts')
@@ -517,7 +655,7 @@ if __name__ == "__main__":
     print('[+] Plotting rhythm...')
 
     rhythm = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/order_param_mon_rhythm.txt')
-    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=True, zorder=1)
+    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
     pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
@@ -532,13 +670,44 @@ if __name__ == "__main__":
             # ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
-    ax_rhythm.vlines(x=t_stim, ymin=-10.2, ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
+    ax_rhythm.vlines(x=t_stim, ymin=-17.2, ymax=1., color='gray', ls='-', linewidth=1.5, zorder=11, rasterized=False, clip_on=False)
+
+    # ax_rhythm.scatter(x=t_stim, y=1.2, s=15, marker='o', edgecolors='red', facecolors='red')
+    #
+    # ax_rhythm.annotate('Stimulation Pulse', xy=(t_stim, 1.2), xytext=(t_stim, 2.5), arrowprops=dict(facecolor='red', shrink=0.05))
 
     # text frequency label
-    ax_rhythm.text(x=duration+100*ms, y=1.1, s=r"$f_\theta={0:.2f}$Hz".format(fval), ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=10*ms, y=1.2, s=r"$f_\theta={0:.2f}$Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
-    # add_sizebar(ax_rhythm, [duration+100*ms, duration+100*ms], [0, 0.5], 'black', '0.5nA')
+    add_sizebar(ax_rhythm, [xlims_rhythm[1]+100*ms, xlims_rhythm[1]+100*ms], [0, 1.], 'black', ['0', '1'])
+
+
+    # ==================
+    # Plot the phase / order parameter
+    # ==================
+    if args.order_parameter:
+        print('[+] Plotting order parameter...')
+        data = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/order_param_mon_coherence.txt')
+
+        # asymptote
+        ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
+    else:
+        print('[+] Plotting phase...')
+        data = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/order_param_mon_phase.txt')
+        # data = (data + np.pi) % (2 * np.pi)
+        data += (1.*(data<0)*2*np.pi)
+
+    # Data plotting
+    ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
+
+    if args.order_parameter:
+        # add a sizebar for the y-axis
+        add_sizebar(ax_common, [xlims_common[1]+100*ms, xlims_common[1]+100*ms], [0, 1.], 'black', '1.pt')
+    else:
+        # add a sizebar for the y-axis
+        add_sizebar(ax_common, [xlims_common[1]+100*ms, xlims_common[1]+100*ms], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
+
 
 
     # ==================
@@ -547,13 +716,20 @@ if __name__ == "__main__":
     tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
+    # SAVE THE NON-NORMALIZED FR SIGNALS
+    np.savetxt(os.path.join('test_FRs', 'FR_inh.txt'), FR_inh, fmt='%.8f')
+    np.savetxt(os.path.join('test_FRs', 'tv_inh.txt'), tv_inh_FR, fmt='%.8f')
+    np.savetxt(os.path.join('test_FRs', 'FR_exc.txt'), FR_exc, fmt='%.8f')
+    np.savetxt(os.path.join('test_FRs', 'tv_exc.txt'), tv_exc_FR, fmt='%.8f')
+
+    # Normalize the FRs
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_exc
 
-    # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=True)
-    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=True)
+    # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=False)
+    # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=False)
+    ax_rates.plot(tv_inh_FR, FR_inh_norm+FR_exc_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
+    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
 
     # add labels
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')
@@ -561,24 +737,24 @@ if __name__ == "__main__":
 
     # ax_rate_inh.text(x=-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
     # ax_rate_exc.text(x=-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
-    ax_rates.text(x=-100*ms, y=ylims_rates[1]-50, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
-    ax_rates.text(x=-100*ms, y=ylims_rates[0]+50, s='Excitatory', ha='center', color=c_exc, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[1]+10, s='Inhibitory cells', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]-75, s='Excitatory cells', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
     # add_sizebar(ax_rate_exc, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
-    add_sizebar(ax_rates, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
+    add_sizebar(ax_rates, [xlims_rates[1]+100*ms, xlims_rates[1]+100*ms], [0, 100], 'black', '100Hz')
 
 
     # ==================
     # Plot the spectrograms
     # ==================
     fv_inh, tv_inh, pspec_inh = my_specgram(signal=FR_inh_norm,
-                                fs=fs2,
+                                fs=fs_FR,
                                 window_width=window_width,
                                 window_overlap=noverlap)
 
     fv_exc, tv_exc, pspec_exc = my_specgram(signal=FR_exc_norm,
-                                fs=fs2,
+                                fs=fs_FR,
                                 window_width=window_width,
                                 window_overlap=noverlap)
 
@@ -587,30 +763,53 @@ if __name__ == "__main__":
     pspec_exc[np.where(pspec_exc<1e-10)] = 1e-10
 
     # get log power
-    # pspec_inh_dB = 10*np.log10(pspec_inh)
-    # pspec_exc_dB = 10*np.log10(pspec_exc)
+    pspec_inh_dB = 10*np.log10(pspec_inh)
+    pspec_exc_dB = 10*np.log10(pspec_exc)
 
     # find min/max for plotting
     # maxval_dB = max(pspec_inh_dB.max(), pspec_exc_dB.max())
-    # minval_dB = min(pspec_inh_dB.min(), pspec_exc_dB.min())
+    # minval_dB = min(pspec_inh_dB.min(), pspec_exc_dB.min()).
+    # norm = colors.Normalize(vmin=minval_dB, vmax=maxval_dB)
 
-    # pcm_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmp_inh, shading='gouraud')
-    # pcm_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmp_exc, shading='gouraud')
+    # pcm_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmap_inh, shading='gouraud')
+    # pcm_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmap_exc, shading='gouraud')
 
-    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh, cmap=newcmp_inh, shading='auto')
-    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc, cmap=newcmp_exc, shading='auto')
-    # im_inh = ax_specg_inh.imshow(pspec_inh_dB, cmap=newcmp_inh, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
-    # im_exc = ax_specg_exc.imshow(pspec_exc_dB, cmap=newcmp_exc, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
+    # set vmin/vmax for plotting
+    # norm_inh = colors.Normalize(vmin=-1, vmax=1)
+    # norm_exc = colors.Normalize(vmin=-1, vmax=1)
 
-    # pcm_inh= ax_specg_inh.specgram(FR_exc_norm, NFFT=window_width, detrend='none', Fs=fs2, window=sig.windows.hann(M=window_width, sym=False), noverlap=noverlap, scale_by_freq=False, mode='magnitude', scale='dB', sides='onesided')
+    # norm_inh = colors.LogNorm(vmin=pspec_inh.min(), vmax=pspec_inh.max())
+    # norm_exc = colors.LogNorm(vmin=pspec_exc.min(), vmax=pspec_exc.max())
+    norm_inh = colors.Normalize(vmin=1e-12, vmax=.5)
+    norm_exc = colors.Normalize(vmin=1e-12, vmax=.5)
+    # norm_com = colors.Normalize(vmin=1e-12, vmax=.5)
+
+    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh/pspec_inh.max(), cmap=newcmap_inh, norm=norm_inh, shading='auto')
+    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc/pspec_exc.max(), cmap=newcmap_exc, norm=norm_exc, shading='auto')
+
+    # im_inh = ax_specg_inh.imshow(pspec_inh_dB, cmap=newcmap_inh, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
+    # im_exc = ax_specg_exc.imshow(pspec_exc_dB, cmap=newcmap_exc, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
+
+    # pcm_inh= ax_specg_inh.specgram(FR_exc_norm, NFFT=window_width, detrend='none', Fs=fs_FR, window=sig.windows.hann(M=window_width, sym=False), noverlap=noverlap, scale_by_freq=False, mode='magnitude', scale='dB', sides='onesided')
 
     # Colorbars
     # fig.colorbar(pcm_exc, ax=ax_specg_exc)
     # fig.colorbar(pcm_inh, ax=ax_specg_inh)
-    # cbar_inh_ax = fig.add_subplot(G_specg_cbars[0])
-    # cbar_exc_ax = fig.add_subplot(G_specg_cbars[1])
-    # fig.colorbar(im_inh, cax=cbar_inh_ax, aspect=1)
-    # fig.colorbar(im_exc, cax=cbar_exc_ax, aspect=1)
+    cbar_inh_ax = fig.add_subplot(G_specg_cbars[0])
+    cbar_exc_ax = fig.add_subplot(G_specg_cbars[1])
+
+    cbi = fig.colorbar(im_inh, cax=cbar_inh_ax, aspect=1, ticks=[.5])
+    cbe = fig.colorbar(im_exc, cax=cbar_exc_ax, aspect=1, ticks=[.5])
+
+    cbi.outline.set_color('black')
+    cbi.outline.set_linewidth(0.5)
+    cbi.solids.set_rasterized(True)
+    cbe.outline.set_color('black')
+    cbe.outline.set_linewidth(0.5)
+    cbe.solids.set_rasterized(True)
+
+    # cbe.dividers.set_color('none')
+    # cbe.dividers.set_linewidth(5)
 
     # sizebars
     # ax_specg_exc.plot([550*ms, 600*ms, None, 550*ms, 550*ms], [-60, -60, None, 0, 0], ls='-', c='r', linewidth=1., rasterized=True, clip_on=False)
@@ -618,38 +817,40 @@ if __name__ == "__main__":
 
     # save the figure
     print('[+] Saving the figures...')
-    # fig.savefig('figures/fig2_A.svg', dpi=200, format='svg')
-    # fig.savefig('figures/fig2_A.pdf', dpi=200, format='pdf')
-    fig.savefig('figures/fig2_A.png', dpi=200, format='png')
+    # fig.savefig('figures/' + args.figure_name + '.svg', transparent=True, dpi=200, format='svg')
+    fig.savefig('figures/' + args.figure_name + '.pdf', transparent=True, dpi=600, format='pdf', bbox_inches='tight')
+    fig.savefig('figures/' + args.figure_name + '.png', transparent=True, dpi=600, format='png', bbox_inches='tight')
 
 
     # Also make an animation
     # ------------------------
-    x_min = 0
-    x_max = int(duration/dt)
-    x_vals = range(x_min, x_max+1) # possible x values for the line
+    if args.animate:
+        x_min = 0
+        x_max = int(duration/dt)
+        x_vals = range(x_min, x_max+1) # possible x values for the line
 
-    animation_time = 5*second
-    framerate = 60
-    F = animation_time*framerate
-    t_step = int(x_max/F)
+        animation_time = 5*second
+        framerate = 60
+        F = animation_time*framerate
+        t_step = int(x_max/F)
 
-    moving_line = ax_rhythm.axvline(x=[0], ymin=-11., ymax=1., color='red', ls='-', linewidth=1.5, zorder=12, clip_on=False)
+        moving_line = ax_rhythm.axvline(x=[0], ymin=-11., ymax=1., color='red', ls='-', linewidth=1.5, zorder=12, clip_on=False)
 
-    def update_line(i):
-        t_val = x_vals[i*t_step]
-        moving_line.set_xdata([t_val*dt, t_val*dt])
-        # moving_line.set_ydata([-15.85, 1.])
-        return moving_line,
+        def update_line(i):
+            t_val = x_vals[i*t_step]
+            moving_line.set_xdata([t_val*dt, t_val*dt])
+            # moving_line.set_ydata([-15.85, 1.])
+            return moving_line,
 
-    # create animation using the animate() function
-    # print('[+] Making animation...')
-    # line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
+        # create animation using the animate() function
+        print('[+] Making animation...')
+        line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
 
-    # print('[+] Saving the video...')
-    # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.mp4', fps=framerate, extra_args=['-vcodec', 'libx264'])
-    # save animation at 30 frames per second
-    # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
+        print('[+] Saving the video...')
+        line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.mp4', fps=framerate, extra_args=['-vcodec', 'libx264'])
+        # save animation at 30 frames per second
+        # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
+
     print('[!] Done')
 
     # fig.tight_layout()
