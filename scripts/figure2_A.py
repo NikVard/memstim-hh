@@ -181,7 +181,7 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
     t_stim = 1615*ms
-    t_lims = [1000*ms, 2910*ms] # ms
+    t_lims = [1000*ms, 3010*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -219,8 +219,8 @@ if __name__ == "__main__":
     newcmap_exc = ListedColormap(cvals_exc)
 
     # Raster downsampling
-    N_scaling = 100
-    N_gap = 5
+    N_scaling = 200
+    N_gap = 10
 
     # Firing rates plotting gap
     rates_gap = 2 # Hz
@@ -258,7 +258,7 @@ if __name__ == "__main__":
     print('[+] Generating the figure...')
 
     # Figure sizes
-    fig_width = 8
+    fig_width = 7.16
     fig_height = 8
 
     # Make a figure
@@ -492,7 +492,7 @@ if __name__ == "__main__":
         ax_common = fig.add_subplot(G_phase[0])
         xlims_common = xlims_rhythm
         # ylims_common = [-np.pi-0.1, np.pi+0.1]
-        ylims_common = [-0.1, 2*np.pi+0.2]
+        ylims_common = [-0.1, 2*np.pi+0.1]
 
         # Set the title
         ax_common.set_title('Phase')
@@ -568,7 +568,9 @@ if __name__ == "__main__":
         i_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1]))
         t_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1]))
 
+        i_exc = i_exc.astype(int)
         t_exc = t_exc/1000
+        i_inh = i_inh.astype(int)
         t_inh = t_inh/1000
 
         # sort based on index number (lower to higher)
@@ -584,10 +586,10 @@ if __name__ == "__main__":
         N_inh = N_tot[area_idx][1]
 
         # select some neurons randomly, subscaling
-        # exc_mixed = np.random.permutation(np.arange(N_exc))
-        # inh_mixed = np.random.permutation(np.arange(N_inh))
-        exc_mixed = np.arange(0, N_exc, int(N_exc/N_scaling))
-        inh_mixed = np.arange(0, N_inh, int(N_inh/N_scaling))
+        # exc_mixed = np.random.permutation(np.arange(N_exc))[:N_scaling]
+        # inh_mixed = np.random.permutation(np.arange(N_inh))[:N_scaling]
+        exc_mixed = np.arange(0, N_exc+1, int(N_exc/N_scaling))
+        inh_mixed = np.arange(0, N_inh+1, int(N_inh/N_scaling))
 
         idx_exc = np.in1d(i_exc, exc_mixed)
         idx_inh = np.in1d(i_inh, inh_mixed)
@@ -599,17 +601,23 @@ if __name__ == "__main__":
 
         # assign new neuron count numbers
         cnt = 0
+        i_exc_sub_new = np.copy(i_exc_sub)
         for ii in exc_mixed:
             idx_tmp = np.where(i_exc_sub == ii)
-            i_exc_sub[idx_tmp] = cnt
+            # print('changing ', ii, 'to ', cnt)
+            i_exc_sub_new[idx_tmp] = cnt
             cnt += 1
+        i_exc_sub = i_exc_sub_new
 
         # cnt = 0
         cnt += N_gap
-        for jj in inh_mixed:
-            idx_tmp = np.where(i_inh_sub == jj)
-            i_inh_sub[idx_tmp] = cnt
+        i_inh_sub_new = np.copy(i_inh_sub)
+        for ii in inh_mixed:
+            idx_tmp = np.where(i_inh_sub == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_inh_sub_new[idx_tmp] = cnt
             cnt += 1
+        i_inh_sub = i_inh_sub_new
 
         # plot spikes
         print('[>] Plotting spikes...')
@@ -622,11 +630,11 @@ if __name__ == "__main__":
 
         # inhibitory
         # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='o', c=c_inh, edgecolors=None, alpha=.25, zorder=1, rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='|', c=c_inh, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
 
         # excitatory
         # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='|', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
 
         # Calculate mean firing rates
         t_lims_adj = [2000*ms, 3000*ms]
@@ -638,8 +646,8 @@ if __name__ == "__main__":
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=xlims_rates[1]+200*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=xlims_rates[1]+200*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+150*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+150*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
         # Shade the areas
         ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
@@ -677,7 +685,7 @@ if __name__ == "__main__":
     # ax_rhythm.annotate('Stimulation Pulse', xy=(t_stim, 1.2), xytext=(t_stim, 2.5), arrowprops=dict(facecolor='red', shrink=0.05))
 
     # text frequency label
-    ax_rhythm.text(x=10*ms, y=1.2, s=r"$f_\theta={0:.2f}$Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
     add_sizebar(ax_rhythm, [xlims_rhythm[1]+100*ms, xlims_rhythm[1]+100*ms], [0, 1.], 'black', ['0', '1'])
@@ -698,14 +706,6 @@ if __name__ == "__main__":
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 
-        phase_pks, _ = sig.find_peaks(data, distance=int(80*ms*fs))
-
-        # for pk in phase_pks:
-        #     ax_common.scatter(x=pk/fs, y=2*np.pi+0.3, s=25, marker='.', color='k')
-        #     ax_common.set_ylim([-0.1, 2*np.pi+0.4])
-
-
-
     # Data plotting
     ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
@@ -715,6 +715,10 @@ if __name__ == "__main__":
     else:
         # add a sizebar for the y-axis
         add_sizebar(ax_common, [xlims_common[1]+100*ms, xlims_common[1]+100*ms], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
+
+
+    # text with stimulation phase [deg/rad]
+    ax_rhythm.text(x=t_stim+10*ms, y=1.2, s=r"$\phi={0:.2f} \degree$".format(data[int(t_stim*fs)]*180./np.pi), fontsize=fsize, ha='left', color='k', clip_on=False)
 
 
 
@@ -826,8 +830,10 @@ if __name__ == "__main__":
     # save the figure
     print('[+] Saving the figures...')
     # fig.savefig('figures/' + args.figure_name + '.svg', transparent=True, dpi=200, format='svg')
-    fig.savefig('figures/' + args.figure_name + '.pdf', transparent=True, dpi=600, format='pdf', bbox_inches='tight')
+    # fig.savefig('figures/' + args.figure_name + '.eps', transparent=True, dpi=600, format='eps', bbox_inches='tight')
     fig.savefig('figures/' + args.figure_name + '.png', transparent=True, dpi=600, format='png', bbox_inches='tight')
+    fig.savefig('figures/' + args.figure_name + '.pdf', transparent=True, dpi=600, format='pdf', bbox_inches='tight')
+    # fig.savefig('figures/' + args.figure_name + '.pdf')
 
 
     # Also make an animation
