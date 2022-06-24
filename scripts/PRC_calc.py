@@ -18,6 +18,9 @@ tv = np.linspace(0,250,2501)
 PRC_all = []
 xvals_all = []
 
+# Plot tuning
+ms = 11 # markersize
+
 # Open-loop results directory| no stim
 # dir_cl = os.path.join('..', 'results', 'None', 'OL')
 # phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
@@ -97,20 +100,27 @@ for root in dirs:
 # Plotting
 # ------------------------------------------------------------------------------
 fig, axs = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
-fig.set_figheight(12)
-fig.set_figwidth(16)
+fig.set_figheight(8)
+fig.set_figwidth(8)
 
-# 5-15nA
-axs.plot(xvals_all[0], PRC_all[0], c='C0', ls='--', marker='^', markersize=11, label=r'2nA', zorder=10)
-axs.plot(xvals_all[1], PRC_all[1], c='C1', ls='--', marker='X', markersize=11, label=r'4nA', zorder=11)
-axs.plot(xvals_all[2], PRC_all[2], c='C2', ls='--', marker='D', markersize=11, label=r'10nA', zorder=12)
-axs.plot(xvals_all[3], PRC_all[3], c='C3', ls='--', marker='H', markersize=11, label=r'20nA', zorder=13)
-axs.plot(xvals_all[4], PRC_all[4], c='C4', ls='--', marker='*', markersize=11, label=r'40nA', zorder=14)
-# axs.plot(xvals_all[5], PRC_all[5], c='C5', ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
+# Twin axes, shares x-axis
+axs2 = axs.twinx()
+
+# Colormaps
+n = 5
+colors = plt.cm.hot(np.linspace(0,0.5,n))
+
+# 1-50nA
+axs.plot(xvals_all[0], PRC_all[0], c=colors[0], ls='-', linewidth=0.5, marker='^', markersize=ms, label=r'2nA', zorder=10)
+axs.plot(xvals_all[1], PRC_all[1], c=colors[1], ls='-', linewidth=0.5, marker='X', markersize=ms, label=r'4nA', zorder=11)
+axs.plot(xvals_all[2], PRC_all[2], c=colors[2], ls='-', linewidth=0.5, marker='D', markersize=ms, label=r'10nA', zorder=12)
+axs.plot(xvals_all[3], PRC_all[3], c=colors[3], ls='-', linewidth=0.5, marker='H', markersize=ms, label=r'20nA', zorder=13)
+axs.plot(xvals_all[4], PRC_all[4], c=colors[4], ls='-', linewidth=0.5, marker='*', markersize=ms, label=r'40nA', zorder=14)
+# axs.plot(xvals_all[5], PRC_all[5], c=colors[5], ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
 
 # Plot the theoretical PRC in the background
-phase_vec = np.linspace(-np.pi, np.pi,512)
-axs.plot(phase_vec, -np.sin(phase_vec), c='k', zorder=0, label=r'Theoretical')
+# phase_vec = np.linspace(-np.pi, np.pi,512)
+# axs.plot(phase_vec, -np.sin(phase_vec), c='k', zorder=0, label=r'Theoretical')
 
 # find the time indices for the peri-stim phase cycle
 tmin = np.array(t_stim_arr).min()
@@ -126,8 +136,7 @@ rhythm_cut = rhythm_cl[tmin_idx:tmax_idx]
 idxs = np.argsort(phase_cut)
 
 # Plot the actual theta rhythm w.r.t. phase
-axs.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='r', zorder=0, label=r'Rhythm')
-
+axs2.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='r', zorder=0, label=r'Rhythm')
 
 # Horizontal line @ y=0
 axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
@@ -139,7 +148,7 @@ axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zor
 axs.fill_between(x=[-4,4], y1=[4., 4.], color='green', alpha=0.1)
 axs.fill_between(x=[-4,4], y1=[-4., -4.], color='red', alpha=0.1)
 
-# Add text
+# Add text boxes
 boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
 axs.text(x=-3.3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
 axs.text(x=-3.3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
@@ -192,6 +201,9 @@ axs.legend()
 # Save the figures
 fig.savefig('figures/PRC.pdf', transparent=True, dpi=200, format='pdf')
 fig.savefig('figures/PRC.png', transparent=True, dpi=200, format='png')
+
+# Set tight layout
+fig.tight_layout()
 
 # Show the figure
 plt.show()
