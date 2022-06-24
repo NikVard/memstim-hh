@@ -10,6 +10,7 @@ mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
 
 dt = .1 # [msec]
+fs = 10e3
 delay = 25 # [samples]
 
 # make a time vector (200 ms, one period)
@@ -22,21 +23,27 @@ xvals_all = []
 # phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
 
 # Closed-loop results directory | no stim
-dir_cl = os.path.join('results_PRC', 'None')
+dir_cl = os.path.join('results_PRC_new', 'None')
 dir_cl = os.path.join(dir_cl, os.listdir(dir_cl)[0])
 phase_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_phase.txt'))
 
+# Load the CL rhythm
+rhythm_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_rhythm.txt'))
+
 # Results directories
 dirs = []
-dirs.append(os.path.join('results_PRC', '2_nA'))
-dirs.append(os.path.join('results_PRC', '5_nA'))
-# dirs.append(os.path.join('..', 'results_PRC', '7_nA'))
-# dirs.append(os.path.join('..', 'results_PRC', '8_nA'))
-# dirs.append(os.path.join('..', 'results_PRC', '9_nA'))
-dirs.append(os.path.join('results_PRC', '10_nA'))
+dirs.append(os.path.join('results_PRC_new', '2_nA'))
+dirs.append(os.path.join('results_PRC_new', '4_nA'))
+dirs.append(os.path.join('results_PRC_new', '10_nA'))
+dirs.append(os.path.join('results_PRC_new', '20_nA'))
+dirs.append(os.path.join('results_PRC_new', '40_nA'))
+# dirs.append(os.path.join('results_PRC_new', '10_nA'))
 
 # set default phase to compare against
 phase_def = phase_cl
+
+# stimulation points for rhythm plotting later
+t_stim_arr = []
 
 # iterate over stimulation amplitudes
 for root in dirs:
@@ -54,6 +61,7 @@ for root in dirs:
             tmp = item.split("_")
             t_on = float(tmp[1])
             print(t_on)
+            t_stim_arr.append(t_on)
 
             # find index of phase reset (based on stim_on)
             idx = int(t_on/dt)
@@ -94,11 +102,32 @@ fig.set_figwidth(16)
 
 # 5-15nA
 axs.plot(xvals_all[0], PRC_all[0], c='C0', ls='--', marker='^', markersize=11, label=r'2nA', zorder=10)
-axs.plot(xvals_all[1], PRC_all[1], c='C1', ls='--', marker='X', markersize=11, label=r'5nA', zorder=11)
+axs.plot(xvals_all[1], PRC_all[1], c='C1', ls='--', marker='X', markersize=11, label=r'4nA', zorder=11)
 axs.plot(xvals_all[2], PRC_all[2], c='C2', ls='--', marker='D', markersize=11, label=r'10nA', zorder=12)
-# axs.plot(xvals_all[3], PRC_all[3], c='C3', ls='--', marker='H', markersize=11, label=r'15nA', zorder=13)
-# axs.plot(xvals_all[4], PRC_all[4], c='C4', ls='--', marker='*', markersize=11, label=r'20nA', zorder=14)
+axs.plot(xvals_all[3], PRC_all[3], c='C3', ls='--', marker='H', markersize=11, label=r'20nA', zorder=13)
+axs.plot(xvals_all[4], PRC_all[4], c='C4', ls='--', marker='*', markersize=11, label=r'40nA', zorder=14)
 # axs.plot(xvals_all[5], PRC_all[5], c='C5', ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
+
+# Plot the theoretical PRC in the background
+phase_vec = np.linspace(-np.pi, np.pi,512)
+axs.plot(phase_vec, -np.sin(phase_vec), c='k', zorder=0, label=r'Theoretical')
+
+# find the time indices for the peri-stim phase cycle
+tmin = np.array(t_stim_arr).min()
+tmax = np.array(t_stim_arr).max()
+tmin_idx = int(tmin/1000*fs)
+tmax_idx = int(tmax/1000*fs)
+
+# phase / rhythm
+phase_cut = phase_cl[tmin_idx:tmax_idx]
+rhythm_cut = rhythm_cl[tmin_idx:tmax_idx]
+
+# Get sorting indices
+idxs = np.argsort(phase_cut)
+
+# Plot the actual theta rhythm w.r.t. phase
+axs.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='r', zorder=0, label=r'Rhythm')
+
 
 # Horizontal line @ y=0
 axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
@@ -118,6 +147,7 @@ axs.text(x=-3.3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
 # Limits
 axs.set_xlim([-3.3, 3.3])
 axs.set_ylim([-3.5, 3.5])
+axs.set_ylim([-1.1, 1.1])
 
 # Ticks
 def format_func(x, pos):
@@ -145,8 +175,6 @@ axs.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
 axs.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
 axs.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
 axs.yaxis.set_major_formatter(plt.FuncFormatter(format_func))
-
-axs.set_ylim([-1., 1.])
 
 # Labels
 axs.set_xlabel('Stim. Phase [rad]')
