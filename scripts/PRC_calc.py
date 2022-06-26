@@ -19,7 +19,10 @@ PRC_all = []
 xvals_all = []
 
 # Plot tuning
+fig_height = 8
+fig_width = 10
 ms = 11 # markersize
+lw = 3 # linewidth
 
 # Open-loop results directory| no stim
 # dir_cl = os.path.join('..', 'results', 'None', 'OL')
@@ -36,7 +39,7 @@ rhythm_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_rhythm.txt'
 # Results directories
 dirs = []
 dirs.append(os.path.join('results_PRC_new', '2_nA'))
-dirs.append(os.path.join('results_PRC_new', '4_nA'))
+dirs.append(os.path.join('results_PRC_new', '5_nA'))
 dirs.append(os.path.join('results_PRC_new', '10_nA'))
 dirs.append(os.path.join('results_PRC_new', '20_nA'))
 dirs.append(os.path.join('results_PRC_new', '40_nA'))
@@ -96,26 +99,33 @@ for root in dirs:
     PRC_all.append(PRC)
     xvals_all.append(xvals)
 
+    # break
 
 # Plotting
-# ------------------------------------------------------------------------------
+# ------------------------
 fig, axs = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
-fig.set_figheight(8)
-fig.set_figwidth(8)
+fig.set_figheight(fig_height)
+fig.set_figwidth(fig_width)
 
 # Twin axes, shares x-axis
 axs2 = axs.twinx()
 
+# Set backgroudn color
+cbg = '#f0f8fe'
+cbg = '#fcfbf9'
+axs.set_facecolor(cbg)
+
 # Colormaps
 n = 5
-colors = plt.cm.hot(np.linspace(0,0.5,n))
+# colors = plt.cm.Spectral(np.linspace(0,1,n))
+colors = plt.cm.Spectral([0., 0.3, 0.7, 0.8, 1])
 
 # 1-50nA
-axs.plot(xvals_all[0], PRC_all[0], c=colors[0], ls='-', linewidth=0.5, marker='^', markersize=ms, label=r'2nA', zorder=10)
-axs.plot(xvals_all[1], PRC_all[1], c=colors[1], ls='-', linewidth=0.5, marker='X', markersize=ms, label=r'4nA', zorder=11)
-axs.plot(xvals_all[2], PRC_all[2], c=colors[2], ls='-', linewidth=0.5, marker='D', markersize=ms, label=r'10nA', zorder=12)
-axs.plot(xvals_all[3], PRC_all[3], c=colors[3], ls='-', linewidth=0.5, marker='H', markersize=ms, label=r'20nA', zorder=13)
-axs.plot(xvals_all[4], PRC_all[4], c=colors[4], ls='-', linewidth=0.5, marker='*', markersize=ms, label=r'40nA', zorder=14)
+axs.plot(xvals_all[0], PRC_all[0], c=colors[0], ls='-', linewidth=lw, marker='o', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'2nA', zorder=10)
+axs.plot(xvals_all[1], PRC_all[1], c=colors[1], ls='-', linewidth=lw, marker='X', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'5nA', zorder=11)
+axs.plot(xvals_all[2], PRC_all[2], c=colors[2], ls='-', linewidth=lw, marker='D', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'10nA', zorder=12)
+axs.plot(xvals_all[3], PRC_all[3], c=colors[3], ls='-', linewidth=lw, marker='s', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'20nA', zorder=13)
+axs.plot(xvals_all[4], PRC_all[4], c=colors[4], ls='-', linewidth=lw, marker='^', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'40nA', zorder=14)
 # axs.plot(xvals_all[5], PRC_all[5], c=colors[5], ls='--', marker='o', markersize=11, label=r'25nA', zorder=15)
 
 # Plot the theoretical PRC in the background
@@ -136,7 +146,7 @@ rhythm_cut = rhythm_cl[tmin_idx:tmax_idx]
 idxs = np.argsort(phase_cut)
 
 # Plot the actual theta rhythm w.r.t. phase
-axs2.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='r', zorder=0, label=r'Rhythm')
+axs2.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='k', alpha=0.4, zorder=0, label=r'Rhythm')
 
 # Horizontal line @ y=0
 axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
@@ -145,18 +155,19 @@ axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewid
 axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zorder=2)
 
 # Fill positive (y>0) and negative (y<0)
-axs.fill_between(x=[-4,4], y1=[4., 4.], color='green', alpha=0.1)
-axs.fill_between(x=[-4,4], y1=[-4., -4.], color='red', alpha=0.1)
+# axs.fill_between(x=[-4,4], y1=[4., 4.], color='green', alpha=0.1)
+# axs.fill_between(x=[-4,4], y1=[-4., -4.], color='red', alpha=0.1)
 
 # Add text boxes
-boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
-axs.text(x=-3.3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
-axs.text(x=-3.3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
+# boxp = dict(boxstyle='square', alpha=0.75, facecolor='white', edgecolor='none')
+# axs.text(x=-3.3, y=0.28, color='black', s='ADV', fontsize=11, verticalalignment='top', horizontalalignment='left', bbox=boxp, zorder=20)
+# axs.text(x=-3.3, y=-0.28, color='black', s='DEL', bbox=boxp, zorder=21)
 
 # Limits
 axs.set_xlim([-3.3, 3.3])
 axs.set_ylim([-3.5, 3.5])
 axs.set_ylim([-1.1, 1.1])
+axs2.set_ylim([0,1])
 
 # Ticks
 def format_func(x, pos):
@@ -177,17 +188,48 @@ def format_func(x, pos):
     else:
         return r"${0}\pi$".format(N // 2)
 
+def format_func_minors(x, pos):
+    # find number of multiples of pi/8
+    N = int(np.round(2 * x / np.pi))
+    if N == -8:
+        return r"-$\pi$"
+    elif N == -7:
+        return r"-$7\pi/8$"
+    elif N == -6:
+        return r"-$6\pi/8$"
+    elif N == -5:
+        return r"-$5\pi/8$"
+    elif N == -4:
+        return r"-$4\pi/8$"
+    elif N == -3:
+        return r"-$3\pi/8$"
+    else:
+        return r"${0}\pi$".format(N // 2)
+
 axs.xaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
 axs.xaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
 axs.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
+# axs.xaxis.set_minor_formatter(plt.FuncFormatter(format_func_minors))
 
 axs.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
 axs.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
 axs.yaxis.set_major_formatter(plt.FuncFormatter(format_func))
 
+axs2.yaxis.set_major_locator(plt.MultipleLocator(0.5))
+axs2.yaxis.set_minor_locator(plt.MultipleLocator(0.1))
+# axs2.minorticks_off()
+# axs2.yaxis.set_major_formatter(plt.FuncFormatter(format_func))
+
+
+axs.tick_params(which='major', width=1.0)
+axs.tick_params(which='major', length=10)
+axs.tick_params(which='minor', width=1.0, labelsize=10)
+axs.tick_params(which='minor', length=5, labelsize=10, labelcolor='0.25')
+
 # Labels
 axs.set_xlabel('Stim. Phase [rad]')
 axs.set_ylabel(r'PRC - $\Delta\phi$ [rad]')
+axs2.set_ylabel(r'Amplitude', rotation=270, va="center")
 
 # Title
 axs.set_title("Phase Response Curve (PRC)")
@@ -196,7 +238,12 @@ axs.set_title("Phase Response Curve (PRC)")
 axs.grid()
 
 # Legend
-axs.legend()
+
+# ask matplotlib for the plotted objects and their labels
+lines, labels = axs.get_legend_handles_labels()
+lines2, labels2 = axs2.get_legend_handles_labels()
+axs2.legend(lines + lines2, labels + labels2, loc=0)
+# axs.legend()
 
 # Save the figures
 fig.savefig('figures/PRC.pdf', transparent=True, dpi=200, format='pdf')
