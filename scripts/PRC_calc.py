@@ -118,7 +118,8 @@ axs.set_facecolor(cbg)
 # Colormaps
 n = 5
 # colors = plt.cm.Spectral(np.linspace(0,1,n))
-colors = plt.cm.Spectral([0., 0.3, 0.7, 0.8, 1])
+colors = plt.cm.Spectral([1., 0.8, 0.7, 0.3, 0.])
+# colors = plt.cm.hot(np.linspace(0.2,0.8,n))
 
 # 1-50nA
 axs.plot(xvals_all[0], PRC_all[0], c=colors[0], ls='-', linewidth=lw, marker='o', markersize=ms, markeredgecolor="white", markeredgewidth=2, label=r'2nA', zorder=10)
@@ -167,7 +168,7 @@ axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zor
 axs.set_xlim([-3.3, 3.3])
 axs.set_ylim([-3.5, 3.5])
 axs.set_ylim([-1.1, 1.1])
-axs2.set_ylim([0,1])
+axs2.set_ylim([-0.5,1.5])
 
 # Ticks
 def format_func(x, pos):
