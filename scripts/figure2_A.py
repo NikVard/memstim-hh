@@ -183,7 +183,7 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
     t_stim = 1857.3*ms
-    t_lims = [1000*ms, 2925*ms] # ms
+    t_lims = [1195*ms, 2925*ms] # ms
     # t_lims = [0*ms, 2000*ms] # ms
     interp = 'nearest'
 
@@ -255,6 +255,7 @@ if __name__ == "__main__":
 
     # Text parameters
     fsize = 10
+    sizebar_off = 50*ms # sizebar offset
 
     """ Plot Figure 2 of the paper """
     print('[+] Generating the figure...')
@@ -268,7 +269,7 @@ if __name__ == "__main__":
 
     # Use gridspecs
     G_outer = GridSpec(5, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
-                        wspace=0.05, hspace=0.3, height_ratios=(0.1, 0.1, 0.35, 0.2, 0.25), width_ratios=(0.99,0.01))
+                        wspace=0.05, hspace=0.3, height_ratios=(0.1, 0.1, 0.3, 0.2, 0.3), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[0,0])
     G_order_param = G_phase = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[1,0])
     if args.rasters_all:
@@ -277,7 +278,7 @@ if __name__ == "__main__":
         G_rasters = GridSpecFromSubplotSpec(1, 1, hspace=0.4, subplot_spec=G_outer[2,0])
     G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[3,0])
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[4,0])
-    G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.3, subplot_spec=G_outer[4,1])
+    G_specg_cbars = GridSpecFromSubplotSpec(1, 1, hspace=0.3, subplot_spec=G_outer[4,1])
 
     G_outer.tight_layout(fig)
 
@@ -639,15 +640,15 @@ if __name__ == "__main__":
 
         # inhibitory
         # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=0.75, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
-        ax_curr.set_rasterized(True)
+        # ax_curr.set_rasterized(True)
 
         # excitatory
         # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=0.75, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
-        ax_curr.set_rasterized(True)
+        # ax_curr.set_rasterized(True)
 
         # Calculate mean firing rates
         t_lims_adj = [2000*ms, 3000*ms]
@@ -659,8 +660,8 @@ if __name__ == "__main__":
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=xlims_rates[1]+150*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=xlims_rates[1]+150*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
         # Shade the areas
         ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
@@ -701,7 +702,7 @@ if __name__ == "__main__":
     ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
-    add_sizebar(ax_rhythm, [xlims_rhythm[1]+100*ms, xlims_rhythm[1]+100*ms], [0, 1.], 'black', ['0', '1'])
+    add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'])
 
 
     # ==================
@@ -724,10 +725,10 @@ if __name__ == "__main__":
 
     if args.order_parameter:
         # add a sizebar for the y-axis
-        add_sizebar(ax_common, [xlims_common[1]+100*ms, xlims_common[1]+100*ms], [0, 1.], 'black', '1.pt')
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt')
     else:
         # add a sizebar for the y-axis
-        add_sizebar(ax_common, [xlims_common[1]+100*ms, xlims_common[1]+100*ms], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
 
 
     # text with stimulation phase [deg/rad]
@@ -763,12 +764,13 @@ if __name__ == "__main__":
 
     # ax_rate_inh.text(x=-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
     # ax_rate_exc.text(x=-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
-    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[1]+10, s='Inhibitory cells', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]-75, s='Excitatory cells', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+    # ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[1]-100, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]+150+FR_exc_norm.max()+rates_gap, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]+75, s='Excitatory', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
-    # add_sizebar(ax_rate_exc, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
-    add_sizebar(ax_rates, [xlims_rates[1]+100*ms, xlims_rates[1]+100*ms], [0, 100], 'black', '100Hz')
+    # add_sizebar(ax_rate_exc, [duration+sizebar_off, duration+sizebar_off], [0, 50], 'black', '50Hz')
+    add_sizebar(ax_rates, [xlims_rates[1]+sizebar_off, xlims_rates[1]+sizebar_off], [0, 100], 'black', '100Hz')
 
 
     # ==================
@@ -801,20 +803,32 @@ if __name__ == "__main__":
     # pcm_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmap_exc, shading='gouraud')
 
     # set vmin/vmax for plotting
-    # vmin = 0.
-    # vmax = .2
+    vmin = 1e-12
+    vmax = .5
     # norm_inh = colors.Normalize(vmin=-1, vmax=1)
     # norm_exc = colors.Normalize(vmin=-1, vmax=1)
 
     # norm_inh = colors.LogNorm(vmin=pspec_inh.min(), vmax=pspec_inh.max())
     # norm_exc = colors.LogNorm(vmin=pspec_exc.min(), vmax=pspec_exc.max())
-    norm_inh = colors.Normalize(vmin=1e-12, vmax=.5)
-    norm_exc = colors.Normalize(vmin=1e-12, vmax=.5)
+    norm_inh = colors.Normalize(vmin=vmin, vmax=vmax)
+    norm_exc = colors.Normalize(vmin=vmin, vmax=vmax)
     # norm_com = colors.Normalize(vmin=1e-12, vmax=.5)
 
-    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh/pspec_inh.max(), cmap='inferno', norm=norm_inh, shading='auto')
-    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc/pspec_exc.max(), cmap='inferno', norm=norm_exc, shading='gouraud')
+    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh/pspec_inh.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
+    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc/pspec_exc.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
 
+    # ax_specg_inh.set_ylabel('Inhibitory', color=c_inh)
+    # ax_specg_exc.set_ylabel('Excitatory', color=c_exc)
+
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='white', alpha=1.)
+
+    # place a text box in upper left in axes coords
+    # ax_specg_inh.text(0.05, 0.95, 'inhibitory', transform=ax_specg_inh.transAxes, verticalalignment='top', bbox=props)
+    # ax_specg_inh.text(0.01, 0.9, 'I', fontsize=14, transform=ax_specg_inh.transAxes, color='white', verticalalignment='top')
+    # ax_specg_exc.text(0.01, 0.9, 'E', fontsize=14, transform=ax_specg_exc.transAxes, color='white', verticalalignment='top')
+    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=11, transform=ax_specg_inh.transAxes, color=c_inh, verticalalignment='top', bbox=props)
+    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=11, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', bbox=props)
 
     # data_inh, freqs_inh, bins_inh, im_inh = ax_specg_inh.specgram(FR_inh_norm, NFFT=window_width, pad_to=2048, Fs=fs_FR, noverlap=noverlap, scale='linear', window=sig.windows.hann(M=window_width, sym=False), cmap=newcmap_inh)
     # # ax_specg_inh.axis('tight')
@@ -835,25 +849,33 @@ if __name__ == "__main__":
     # pcm_inh= ax_specg_inh.specgram(FR_exc_norm, NFFT=window_width, detrend='none', Fs=fs_FR, window=sig.windows.hann(M=window_width, sym=False), noverlap=noverlap, scale_by_freq=False, mode='magnitude', scale='dB', sides='onesided')
 
     # Make sure the spectrogams are rasterized!
-    ax_specg_inh.set_rasterized(True)
-    ax_specg_exc.set_rasterized(True)
+    # ax_specg_inh.set_rasterized(True)
+    # ax_specg_exc.set_rasterized(True)
 
     # Colorbars
     # fig.colorbar(pcm_exc, ax=ax_specg_exc)
     # fig.colorbar(pcm_inh, ax=ax_specg_inh)
-    cbar_inh_ax = fig.add_subplot(G_specg_cbars[0])
-    cbar_exc_ax = fig.add_subplot(G_specg_cbars[1])
+    # cbar_inh_ax = fig.add_subplot(G_specg_cbars[0])
+    # cbar_exc_ax = fig.add_subplot(G_specg_cbars[1])
 
-    cbi = fig.colorbar(im_inh, cax=cbar_inh_ax, aspect=1, ticks=[.5])
-    cbe = fig.colorbar(im_exc, cax=cbar_exc_ax, aspect=1, ticks=[.5])
+    # cbi = fig.colorbar(im_inh, cax=cbar_inh_ax, aspect=1, ticks=[.5])
+    # cbe = fig.colorbar(im_exc, cax=cbar_exc_ax, aspect=1, ticks=[.5])
+    #
+    # cbi.outline.set_color('black')
+    # cbi.outline.set_linewidth(0.5)
+    # cbi.solids.set_rasterized(True)
+    # cbe.outline.set_color('black')
+    # cbe.outline.set_linewidth(0.5)
+    # cbe.solids.set_rasterized(True)
+    #
+    # cbe.dividers.set_color('none')
+    # cbe.dividers.set_linewidth(5)
 
-    cbi.outline.set_color('black')
-    cbi.outline.set_linewidth(0.5)
-    cbi.solids.set_rasterized(True)
+    cbar_comm = fig.add_subplot(G_specg_cbars[0])
+    cbe = fig.colorbar(im_exc, cax=cbar_comm, aspect=1, ticks=[0., vmax])
     cbe.outline.set_color('black')
     cbe.outline.set_linewidth(0.5)
     cbe.solids.set_rasterized(True)
-
     cbe.dividers.set_color('none')
     cbe.dividers.set_linewidth(5)
 
