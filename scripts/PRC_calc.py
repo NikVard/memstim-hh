@@ -241,15 +241,15 @@ axs2.set_ylabel(r'Amplitude', rotation=270, va="center")
 axs.set_title("Phase Response Curve (PRC)")
 
 # Spines
-axs.spines['top'].set_visible(False)
-axs.spines['bottom'].set_visible(False)
-axs.spines['left'].set_visible(False)
-axs.spines['right'].set_visible(False)
-
-axs2.spines['top'].set_visible(False)
-axs2.spines['bottom'].set_visible(False)
-axs2.spines['left'].set_visible(False)
-axs2.spines['right'].set_visible(False)
+# axs.spines['top'].set_visible(False)
+# axs.spines['bottom'].set_visible(False)
+# axs.spines['left'].set_visible(False)
+# axs.spines['right'].set_visible(False)
+#
+# axs2.spines['top'].set_visible(False)
+# axs2.spines['bottom'].set_visible(False)
+# axs2.spines['left'].set_visible(False)
+# axs2.spines['right'].set_visible(False)
 
 # Grids
 axs.grid()
