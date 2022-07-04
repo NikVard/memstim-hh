@@ -166,9 +166,9 @@ axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zor
 
 # Limits
 axs.set_xlim([-3.3, 3.3])
-axs.set_ylim([-3.5, 3.5])
-axs.set_ylim([-1.1, 1.1])
-axs2.set_ylim([-0.5,1.5])
+# axs.set_ylim([-3.5, 3.5])
+axs.set_ylim([-np.pi/4-0.05, np.pi/4+0.05])
+axs2.set_ylim([-0.1,1.1])
 
 # Ticks
 def format_func(x, pos):
@@ -191,30 +191,35 @@ def format_func(x, pos):
 
 def format_func_minors(x, pos):
     # find number of multiples of pi/8
-    N = int(np.round(2 * x / np.pi))
-    if N == -8:
-        return r"-$\pi$"
-    elif N == -7:
-        return r"-$7\pi/8$"
-    elif N == -6:
-        return r"-$6\pi/8$"
-    elif N == -5:
-        return r"-$5\pi/8$"
-    elif N == -4:
-        return r"-$4\pi/8$"
-    elif N == -3:
-        return r"-$3\pi/8$"
-    else:
-        return r"${0}\pi$".format(N // 2)
+    N = int(np.round(x/(np.pi/8)))
+    if N == -8: return r"-$\pi$"
+    elif N == -7: return r"-$7\pi/8$"
+    elif N == -6: return r"-$3\pi/4$"
+    elif N == -5: return r"-$5\pi/8$"
+    elif N == -4: return r"-$\pi/2$"
+    elif N == -3: return r"-$3\pi/8$"
+    elif N == -2: return r"-$\pi/4$"
+    elif N == -1: return r"-$\pi/8$"
+    elif N == 0: return r"0"
+    elif N == 1: return r"$\pi/8$"
+    elif N == 2: return r"$\pi/4$"
+    elif N == 3: return r"$3\pi/8$"
+    elif N == 4: return r"$\pi/2$"
+    elif N == 5: return r"$5\pi/8$"
+    elif N == 6: return r"$3\pi/4$"
+    elif N == 7: return r"$7\pi/8$"
+    elif N == 8: return r"$\pi$"
+    else: return r"${0}\pi$".format(N // 2)
 
 axs.xaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
-axs.xaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
+axs.xaxis.set_minor_locator(plt.MultipleLocator(np.pi / 4))
 axs.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
 # axs.xaxis.set_minor_formatter(plt.FuncFormatter(format_func_minors))
 
 axs.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
 axs.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 8))
 axs.yaxis.set_major_formatter(plt.FuncFormatter(format_func))
+axs.yaxis.set_minor_formatter(plt.FuncFormatter(format_func_minors))
 
 axs2.yaxis.set_major_locator(plt.MultipleLocator(0.5))
 axs2.yaxis.set_minor_locator(plt.MultipleLocator(0.1))
@@ -234,6 +239,17 @@ axs2.set_ylabel(r'Amplitude', rotation=270, va="center")
 
 # Title
 axs.set_title("Phase Response Curve (PRC)")
+
+# Spines
+axs.spines['top'].set_visible(False)
+axs.spines['bottom'].set_visible(False)
+axs.spines['left'].set_visible(False)
+axs.spines['right'].set_visible(False)
+
+axs2.spines['top'].set_visible(False)
+axs2.spines['bottom'].set_visible(False)
+axs2.spines['left'].set_visible(False)
+axs2.spines['right'].set_visible(False)
 
 # Grids
 axs.grid()
