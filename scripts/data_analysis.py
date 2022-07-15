@@ -22,7 +22,7 @@ bin_size = 1*ms
 dirs = {}
 
 # Results path
-dirs['results'] = 'results/analysis/'
+dirs['results'] = 'results/analysis/current/85d/'
 dirs['data'] = dirs['results'] + 'data/'
 
 # Spikes
