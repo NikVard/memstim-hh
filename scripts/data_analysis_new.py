@@ -5,9 +5,11 @@
 
 # from brian2 import *
 
+import os
 import numpy as np
 import matplotlib as mplb
 import matplotlib.pyplot as plt
+from matplotlib import colors
 from matplotlib import font_manager as fm
 from matplotlib.ticker import (MultipleLocator, FormatStrFormatter, AutoMinorLocator)
 
@@ -173,7 +175,7 @@ def calc_PLV(sigl:np.ndarray,
     sigh_a = sig.hilbert(sigh)
 
     # 3. Hilbert-transform the amplitude of the HF-analytic signal
-    sigh_aa = sig.hilbert(np.real(sigh_a))
+    sigh_aa = sig.hilbert(abs(sigh_a))
 
     # 4. Calculate the phase differences
     phi_lt = np.angle(sigl_a)
@@ -193,6 +195,77 @@ def myround(x, base=100):
     val = int(base * round(x/base))
     return val if val > 0 else base*1
 
+# Filtering functions
+def butter_lowpass(lowcut, fs, order=8, sos=False):
+    ''' Create a lowpass butterworth filter '''
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+
+    if sos:
+        sos_out = sig.butter(order, low, analog=False, btype='low', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, low, analog=False, btype='low', output='ba')
+    return b, a
+
+def butter_highpass(highcut, fs, order=8, sos=False):
+    ''' Create a highpass butterworth filter '''
+    nyq = 0.5 * fs
+    high = highcut / nyq
+
+    if sos:
+        sos_out = sig.butter(order, high, analog=False, btype='high', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, high, analog=False, btype='high', output='ba')
+    return b, a
+
+def butter_bandpass(lowcut, highcut, fs, order=8, sos=False):
+    ''' Create a bandpass butterworth filter '''
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+
+    if sos:
+        sos_out = sig.butter(order, [low, high], analog=False, btype='band', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, [low, high], analog=False, btype='band', output='ba')
+    return b, a
+
+
+def butter_lowpass_filter(data, lowcut, fs, order=5, sos=False):
+    ''' Lowpass filter the data '''
+    if sos:
+        sos_out = butter_lowpass(lowcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_lowpass(lowcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
+
+def butter_highpass_filter(data, highcut, fs, order=5, sos=False):
+    ''' Highpass filter the data '''
+    if sos:
+        sos_out = butter_highpass(highcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_highpass(highcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, sos=False):
+    ''' Bandpass filter the data '''
+    if sos:
+        sos_out = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
 
 
 # main program
@@ -203,7 +276,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-m', '--method',
                         type=str,
-                        default='histogram',
+                        default='custom',
                         help='Which method to use for the calculation of the FRs. [histogram/hist] | [windowed/win]')
 
     args = parser.parse_args()
@@ -230,12 +303,12 @@ if __name__ == "__main__":
     N_tot = EC_exc_N + EC_inh_N + DG_exc_N + DG_inh_N + CA3_exc_N + CA3_inh_N + CA1_exc_N + CA1_inh_N
 
     # Timing
-    duration = 2*second
+    duration = 3*second
     dt = 0.1*ms
     fs = int(1/dt)
 
     # FR calculation
-    winsize_FR = 1*ms
+    winsize_FR = 5*ms
     overlap_FR = 0.9
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
 
@@ -253,7 +326,8 @@ if __name__ == "__main__":
         fs_FR = int(1/winstep_FR)
 
     # PSD calculation
-    freq_res = 2. # 1 Hz freq. res -> 1 second window
+    freq_res = 1. # 1 Hz freq. res -> 1 second window
+    overlap_PSD = 0.9
     winsize_freq = 1./freq_res
     winsize_samples = winsize_freq*fs_FR
 
@@ -274,6 +348,10 @@ if __name__ == "__main__":
 
     # Spikes
     dirs['spikes'] = dirs['data'] + 'spikes/'
+
+    # FRs
+    dirs['FRs'] = dirs['data'] + 'FRs/'
+
 
 
     # Load the rasters
@@ -307,24 +385,24 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------------
     print("[+] Generating firing rates from rasters...")
     EC_exc_spk_cnt, EC_exc_bin_edges = calc_FR(EC_exc_t*ms)
-    EC_exc_rate = (EC_exc_spk_cnt/winsize_FR)/(EC_exc_N)
+    EC_exc_rate = (EC_exc_spk_cnt/winsize_FR)/EC_exc_N
     EC_inh_spk_cnt, EC_inh_bin_edges = calc_FR(EC_inh_t*ms)
-    EC_inh_rate = (EC_inh_spk_cnt/winsize_FR)/(EC_inh_N)
+    EC_inh_rate = (EC_inh_spk_cnt/winsize_FR)/EC_inh_N
 
     DG_exc_spk_cnt, DG_exc_bin_edges = calc_FR(DG_exc_t*ms)
-    DG_exc_rate = (DG_exc_spk_cnt/winsize_FR)/(DG_exc_N)
+    DG_exc_rate = (DG_exc_spk_cnt/winsize_FR)/DG_exc_N
     DG_inh_spk_cnt, DG_inh_bin_edges = calc_FR(DG_inh_t*ms)
-    DG_inh_rate = (DG_inh_spk_cnt/winsize_FR)/(DG_inh_N)
+    DG_inh_rate = (DG_inh_spk_cnt/winsize_FR)/DG_inh_N
 
     CA3_exc_spk_cnt, CA3_exc_bin_edges = calc_FR(CA3_exc_t*ms)
-    CA3_exc_rate = (CA3_exc_spk_cnt/winsize_FR)/(CA3_exc_N)
+    CA3_exc_rate = (CA3_exc_spk_cnt/winsize_FR)/CA3_exc_N
     CA3_inh_spk_cnt, CA3_inh_bin_edges = calc_FR(CA3_inh_t*ms)
-    CA3_inh_rate = (CA3_inh_spk_cnt/winsize_FR)/(CA3_inh_N)
+    CA3_inh_rate = (CA3_inh_spk_cnt/winsize_FR)/CA3_inh_N
 
     CA1_exc_spk_cnt, CA1_exc_bin_edges = calc_FR(CA1_exc_t*ms)
-    CA1_exc_rate = (CA1_exc_spk_cnt/winsize_FR)/(CA1_exc_N)
+    CA1_exc_rate = (CA1_exc_spk_cnt/winsize_FR)/CA1_exc_N
     CA1_inh_spk_cnt, CA1_inh_bin_edges = calc_FR(CA1_inh_t*ms)
-    CA1_inh_rate = (CA1_inh_spk_cnt/winsize_FR)/(CA1_inh_N)
+    CA1_inh_rate = (CA1_inh_spk_cnt/winsize_FR)/CA1_inh_N
 
 
     # Plot the firing rates
@@ -342,7 +420,7 @@ if __name__ == "__main__":
 
     for (ax, lbl) in zip(axs1, areas):
         ax.set_title(lbl)
-        ax.set_ylabel('Rate [Hz]', rotation=0, fontsize=12, labelpad=30)
+        ax.set_ylabel('Spk/sec', rotation=0, fontsize=12, labelpad=30)
         ax.grid(linestyle='-', color=[0.5, 0.5, 0.5], alpha=0.33)
         ax.set_ylim([0, 1000])
 
@@ -360,32 +438,43 @@ if __name__ == "__main__":
     # win = 'boxcar' # periodogram default
     win = 'hann'
     N = len(EC_exc_rate)
-    NFFT = 2*int(pow(2, np.ceil(np.log(2*N)/np.log(2))))
-    dt2 = winsize_FR
-    fs2 = 1/dt2
+    NFFT = int(pow(2, np.ceil(np.log(2*N)/np.log(2))))
+    dt2 = 1/fs_FR
+    fs2 = fs_FR
+    df = 1/duration
 
     # fv = rfftfreq(NFFT, dt2)
-    # EC_exc_Pxx = np.abs(rfft(EC_exc_rate, n=NFFT)/NFFT)**2
-    # EC_inh_Pxx = np.abs(rfft(EC_inh_rate, n=NFFT)/NFFT)**2
-    # DG_exc_Pxx = np.abs(rfft(DG_exc_rate, n=NFFT)/NFFT)**2
-    # DG_inh_Pxx = np.abs(rfft(DG_inh_rate, n=NFFT)/NFFT)**2
-    # CA3_exc_Pxx = np.abs(rfft(CA3_exc_rate, n=NFFT)/NFFT)**2
-    # CA3_inh_Pxx = np.abs(rfft(CA3_inh_rate, n=NFFT)/NFFT)**2
-    # CA1_exc_Pxx = np.abs(rfft(CA1_exc_rate, n=NFFT)/NFFT)**2
-    # CA1_inh_Pxx = np.abs(rfft(CA1_inh_rate, n=NFFT)/NFFT)**2
+    # EC_exc_Pxx = (1/(fs2*N)) * np.abs(rfft(EC_exc_rate-EC_exc_rate.mean(), n=NFFT))**2
+    # EC_inh_Pxx = (1/(fs2*N)) * np.abs(rfft(EC_inh_rate-EC_inh_rate.mean(), n=NFFT))**2
+    # DG_exc_Pxx = (1/(fs2*N)) * np.abs(rfft(DG_exc_rate-DG_exc_rate.mean(), n=NFFT))**2
+    # DG_inh_Pxx = (1/(fs2*N)) * np.abs(rfft(DG_inh_rate-DG_inh_rate.mean(), n=NFFT))**2
+    # CA3_exc_Pxx = (1/(fs2*N)) * np.abs(rfft(CA3_exc_rate-CA3_exc_rate.mean(), n=NFFT))**2
+    # CA3_inh_Pxx = (1/(fs2*N)) * np.abs(rfft(CA3_inh_rate-CA3_inh_rate.mean(), n=NFFT))**2
+    # CA1_exc_Pxx = (1/(fs2*N)) * np.abs(rfft(CA1_exc_rate-CA1_exc_rate.mean(), n=NFFT))**2
+    # CA1_inh_Pxx = (1/(fs2*N)) * np.abs(rfft(CA1_inh_rate-CA1_inh_rate.mean(), n=NFFT))**2
 
-    fv, EC_exc_Pxx = sig.welch(EC_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, EC_inh_Pxx = sig.welch(EC_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, DG_exc_Pxx = sig.welch(DG_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, DG_inh_Pxx = sig.welch(DG_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, CA3_exc_Pxx = sig.welch(CA3_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, CA3_inh_Pxx = sig.welch(CA3_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, CA1_exc_Pxx = sig.welch(CA1_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
-    _, CA1_inh_Pxx = sig.welch(CA1_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, nfft=NFFT, scaling='spectrum', average='mean')
+    fv, EC_exc_Pxx = sig.welch(EC_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, EC_inh_Pxx = sig.welch(EC_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, DG_exc_Pxx = sig.welch(DG_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, DG_inh_Pxx = sig.welch(DG_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA3_exc_Pxx = sig.welch(CA3_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA3_inh_Pxx = sig.welch(CA3_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA1_exc_Pxx = sig.welch(CA1_exc_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA1_inh_Pxx = sig.welch(CA1_inh_rate, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+
 
     # Plot the PSDs
     # ------------------------------------------------------------------------------
     fig2, axs2 = plt.subplots(4, sharex=True, sharey=True, figsize=(16,8))
+    # axs2[0].plot(fv, 10*np.log10(EC_exc_Pxx), linestyle='-', color='b', label='exc')
+    # axs2[0].plot(fv, 10*np.log10(EC_inh_Pxx), linestyle='-', color='r', label='inh')
+    # axs2[1].plot(fv, 10*np.log10(DG_exc_Pxx), linestyle='-', color='b', label='exc')
+    # axs2[1].plot(fv, 10*np.log10(DG_inh_Pxx), linestyle='-', color='r', label='inh')
+    # axs2[2].plot(fv, 10*np.log10(CA3_exc_Pxx), linestyle='-', color='b', label='exc')
+    # axs2[2].plot(fv, 10*np.log10(CA3_inh_Pxx), linestyle='-', color='r', label='inh')
+    # axs2[3].plot(fv, 10*np.log10(CA1_exc_Pxx), linestyle='-', color='b', label='exc')
+    # axs2[3].plot(fv, 10*np.log10(CA1_inh_Pxx), linestyle='-', color='r', label='inh')
+
     axs2[0].plot(fv, EC_exc_Pxx, linestyle='-', color='b', label='exc')
     axs2[0].plot(fv, EC_inh_Pxx, linestyle='-', color='r', label='inh')
     axs2[1].plot(fv, DG_exc_Pxx, linestyle='-', color='b', label='exc')
@@ -397,11 +486,11 @@ if __name__ == "__main__":
 
     for (ax, lbl) in zip(axs2, areas):
         ax.set_title(lbl)
-        # ax.set_ylabel('Rate [Hz]', rotation=0, fontsize=12, labelpad=30)
+        # ax.set_ylabel('PSD [Hz]', rotation=0, fontsize=12, labelpad=30)
         ax.grid(linestyle='-', color=[0.5, 0.5, 0.5], alpha=0.33)
 
-    axs2[3].set_xlim([0,150])
-    axs2[3].set_xlabel('Time [ms]')
+    axs2[3].set_xlim([0,250])
+    axs2[3].set_xlabel('Frequency [Hz]')
     axs2[3].legend()
 
 
@@ -441,15 +530,21 @@ if __name__ == "__main__":
     _, _, CA1_exc_Sxx = my_specgram(signal=CA1_exc_rate, fs=fs_FR, window_width=winsize_samples_TF, window_overlap=noverlap_TF)
     _, _, CA1_inh_Sxx = my_specgram(signal=CA1_inh_rate, fs=fs_FR, window_width=winsize_samples_TF, window_overlap=noverlap_TF)
 
+    # set vmin/vmax for plotting
+    vmin = 1e-12
+    vmax = 1.
+    norm_exc = colors.Normalize(vmin=vmin, vmax=vmax)
+    norm_inh = colors.Normalize(vmin=vmin, vmax=vmax)
+
     fig3, axs3 = plt.subplots(nrows=2, ncols=4, sharex=True, sharey=True, figsize=(16,8))
-    axs3[0,0].pcolormesh(tv, fv, EC_exc_Sxx/EC_exc_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[1,0].pcolormesh(tv, fv, EC_inh_Sxx/EC_inh_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[0,1].pcolormesh(tv, fv, DG_exc_Sxx/DG_exc_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[1,1].pcolormesh(tv, fv, DG_inh_Sxx/DG_inh_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[0,2].pcolormesh(tv, fv, CA3_exc_Sxx/CA3_exc_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[1,2].pcolormesh(tv, fv, CA3_inh_Sxx/CA3_inh_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[0,3].pcolormesh(tv, fv, CA1_exc_Sxx/CA1_exc_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
-    axs3[1,3].pcolormesh(tv, fv, CA1_inh_Sxx/CA1_inh_Sxx.max(), cmap='inferno', shading='auto', rasterized=True)
+    axs3[0,0].pcolormesh(tv, fv, EC_exc_Sxx/EC_exc_Sxx.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
+    axs3[1,0].pcolormesh(tv, fv, EC_inh_Sxx/EC_inh_Sxx.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
+    axs3[0,1].pcolormesh(tv, fv, DG_exc_Sxx/DG_exc_Sxx.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
+    axs3[1,1].pcolormesh(tv, fv, DG_inh_Sxx/DG_inh_Sxx.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
+    axs3[0,2].pcolormesh(tv, fv, CA3_exc_Sxx/CA3_exc_Sxx.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
+    axs3[1,2].pcolormesh(tv, fv, CA3_inh_Sxx/CA3_inh_Sxx.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
+    axs3[0,3].pcolormesh(tv, fv, CA1_exc_Sxx/CA1_exc_Sxx.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
+    axs3[1,3].pcolormesh(tv, fv, CA1_inh_Sxx/CA1_inh_Sxx.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
 
     for ax_out in axs3:
         for ax_in in ax_out:
@@ -461,6 +556,9 @@ if __name__ == "__main__":
     axs3[0,1].set_title('DG')
     axs3[0,2].set_title('CA3')
     axs3[0,3].set_title('CA1')
+
+    axs3[0,3].text(x=1.1, y=0.5, s="Exc", transform=axs3[0,3].transAxes)
+    axs3[1,3].text(x=1.1, y=0.5, s="Inh", transform=axs3[1,3].transAxes)
 
     fig3.suptitle('Spectrograms', fontsize=16)
 
@@ -478,82 +576,11 @@ if __name__ == "__main__":
     print("\n[*] Analysis #3")
     print("[+] Phase-amplitude coupling in theta-gamma using filter-Hilbert method...")
 
-    def butter_lowpass(lowcut, fs, order=8, sos=False):
-        ''' Create a lowpass butterworth filter '''
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-
-        if sos:
-            sos_out = sig.butter(order, low, analog=False, btype='low', output='sos')
-            return sos_out
-
-        b, a = sig.butter(order, low, analog=False, btype='low', output='ba')
-        return b, a
-
-    def butter_highpass(highcut, fs, order=8, sos=False):
-        ''' Create a highpass butterworth filter '''
-        nyq = 0.5 * fs
-        high = highcut / nyq
-
-        if sos:
-            sos_out = sig.butter(order, high, analog=False, btype='high', output='sos')
-            return sos_out
-
-        b, a = sig.butter(order, high, analog=False, btype='high', output='ba')
-        return b, a
-
-    def butter_bandpass(lowcut, highcut, fs, order=8, sos=False):
-        ''' Create a bandpass butterworth filter '''
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
-
-        if sos:
-            sos_out = sig.butter(order, [low, high], analog=False, btype='band', output='sos')
-            return sos_out
-
-        b, a = sig.butter(order, [low, high], analog=False, btype='band', output='ba')
-        return b, a
-
-
-    def butter_lowpass_filter(data, lowcut, fs, order=5, sos=False):
-        ''' Lowpass filter the data '''
-        if sos:
-            sos_out = butter_lowpass(lowcut, fs, order=order, sos=sos)
-            y = sig.sosfiltfilt(sos_out, data)
-        else:
-            b, a = butter_lowpass(lowcut, fs, order=order, sos=sos)
-            y = sig.filtfilt(b, a, data)
-
-        return y
-
-    def butter_highpass_filter(data, highcut, fs, order=5, sos=False):
-        ''' Highpass filter the data '''
-        if sos:
-            sos_out = butter_highpass(highcut, fs, order=order, sos=sos)
-            y = sig.sosfiltfilt(sos_out, data)
-        else:
-            b, a = butter_highpass(highcut, fs, order=order, sos=sos)
-            y = sig.filtfilt(b, a, data)
-
-        return y
-
-    def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, sos=False):
-        ''' Bandpass filter the data '''
-        if sos:
-            sos_out = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
-            y = sig.sosfiltfilt(sos_out, data)
-        else:
-            b, a = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
-            y = sig.filtfilt(b, a, data)
-
-        return y
-
 
     # Make butterworth n-th order bandpass filters for theta/gamma bands
     # Theta band filter
     N = 12 # filter order
-    fc_theta = [1, 10] # theta frequencies [Hz]
+    fc_theta = [1, 12] # theta frequencies [Hz]
     fc_gamma = [30, 200] # all gamma frequencyes [Hz]
     fc_gamma_low = [30, 60] # low-gamma frequencies [Hz]
     fc_gamma_high = [60, 120] # high-gamma frequencies [Hz]
@@ -736,7 +763,7 @@ if __name__ == "__main__":
     lags_inh = []
     PLV_inh = []
 
-    tlims = [1450, 1700]
+    tlims = [2000, 2500]
 
     lags_tmp, PLV_tmp = calc_PLV(EC_exc_rate_filt_theta[tlims[0]:tlims[1]], EC_exc_rate_filt_gamma[tlims[0]:tlims[1]])
     lags_exc.append(lags_tmp)
@@ -807,7 +834,49 @@ if __name__ == "__main__":
 
 
 
+    # Analysis #101: Filtered PSDs
+    # ------------------------------------------------------------------------------
+    print("\n[*] Analysis #101")
+    print("[+] PSD of filtered signals...")
 
+    fv, EC_exc_Pxx = sig.welch(EC_exc_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, EC_inh_Pxx = sig.welch(EC_inh_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, DG_exc_Pxx = sig.welch(DG_exc_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, DG_inh_Pxx = sig.welch(DG_inh_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA3_exc_Pxx = sig.welch(CA3_exc_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA3_inh_Pxx = sig.welch(CA3_inh_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA1_exc_Pxx = sig.welch(CA1_exc_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+    _, CA1_inh_Pxx = sig.welch(CA1_inh_rate_filt_high, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*overlap_PSD), nfft=NFFT, scaling='density', average='mean')
+
+    fig101, axs101 = plt.subplots(4, sharex=True, sharey=True, figsize=(16,8))
+    axs101[0].plot(fv, (EC_exc_Pxx), linestyle='-', color='b', label='exc')
+    axs101[0].plot(fv, (EC_inh_Pxx), linestyle='-', color='r', label='inh')
+    axs101[1].plot(fv, (DG_exc_Pxx), linestyle='-', color='b', label='exc')
+    axs101[1].plot(fv, (DG_inh_Pxx), linestyle='-', color='r', label='inh')
+    axs101[2].plot(fv, (CA3_exc_Pxx), linestyle='-', color='b', label='exc')
+    axs101[2].plot(fv, (CA3_inh_Pxx), linestyle='-', color='r', label='inh')
+    axs101[3].plot(fv, (CA1_exc_Pxx), linestyle='-', color='b', label='exc')
+    axs101[3].plot(fv, (CA1_inh_Pxx), linestyle='-', color='r', label='inh')
+
+    for (ax, lbl) in zip(axs101, areas):
+        ax.set_title(lbl)
+        ax.set_ylabel('PSD [Hz]', rotation=0, fontsize=12, labelpad=30)
+        ax.grid(linestyle='-', color=[0.5, 0.5, 0.5], alpha=0.33)
+
+    axs101[3].set_xlim([0,250])
+    axs101[3].set_xlabel('Frequency [Hz]')
+    axs101[3].legend()
+
+
+    # TEST coherence
+    fv, Cxy = sig.coherence(CA1_inh_rate, CA1_exc_rate_filt_gamma, fs=fs_FR, window=win, nperseg=winsize_samples, noverlap=int(winsize_samples*0.9), nfft=8192)
+
+    fig41, axs41 = plt.subplots(1, sharex=True, sharey=True, figsize=(16,8))
+    axs41.plot(fv, Cxy, linestyle='-', color='C0', label='Cxy')
+
+    axs41.set_title(r'Coherence between FR - $\gamma$')
+    axs41.set_xlim([0,150])
+    axs41.set_ylim([0,1])
 
     # Show the plots
     plt.tight_layout()
