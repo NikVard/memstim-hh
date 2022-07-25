@@ -161,9 +161,9 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration"  : 3.0,                  # second
-        "dt"        : .1e-3,                # second
-        "debugging" : False
+        "duration"      : 3.0,              # second
+        "dt"            : .1e-3,            # second
+        "debugging"     : False
     },
 
     # git stuff

@@ -102,7 +102,7 @@ _data = {
         "sigma"         : 0.5,  # normal std
         "kN"            : 15,
         "gain_reset"    : 4.0,
-        "gain_rhythm"   : 1.0,  # nA
+        "gain_rhythm"   : np.around(I_in, 2), # nA
         "offset"        : -0*pi/2
     },
 
