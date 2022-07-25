@@ -12,14 +12,18 @@ import subprocess
 import numpy as np
 from numpy import pi
 
+# Constants
+noise_exc = 10e-06
+noise_inh = 1e-06
+
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
 a = b = c = d = 0. # connections
-# a = 1.5 # 1.5
-# b = 0.2 # 0.2
-# c = 1.5 # 1.5
-# d = 0.25 # 25
-I_in = 0.0 # input
+# a = 1.5 # 13
+# b = 0.2 # 0.14
+# c = 1.5 # 1.1
+# d = 0.25 # 0.2
+I_in = 0.22 # 0.22 input
 stim_amplitude = [10.] # nA
 stim_onset = 1.5 # sec
 

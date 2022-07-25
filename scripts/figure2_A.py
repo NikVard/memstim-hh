@@ -579,9 +579,9 @@ if __name__ == "__main__":
         t_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1]))
 
         i_exc = i_exc.astype(int)
-        t_exc = t_exc/1000
+        t_exc = t_exc*ms
         i_inh = i_inh.astype(int)
-        t_inh = t_inh/1000
+        t_inh = t_inh*ms
 
         # sort based on index number (lower to higher)
         idx_sort_exc = np.argsort(i_exc)
@@ -736,7 +736,6 @@ if __name__ == "__main__":
     ax_common.text(x=t_stim-55*ms, y=data[int(t_stim*fs)]+0.25, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
 
 
-
     # ==================
     # Plot CA1 FRs
     # ==================
@@ -787,12 +786,12 @@ if __name__ == "__main__":
                                 window_overlap=noverlap)
 
     # avoid division by zero in log transform
-    pspec_inh[np.where(pspec_inh<1e-10)] = 1e-10
-    pspec_exc[np.where(pspec_exc<1e-10)] = 1e-10
+    # pspec_inh[np.where(pspec_inh<1e-10)] = 1e-10
+    # pspec_exc[np.where(pspec_exc<1e-10)] = 1e-10
 
     # get log power
-    pspec_inh_dB = 10*np.log10(pspec_inh)
-    pspec_exc_dB = 10*np.log10(pspec_exc)
+    # pspec_inh_dB = 10*np.log10(pspec_inh)
+    # pspec_exc_dB = 10*np.log10(pspec_exc)
 
     # find min/max for plotting
     # maxval_dB = max(pspec_inh_dB.max(), pspec_exc_dB.max())
@@ -804,7 +803,7 @@ if __name__ == "__main__":
 
     # set vmin/vmax for plotting
     vmin = 1e-12
-    vmax = .5
+    vmax = 1.
     # norm_inh = colors.Normalize(vmin=-1, vmax=1)
     # norm_exc = colors.Normalize(vmin=-1, vmax=1)
 
