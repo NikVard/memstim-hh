@@ -12,8 +12,32 @@ import subprocess
 from numpy import pi
 
 # Constants
-noise_exc = 10e-06
-noise_inh = 1e-06
+# noise_exc = 10e-06
+# noise_inh = 1e-06
+noise_exc = 0.
+noise_inh = 0.
+
+# Default parameters
+noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
+a = b = c = d = 0. # connections
+a = 13. # 13
+b = 0.14 # 0.14
+c = 1.1 # 1.1
+d = 0.2 # 0.2
+I_in = 0.22 # 0.22 input
+stim_amplitude = [10.] # nA
+stim_onset = 1.5 # sec
+
+noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
+noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
+noise_EC_exc = 0. # 0.0031
+noise_EC_inh = 0. # 0.0017
+noise_DG_exc = 0. # 0.003
+noise_DG_inh = 0. #
+noise_CA3_exc = 0. # 0.003
+noise_CA3_inh = 0. #
+noise_CA1_exc = 0. # 0.0031
+noise_CA1_inh = 0. #
 
 # Default parameters
 _data = {
@@ -93,6 +117,24 @@ _data = {
         "inter" : { # inter-area conn. probabilities
             "p_tri"     : 0.45,     # tri: [DG->CA3, CA3->CA1, CA1->EC] Aussel, pages 49,59
             "p_mono"    : 0.2       # mono: [EC->CA3, EC->CA1]
+        },
+        "inter_custom" : {
+            "EC" : {
+                "E" : [[0., 0.], [a, a], [b, b], [c, c]],
+                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
+            },
+            "DG" : {
+                "E" : [[0., 0.], [0., 0.], [b, b], [0., 0.]],
+                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
+            },
+            "CA3" : {
+                "E" : [[0., 0.], [0., 0.], [0., 0.], [c, c]],
+                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
+            },
+            "CA1" : {
+                "E" : [[d, d], [0., 0.], [0., 0.], [0., 0.]],
+                "I" : [[0., 0.], [0., 0.], [0., 0.], [0., 0.]]
+            }
         }
     },
 
@@ -109,8 +151,8 @@ _data = {
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 3.,               # [sec]
         "dt"            : .1e-3,            # [sec]
-        "onset"         : 1.615,            # [sec]
-        "I"             : [10.],            # stimulation amplitude [nA]
+        "onset"         : stim_onset,       # [sec]
+        "I"             : stim_amplitude,   # stimulation amplitude [nA]
         "pulse_width"   : [1.e-3],          # width (in time) of pulse ON phase [sec]
         "stim_freq"     : 5,                # stimulation frequency [Hz]
         "pulse_freq"    : 100,              # pulse frequency, determines ON duration [Hz]
@@ -211,9 +253,17 @@ if __name__  == "__main__":
                         default='default',
                         type=str, nargs='?',
                         help='Parameters file (json format)')
+    parser.add_argument('-po', '--parameters_old',
+                        action='store_true',
+                        default=False,
+                        help='Set this to generate default parameters file instead.')
     args = parser.parse_args()
 
     filename = "./configs/{0}.json".format(args.parameters_file)
+
+    # Delete custom connectivity
+    if args.parameters_old:
+        del _data["connectivity"]["inter_custom"]
 
     print('Saving file "{0}"'.format(filename))
     save(filename, _data)
