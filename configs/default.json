@@ -117,7 +117,7 @@
         "sigma": 0.33,
         "duration": 3.0,
         "dt": 0.0001,
-        "onset": 1.615,
+        "onset": 1.55,
         "I": [
             10.0
         ],
@@ -135,8 +135,8 @@
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "2b33e732",
-    "timestamp": "Tue Jun 14 12:29:38 2022",
-    "git_branch": "master",
-    "git_hash": "2b33e732ec330c6691091a2cc4be7a131cddd49a"
+    "git_short_hash": "63aefa21",
+    "timestamp": "Thu Jun 16 16:25:10 2022",
+    "git_branch": "fig2",
+    "git_hash": "63aefa218e05d02025c716cf6aaaafc60c0ea27c"
 }
