@@ -200,7 +200,7 @@ def plot_kuramoto(order_param_mon):
 def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv, stim_inp):
     """ Plots the network output (population CA1 E/I) activity along with the Kuramoto oscillators and the stimulation input. """
 
-    fig, axs = subplots(nrows=5, ncols=1)
+    fig, axs = subplots(nrows=6, ncols=1)
     fig.set_figheight(12)
     fig.set_figwidth(16)
 
@@ -215,12 +215,6 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[1].set_xlim(0, settings.duration/second)
     axs[1].set_ylim(0, settings.N_CA1[1])
     axs[1].set_ylabel('Neuron index')
-
-    # axs[1].plot(tv*1000, stim_inp)
-    # axs[1].set_title('Stimulation Input')
-    # axs[1].set_xlim(0, settings.duration/second)
-    # axs[1].set_ylabel('Current [nA]')
-    # axs[1].grid()
 
     axs[2].plot(rate_mon.t/second, rate_mon.drive[0], label='LPF Output')
     axs[2].set_title('CA1 Population Firing Rates')
@@ -243,6 +237,12 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[4].set_xlabel('Time (ms)')
     axs[4].legend()
     axs[4].grid()
+
+    axs[5].plot(tv[:len(stim_inp)], stim_inp)
+    axs[5].set_title('Stimulation Input')
+    axs[5].set_xlim(0, settings.duration/second)
+    axs[5].set_ylabel('Current [nA]')
+    axs[5].grid()
 
     if settings.I_stim[0]:
         axs[0].axvline(x=settings.stim_onset, ymin=-1, ymax=1, c="red", linewidth=2, zorder=0, clip_on=False)
