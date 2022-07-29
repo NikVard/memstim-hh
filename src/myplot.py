@@ -4,9 +4,11 @@ from mpl3d import glm               # https://github.com/rougier/matplotlib-3d
 from mpl3d.camera import Camera
 
 # -----------
+import numpy as np
+import matplotlib as mplb
 from scipy import signal as sig
-
 from matplotlib import ticker
+from matplotlib import colors
 from matplotlib import font_manager as fm
 from matplotlib.gridspec import GridSpecFromSubplotSpec
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
@@ -16,6 +18,10 @@ from model import settings
 from model import globals
 from model.globals import *
 from src import plot3d
+
+# ILLUSTRATOR STUFF
+mplb.rcParams['pdf.fonttype'] = 42
+mplb.rcParams['ps.fonttype'] = 42
 
 def subplot(index):
     ax = plt.subplot(index, xlim=[-1,1], ylim=[-1,1], aspect=1)
@@ -238,7 +244,7 @@ def plot_network_output(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv,
     axs[4].legend()
     axs[4].grid()
 
-    axs[5].plot(tv[:len(stim_inp)], stim_inp)
+    axs[5].plot(tv, stim_inp)
     axs[5].set_title('Stimulation Input')
     axs[5].set_xlim(0, settings.duration/second)
     axs[5].set_ylabel('Current [nA]')
@@ -442,7 +448,7 @@ def plot_network_output2(spike_mon_E, spike_mon_I, rate_mon, order_param_mon, tv
     return fig, axs, fig_name
 
 
-def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, stim_inp):
+def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, stim_inp, mode="order_parameter"):
     """ Plot all rasters, osc. rhythm, phase reset using Nord theme colors.
     This goes in the Fig2 section of the paper! """
 
@@ -480,9 +486,13 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
         # First center is at the middle of the first window
         c0 = window_size/2
         cN = duration-c0
+        print("-----")
+        print(c0)
+        print(cN)
 
         # centers
-        centers = np.arange(c0, cN+win_step, win_step)
+        centers = np.arange(c0, cN+win_step, win_step)*second
+        print(centers)
 
         # Calculate windowed FR
         counts = []
@@ -565,7 +575,7 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     cvals_inh[:,0] = reds[...]
     cvals_inh[:,1] = greens[...]
     cvals_inh[:,2] = blues[...]
-    newcmp_inh = ListedColormap(cvals_inh)
+    newcmap_inh = ListedColormap(cvals_inh)
 
     # excitatory cmap
     reds = np.linspace(1., c_exc_RGB[0], N)
@@ -574,7 +584,7 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     cvals_exc[:,0] = reds[...]
     cvals_exc[:,1] = greens[...]
     cvals_exc[:,2] = blues[...]
-    newcmp_exc = ListedColormap(cvals_exc)
+    newcmap_exc = ListedColormap(cvals_exc)
 
     # Timing
     duration = settings.duration
@@ -598,48 +608,51 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     N_gap = 1
 
     # Firing rates plotting gap
-    rates_gap = 125*Hz
+    rates_gap = 2*Hz
 
     # Power spectra parameters
-    fs2 = int(1/winstep_FR)
     window_size = 100*ms
-    window_width = int(fs2*window_size) # samples
+    window_width = int(fs_FR*window_size) # samples
     overlap = 0.99 # percentage
     noverlap = int(overlap*window_width)
 
     # Set theta rhythm limits
-    # xlims_rhythm = [t for t in t_lims]
     xlims_rhythm = [0*ms, duration+50*ms]
     ylims_rhythm = [-0.1, 1.1]
 
     # Set raster limits
-    # xlims_raster = [t for t in t_lims]
     xlims_raster = [0*ms, duration+50*ms]
-    ylims_raster = [0, 2*N_scaling]
+    ylims_raster = [0, 2*N_scaling+N_gap]
 
     # Set firing rate limits
-    # xlims_rates = [t for t in t_lims]
     xlims_rates = [0*ms, duration+50*ms]
-    ylims_rates = [-1, 200]
+    ylims_rates = [-1, 500]*Hz
 
     # Set spectrogram limits
-    # xlims_freq = [t for t in t_lims]
     xlims_freq = [0*ms, duration+50*ms]
-    ylims_freq = [0, 120] # Hz
+    ylims_freq = [10, 150]*Hz # Hz
     zlims_freq = [0.1, 10] # cmap limits [vmin vmax]
 
-    # Make the figure
-    fig = plt.figure(figsize=(10,14))
+    # Text parameters
+    fsize = 10
+    sizebar_off = 50*ms # sizebar offset
+
+    # Figure sizes
+    fig_width = 12
+    fig_height = 8
+
+    # Make a figure
+    fig = plt.figure(figsize=(fig_width,fig_height))
 
     # Use gridspecs
     G_outer = GridSpec(5, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
                         wspace=0.05, hspace=0.2, height_ratios=(0.1, 0.1, 0.35, 0.2, 0.25), width_ratios=(0.99,0.01))
-    G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[0,0])
-    G_order_param = GridSpecFromSubplotSpec(1, 1, hspace=0., subplot_spec=G_outer[1,0])
+    G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[0,0])
+    G_order_param = G_phase = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[1,0])
     G_rasters = GridSpecFromSubplotSpec(4, 1, hspace=0.4, subplot_spec=G_outer[2,0])
     G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[3,0])
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[4,0])
-    G_specg_cbars = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[4,1])
+    G_specg_cbars = GridSpecFromSubplotSpec(1, 1, hspace=0.3, subplot_spec=G_outer[4,1])
 
     G_outer.tight_layout(fig)
 
@@ -730,17 +743,16 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     axs.append([ax_rates])
 
     # Set the title
-    # ax_rate_exc.set_title('CA1 Firing Rate')
+    ax_rates.set_title('CA1 Firing Rates')
 
     # Set the x-y limits
-    # ax_rate_exc.set_ylim(ylims_rates)
-    ax_rates.set_ylim([0, 300])
+    ax_rates.set_ylim(ylims_rates)
 
     # Set the ticks
     ax_rate_majors = np.arange(0., (duration+50*ms)/second, .5) #[0.5, 1.0, 1.5...]
     # ax_rate_exc.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
     # ax_rate_exc.xaxis.set_minor_locator(ticker.NullLocator())
-    ax_rates.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
+    ax_rates.xaxis.set_major_locator(ticker.NullLocator())
     ax_rates.xaxis.set_minor_locator(ticker.NullLocator())
 
     # Hide x-y axes
@@ -760,7 +772,7 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     # ax_rate_inh.spines['left'].set_visible(False)
     # ax_rate_inh.spines['right'].set_visible(False)
     ax_rates.spines['top'].set_visible(False)
-    # ax_rates.spines['bottom'].set_visible(False)
+    ax_rates.spines['bottom'].set_visible(False)
     ax_rates.spines['left'].set_visible(False)
     ax_rates.spines['right'].set_visible(False)
 
@@ -772,22 +784,29 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     axs.append([ax_specg_exc, ax_specg_inh])
 
     # Set the title
-    # ax_specg_exc.set_title('Spectrogram')
+    ax_specg_inh.set_title('Spectrograms')
 
-    # Set the x-y limits
-    ax_specg_inh.set_xlim(xlims_freq)
-    ax_specg_inh.set_ylim(ylims_freq)
-    ax_specg_exc.set_xlim(xlims_freq)
-    ax_specg_exc.set_ylim(ylims_freq)
+    # # Set the x-y limits
+    # ax_specg_inh.set_xlim(xlims_freq)
+    # ax_specg_inh.set_ylim(ylims_freq)
+    # ax_specg_exc.set_xlim(xlims_freq)
+    # ax_specg_exc.set_ylim(ylims_freq)
 
     # Set the ticks
-    specg_freq_majors = [10, 40, 100]
+    specg_freq_majors = [10, 40, 120]
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
     specg_freq_majors = np.arange(0., (duration+50*ms)/second, .5) #[0.5, 0.6, 0.7, 1., 1.25, 1.5]
+    specg_freq_minors = np.arange(0., (duration+50*ms)/second, .1)
     ax_specg_exc.xaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
-    ax_specg_exc.xaxis.set_minor_locator(ticker.NullLocator())
+    ax_specg_exc.xaxis.set_minor_locator(ticker.FixedLocator(specg_freq_minors))
+
+    # tick sizes
+    ax_specg_exc.tick_params(axis='x', which='major', width=1.0)
+    ax_specg_exc.tick_params(axis='x', which='major', length=10)
+    ax_specg_exc.tick_params(axis='x', which='minor', width=1.0, labelsize=10)
+    ax_specg_exc.tick_params(axis='x', which='minor', length=5, labelsize=10, labelcolor='0.25')
 
     # Hide x axis for inh
     ax_specg_inh.xaxis.set_visible(False)
@@ -806,29 +825,46 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     ax_specg_inh.spines['right'].set_visible(False)
 
 
-    # Order Parameter
+    # Order Parameter / Phase
     # ------------------------
-    ax_order_param = fig.add_subplot(G_order_param[0])
-    axs.append(ax_order_param)
+    if mode.lower() == "order_parameter":
+        print('[er Parameter')
+        ax_common = fig.add_subplot(G_order_param[0])
+        xlims_common = xlims_rhythm
+        ylims_common = ylims_rhythm
+
+        # Set the title
+        ax_common.set_title('Order Parameter')
+
+    else:
+        print('[>] Phase')
+        ax_common = fig.add_subplot(G_phase[0])
+        xlims_common = xlims_rhythm
+        ylims_common = [-0.1, 2*np.pi+0.1]
+
+        # Set the title
+        ax_common.set_title('Phase')
+
+    axs.append(ax_common)
 
     # Set the x-y limits
-    ax_order_param.set_xlim(xlims_rhythm)
-    ax_order_param.set_ylim(ylims_rhythm)
+    ax_common.set_xlim(xlims_common)
+    ax_common.set_ylim(ylims_common)
 
     # Set x-y ticks
-    ax_order_param_majors = np.arange(0., (duration+50*ms)/second, .5)
-    ax_order_param.xaxis.set_major_locator(ticker.FixedLocator(ax_order_param_majors))
-    ax_order_param.xaxis.set_minor_locator(ticker.NullLocator())
+    # ax_common_majors = np.arange(0., (duration+50*ms)/second, .5)
+    # ax_common.xaxis.set_major_locator(ticker.FixedLocator(ax_order_param_majors))
+    # ax_common.xaxis.set_minor_locator(ticker.NullLocator())
 
     # Hide x-y axes
-    # ax_order_param.xaxis.set_visible(False)
-    ax_order_param.yaxis.set_visible(False)
+    ax_common.xaxis.set_visible(False)
+    ax_common.yaxis.set_visible(False)
 
     # Hide some spines
-    ax_order_param.spines['top'].set_visible(False)
-    ax_order_param.spines['bottom'].set_visible(False)
-    ax_order_param.spines['left'].set_visible(False)
-    ax_order_param.spines['right'].set_visible(False)
+    ax_common.spines['top'].set_visible(False)
+    ax_common.spines['bottom'].set_visible(False)
+    ax_common.spines['left'].set_visible(False)
+    ax_common.spines['right'].set_visible(False)
 
 
     # Rhythm
@@ -837,7 +873,7 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     axs.append(ax_rhythm)
 
     # Set the title
-    # ax_rhythm.set_title('Theta Input')
+    ax_rhythm.set_title('Theta Rhythm')
 
     # Set the x-y limits
     ax_rhythm.set_xlim(xlims_rhythm)
@@ -900,8 +936,10 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
         N_inh = settings.N_all[area_idx][1]
 
         # select some neurons randomly, subscaling
-        exc_mixed = np.arange(0, N_exc, int(N_exc/N_scaling))
-        inh_mixed = np.arange(0, N_inh, int(N_inh/N_scaling))
+        print(int(N_exc/N_scaling))
+        print(int(N_inh/N_scaling))
+        exc_mixed = np.arange(0, N_exc+1, int(N_exc/N_scaling))
+        inh_mixed = np.arange(0, N_inh+1, int(N_inh/N_scaling))
 
         idx_exc = np.in1d(i_exc, exc_mixed)
         idx_inh = np.in1d(i_inh, inh_mixed)
@@ -913,28 +951,35 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
 
         # assign new neuron count numbers
         cnt = 0
+        i_exc_sub_new = np.copy(i_exc_sub)
         for ii in exc_mixed:
             idx_tmp = np.where(i_exc_sub == ii)
-            i_exc_sub[idx_tmp] = cnt
+            # print('changing ', ii, 'to ', cnt)
+            i_exc_sub_new[idx_tmp] = cnt
             cnt += 1
+        i_exc_sub = i_exc_sub_new
 
         # cnt = 0
-        for jj in inh_mixed:
-            idx_tmp = np.where(i_inh_sub == jj)
-            i_inh_sub[idx_tmp] = cnt
+        cnt += N_gap
+        i_inh_sub_new = np.copy(i_inh_sub)
+        for ii in inh_mixed:
+            idx_tmp = np.where(i_inh_sub == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_inh_sub_new[idx_tmp] = cnt
             cnt += 1
+        i_inh_sub = i_inh_sub_new
 
         # select axis
         ax_curr = axs[0][area_idx]
 
         # inhibitory
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1, marker='o', c=c_inh, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=0.75, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
 
         # excitatory
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1, marker='o', c=c_exc, edgecolors=None, alpha=.25, zorder=1, rasterized=False)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=0.75, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
 
         # Calculate mean firing rates
-        t_lims_adj = [2000*ms, 3000*ms]
+        t_lims_adj = [duration-1*second, duration]
         duration_adj = t_lims_adj[1] - t_lims_adj[0]
 
         # FR_inh_mean = (len(t_inh)/duration)/N_inh
@@ -943,8 +988,12 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=duration+200*ms, y=150, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=duration+200*ms, y=50, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=duration+200*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=duration+200*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+
+        # Shade the areas
+        ax_curr.fill_betweenx(y=[N_scaling+N_gap, ylims_raster[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_inh, alpha=0.1)
+        ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
 
 
     # ==================
@@ -960,7 +1009,7 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
 
     # vertical lines at x-points
     pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
-    fval = 1/(mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    fval = 1/(np.mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
 
     # for peak in pks:
         # if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
@@ -971,25 +1020,40 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
             # ax_rhythm.vlines(x=peak*dt, ymin=-15.85, ymax=rhythm[peak], color='black', ls='--', linewidth=0.5, zorder=11, clip_on=False)
 
     # stimulation line
-    ax_rhythm.vlines(x=t_stim, ymin=-16., ymax=1., color='red', ls='-', linewidth=0.5, zorder=11, clip_on=False)
+    ax_rhythm.vlines(x=t_stim, ymin=-16., ymax=1., color='gray', ls='-', linewidth=1.5, zorder=11, rasterized=False, clip_on=False)
 
     # text frequency label
-    ax_rhythm.text(x=duration+100*ms, y=1.1, s=r"$f_\theta={0:.2f}$Hz".format(fval), ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=duration+100*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
-    # add_sizebar(ax_rhythm, [duration+100*ms, duration+100*ms], [0, 0.5], 'black', '0.5nA')
+    add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'])
 
 
     # ==================
     # Plot the order parameter
     # ==================
-    order_param = order_param_mon.coherence[0]
+    if mode == "order_parameter":
+        data = order_param_mon.coherence[0]
+
+        # asymptote
+        ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
+
+        # add a sizebar for the y-axis
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt')
+
+    else:
+        data = order_param_mon.phase[0]
+        data += (1.*(data<0)*2*np.pi)
+
+        # add a sizebar for the y-axis
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
+
+        # text with stimulation phase [deg/rad]
+        ax_common.scatter(x=t_stim, y=data[int(t_stim*fs)], s=12, marker='o', c='k')
+        ax_common.text(x=t_stim-55*ms, y=data[int(t_stim*fs)]+0.25, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # Data plotting
-    ax_order_param.plot(np.arange(0.,duration,dt), order_param, ls='-', c='k', linewidth=1.2, rasterized=True, zorder=1)
-
-    # asymptote
-    ax_order_param.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
+    ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
 
     # ==================
@@ -998,37 +1062,35 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
+    # Normalize the FRs
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_exc
 
-    # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=True)
-    # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=True)
-    ax_rates.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=True)
-    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=True)
+    # Plot the FRs
+    ax_rates.plot(tv_inh_FR, FR_inh_norm+FR_exc_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
+    ax_rates.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
 
     # add labels
     # ax_rate_inh.set_title('Inhibitory', color=c_inh, loc='left')
     # ax_rate_exc.set_title('Excitatory', color=c_exc, loc='left')
 
-    # ax_rate_inh.text(x=-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
-    # ax_rate_exc.text(x=-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
-    ax_rates.text(x=-100*ms, y=ylims_rates[1]-50, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
-    ax_rates.text(x=-100*ms, y=ylims_rates[0]+50, s='Excitatory', ha='center', color=c_exc, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]+FR_exc_norm.max()+rates_gap+FR_inh_norm.max()/2, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[0]+FR_exc_norm.max()/2, s='Excitatory', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
     # add_sizebar(ax_rate_exc, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
-    add_sizebar(ax_rates, [duration+100*ms, duration+100*ms], [0, 50], 'black', '50Hz')
+    add_sizebar(ax_rates, [duration+100*ms, duration+100*ms], [0, 100], 'black', '100Hz')
 
     # ==================
     # Plot the spectrograms
     # ==================
     fv_inh, tv_inh, pspec_inh = my_specgram(signal=FR_inh_norm,
-                                fs=fs2,
+                                fs=fs_FR,
                                 window_width=window_width,
                                 window_overlap=noverlap)
 
     fv_exc, tv_exc, pspec_exc = my_specgram(signal=FR_exc_norm,
-                                fs=fs2,
+                                fs=fs_FR,
                                 window_width=window_width,
                                 window_overlap=noverlap)
 
@@ -1044,15 +1106,18 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     # maxval_dB = max(pspec_inh_dB.max(), pspec_exc_dB.max())
     # minval_dB = min(pspec_inh_dB.min(), pspec_exc_dB.min())
 
-    # pcm_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmp_inh, shading='gouraud')
-    # pcm_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc_dB, vmin=minval_dB, vmax=maxval_dB, cmap=newcmp_exc, shading='gouraud')
+    # set vmin/vmax for plotting
+    vmin = 1e-12
+    vmax = 1.
 
-    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh, cmap=newcmp_inh, shading='auto')
-    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc, cmap=newcmp_exc, shading='auto')
-    # im_inh = ax_specg_inh.imshow(pspec_inh_dB, cmap=newcmp_inh, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
-    # im_exc = ax_specg_exc.imshow(pspec_exc_dB, cmap=newcmp_exc, interpolation='nearest', vmin=minval_dB, vmax=maxval_dB, origin='lower', aspect='auto')
+    # normalization of colors in [vmin, vmax]
+    norm_inh = colors.Normalize(vmin=vmin, vmax=vmax)
+    norm_exc = colors.Normalize(vmin=vmin, vmax=vmax)
 
-    # pcm_inh= ax_specg_inh.specgram(FR_exc_norm, NFFT=window_width, detrend='none', Fs=fs2, window=sig.windows.hann(M=window_width, sym=False), noverlap=noverlap, scale_by_freq=False, mode='magnitude', scale='dB', sides='onesided')
+    # Plot as images
+    im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh/pspec_inh.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
+    im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc/pspec_exc.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
+
 
     # Colorbars
     # fig.colorbar(pcm_exc, ax=ax_specg_exc)
@@ -1066,6 +1131,27 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     # ax_specg_exc.plot([550*ms, 600*ms, None, 550*ms, 550*ms], [-60, -60, None, 0, 0], ls='-', c='r', linewidth=1., rasterized=True, clip_on=False)
     # ax_specg_exc.text(x=575*ms, y=-100, s='50ms', ha='center', fontproperties=fontprops, clip_on=False)
 
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='white', alpha=1.)
+
+    # place a text box in upper left in axes coords
+    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=11, transform=ax_specg_inh.transAxes, color=c_inh, verticalalignment='top', bbox=props)
+    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=11, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', bbox=props)
+
+    # Set the x-y limits
+    ax_specg_inh.set_xlim(xlims_freq)
+    ax_specg_inh.set_ylim(ylims_freq)
+    ax_specg_exc.set_xlim(xlims_freq)
+    ax_specg_exc.set_ylim(ylims_freq)
+
+    # Add colorbar
+    cbar_comm = fig.add_subplot(G_specg_cbars[0])
+    cbe = fig.colorbar(im_exc, cax=cbar_comm, aspect=1, ticks=[0., vmax])
+    cbe.outline.set_color('black')
+    cbe.outline.set_linewidth(0.5)
+    cbe.solids.set_rasterized(True)
+    cbe.dividers.set_color('none')
+    cbe.dividers.set_linewidth(5)
 
     # Generate the figure's name
     fig_name = generate_fig_name('Fig2_')
@@ -1075,7 +1161,6 @@ def plot_fig2_all(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, t
     # fig.savefig('figures/fig2_A.png', dpi=200, format='png')
 
     return fig, axs, fig_name
-
 
 
 def plot_fig2_CA1(spike_mon_E_all, spike_mon_I_all, rate_mon, order_param_mon, tv, stim_inp):

@@ -452,7 +452,7 @@ if __name__ == "__main__":
     # ax_specg_inh.set_ylim(ylims_freq)
     # ax_specg_exc.set_xlim(xlims_freq)
     # ax_specg_exc.set_ylim(ylims_freq)
-    #
+
     # Set the ticks
     specg_freq_majors = [10, 40, 120]
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
@@ -714,26 +714,25 @@ if __name__ == "__main__":
 
         # asymptote
         ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
+
+        # add a sizebar for the y-axis
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt')
+
     else:
         print('[+] Plotting phase...')
         data = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/order_param_mon_phase.txt')
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 
-    # Data plotting
-    ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
-
-    if args.order_parameter:
-        # add a sizebar for the y-axis
-        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt')
-    else:
         # add a sizebar for the y-axis
         add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
 
+        # text with stimulation phase [deg/rad]
+        ax_common.scatter(x=t_stim, y=data[int(t_stim*fs)], s=12, marker='o', c='k')
+        ax_common.text(x=t_stim-55*ms, y=data[int(t_stim*fs)]+0.25, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
 
-    # text with stimulation phase [deg/rad]
-    ax_common.scatter(x=t_stim, y=data[int(t_stim*fs)], s=12, marker='o', c='k')
-    ax_common.text(x=t_stim-55*ms, y=data[int(t_stim*fs)]+0.25, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
+    # Data plotting
+    ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
 
     # ==================
@@ -752,6 +751,7 @@ if __name__ == "__main__":
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_exc
 
+    # Plot the FRs
     # ax_rate_inh.plot(tv_inh_FR, FR_inh_norm, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=False)
     # ax_rate_exc.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=False)
     ax_rates.plot(tv_inh_FR, FR_inh_norm+FR_exc_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
@@ -786,8 +786,8 @@ if __name__ == "__main__":
                                 window_overlap=noverlap)
 
     # avoid division by zero in log transform
-    # pspec_inh[np.where(pspec_inh<1e-10)] = 1e-10
-    # pspec_exc[np.where(pspec_exc<1e-10)] = 1e-10
+    pspec_inh[np.where(pspec_inh<1e-10)] = 1e-10
+    pspec_exc[np.where(pspec_exc<1e-10)] = 1e-10
 
     # get log power
     # pspec_inh_dB = 10*np.log10(pspec_inh)
@@ -804,15 +804,17 @@ if __name__ == "__main__":
     # set vmin/vmax for plotting
     vmin = 1e-12
     vmax = 1.
+
+    # normalization of colors in [vmin, vmax]
     # norm_inh = colors.Normalize(vmin=-1, vmax=1)
     # norm_exc = colors.Normalize(vmin=-1, vmax=1)
-
     # norm_inh = colors.LogNorm(vmin=pspec_inh.min(), vmax=pspec_inh.max())
     # norm_exc = colors.LogNorm(vmin=pspec_exc.min(), vmax=pspec_exc.max())
     norm_inh = colors.Normalize(vmin=vmin, vmax=vmax)
     norm_exc = colors.Normalize(vmin=vmin, vmax=vmax)
     # norm_com = colors.Normalize(vmin=1e-12, vmax=.5)
 
+    # Plot as images
     im_inh = ax_specg_inh.pcolormesh(tv_inh, fv_inh, pspec_inh/pspec_inh.max(), cmap='inferno', norm=norm_inh, shading='auto', rasterized=True)
     im_exc = ax_specg_exc.pcolormesh(tv_exc, fv_exc, pspec_exc/pspec_exc.max(), cmap='inferno', norm=norm_exc, shading='auto', rasterized=True)
 
@@ -870,6 +872,7 @@ if __name__ == "__main__":
     # cbe.dividers.set_color('none')
     # cbe.dividers.set_linewidth(5)
 
+    # Add the colorbar
     cbar_comm = fig.add_subplot(G_specg_cbars[0])
     cbe = fig.colorbar(im_exc, cax=cbar_comm, aspect=1, ticks=[0., vmax])
     cbe.outline.set_color('black')

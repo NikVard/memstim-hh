@@ -585,7 +585,7 @@ tv = linspace(0, settings.duration/second, int(settings.duration/(settings.stim_
 # generate stimulation signal
 if settings.I_stim[0]:
     print(bcolors.GREEN + '[+]' + bcolors.ENDC + ' Stimulation ON')
-    xstim = stimulation.generate_stim(duration=settings.stim_duration,
+    xstim, tv_stim = stimulation.generate_stim(duration=settings.stim_duration,
                                       dt=settings.stim_dt,
                                       I_stim=settings.I_stim,
                                       stim_on=settings.stim_onset,
@@ -598,7 +598,8 @@ if settings.I_stim[0]:
     # inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 else:
     print(bcolors.RED + '[-]' + bcolors.ENDC + ' No stimulation defined; using empty TimedArray')
-    xstim = zeros(int(settings.stim_duration/settings.stim_dt))
+    xstim = zeros(tv.shape)
+    tv_stim = tv
 
 inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
 
@@ -891,19 +892,19 @@ print("[+] Saving figure 'figures/%s'" %fig_name)
 kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Plot more stuff
-fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv, xstim)
+fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # newer version
-fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv, xstim)
+fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
 plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Fig2 version
-fig2, axs2, fig_name = plot_fig2_all(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv, xstim)
+fig2, axs2, fig_name = plot_fig2_all(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv_stim, xstim)
 plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig2.savefig(os.path.join(dirs['figures'], fig_name))

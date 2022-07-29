@@ -103,4 +103,4 @@ def generate_stim(duration, dt=1e-4, stim_on=.2, I_stim=[1.], nr_of_trains=5, nr
 
     stimulation[i:i+len(waveform)] = waveform
 
-    return stimulation
+    return stimulation, tv
