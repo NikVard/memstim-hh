@@ -9,6 +9,7 @@ import os
 import json
 import time
 import subprocess
+import numpy as np
 from numpy import pi
 
 # Constants
