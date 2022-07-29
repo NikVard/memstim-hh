@@ -100,7 +100,7 @@ def init(data):
 
     if custom_conn:
         # Custom connectivity
-        print(bcolors.YELLOW + '[!]' + bcolors.ENDC + 'Custom inter-connectivity being used')
+        print('[!] Custom inter-connectivity being used')
         p_custom = data['connectivity']['inter_custom']
 
         p_inter_all = []
@@ -115,7 +115,7 @@ def init(data):
             p_inter_all.append(l0)
     else:
         # Default mono/tri connectivity
-        print('[*] Default inter-connectivity for mono-/tri-synaptic pathways')
+        print('[!] Default inter-connectivity for mono-/tri-synaptic pathways')
 
         p_mono = data['connectivity']['inter']['p_mono'] # monosynaptic pathway connectivity
         p_tri = data['connectivity']['inter']['p_tri'] # trisynaptic pathway connectivity
