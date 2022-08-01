@@ -840,7 +840,31 @@ print('\n[50] Starting simulation...')
 print('-'*32)
 
 start = time.time()
-net.run(settings.duration, report='text', report_period=10*second, profile=True)
+t_elapsed = 0*ms
+
+# Theta OFF
+print("[+] Theta off; nothing happening")
+G_K.kN = 0
+G_pop_avg.G_out = 0.
+t_run = 500*ms
+net.run(t_run, report='text', report_period=10*second, profile=True)
+t_elapsed += t_run
+
+# Theta ON + stim
+print("[+] Theta on + stim.")
+G_K.kN = settings.kN_frac
+G_pop_avg.G_out = settings.r_gain
+t_run = settings.duration - 1.5*second
+net.run(t_run, report='text', report_period=10*second, profile=True)
+t_elapsed += t_run
+
+# Theta off
+print("[+] Theta off | relaxation")
+G_pop_avg.G_out = 0.
+t_run = 1*second
+net.run(t_run, report='text', report_period=10*second, profile=True)
+t_elapsed += t_run
+
 end = time.time()
 print('-'*32)
 print(bcolors.GREEN + '[+]' + ' Simulation ended' + bcolors.ENDC)
