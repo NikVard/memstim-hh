@@ -34,6 +34,13 @@ p_inter_all = None
 p_mono = None # def: 0.2 # monosynaptic pathway connectivity
 p_tri = None # def: 0.45 # trisynaptic pathway connectivity
 
+# Fixed input settings
+fixed_input_enabled = False
+fixed_input_low = 0.
+fixed_input_high = 0.
+fixed_input_frequency = 0.
+fixed_input_delay = 0.
+
 # Kuramoto settings
 N_Kur = None
 f0 = 4 # Hz
@@ -134,6 +141,16 @@ def init(data):
     dt = data['simulation']['dt']*second
     debugging = data['simulation']['debugging']
 
+    # Inputs
+    # Fixed input
+    global fixed_input_enabled, fixed_input_low, fixed_input_high, fixed_input_frequency, fixed_input_delay
+    fixed_input_enabled = bool(data['fixed_input']['enabled'])
+    fixed_input_low = data['fixed_input']['low']*nA
+    fixed_input_high = data['fixed_input']['high']*nA
+    fixed_input_frequency = data['fixed_input']['frequency']*Hz
+    fixed_input_delay = data['fixed_input']['delay']*second
+
+    # Kuramoto Oscillators
     global N_Kur, f0, sigma, kN_frac, k_gain, r_gain, offset
     N_Kur = data['Kuramoto']['N']
     f0 = data['Kuramoto']['f0']

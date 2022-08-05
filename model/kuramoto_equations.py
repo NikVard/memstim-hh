@@ -34,12 +34,16 @@ syn_kuramoto_eqs = '''
 pop_avg_eqs = '''
     coherence = sqrt(x**2 + y**2) : 1
     phase = arctan(y/x) + int(x<0 and y>0)*pi - int(x<0 and y<0)*pi: 1
-    rhythm = coherence * cos(phase) : 1
-    rhythm_pos = coherence * (cos(phase)+1)/2 : 1
-    rhythm_simple = G_out*rhythm : amp
-    rhythm_abs = G_out*abs(rhythm) : amp
-    rhythm_rect = G_out*rhythm_pos : amp
-    rhythm_zero = 0*rhythm_rect : amp   # for debugging
+
+    # Rhythms
+    rhythm_default = coherence * cos(phase) : 1
+    rhythm_positive = coherence * (cos(phase)+1)/2 : 1
+    rhythm_abs = abs(rhythm_default) : amp
+    rhythm_rect = rhythm_positive : amp
+    rhythm_zero = 0*rhythm : amp   # for debugging
+
+    # Output selection
+    rhythm = G_out*rhythm_rect : amp
 
     x : 1
     y : 1

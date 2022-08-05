@@ -17,6 +17,7 @@ from model.globals import *
 from model.HH_equations import *
 from model.kuramoto_equations import *
 from model.filter_equations import *
+from model.fixed_input_equations import *
 from model.Vm_avg_eqs import *
 from model import settings
 from model import setup
@@ -212,7 +213,7 @@ G_E = NeuronGroup(N=settings.N_EC[0],
     name='EC_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_EC[0]*volt
+G_E.sigma = settings.sigma_EC[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -236,7 +237,7 @@ G_I = NeuronGroup(N=settings.N_EC[1],
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_EC[1]*volt
+G_I.sigma = settings.sigma_EC[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -273,7 +274,7 @@ G_E = NeuronGroup(N=settings.N_DG[0],
     name='DG_py')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_DG[0]*volt
+G_E.sigma = settings.sigma_DG[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -297,7 +298,7 @@ G_I = NeuronGroup(N=settings.N_DG[1],
     method=integ_method,
     name='DG_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_DG[1]*volt
+G_I.sigma = settings.sigma_DG[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -334,7 +335,7 @@ G_E = NeuronGroup(N=settings.N_CA3[0],
     name='CA3_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_CA3[0]*volt
+G_E.sigma = settings.sigma_CA3[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -358,7 +359,7 @@ G_I = NeuronGroup(N=settings.N_CA3[1],
     method=integ_method,
     name='CA3_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_CA3[1]*volt
+G_I.sigma = settings.sigma_CA3[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -395,7 +396,7 @@ G_E = NeuronGroup(N=settings.N_CA1[0],
     name='CA1_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_CA1[0]*volt
+G_E.sigma = settings.sigma_CA1[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -419,7 +420,7 @@ G_I = NeuronGroup(N=settings.N_CA1[1],
     method=integ_method,
     name='CA1_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_CA1[1]*volt
+G_I.sigma = settings.sigma_CA1[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -443,27 +444,27 @@ G_flat = make_flat(G_all)
 for ngroup in G_flat:
     ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
 
-    # # CA1 populations get stimulated
-    # if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
-    #     # print("[!] Stimulation applied @", ngroup.name)
-    #
-    #     # calculate the distance
-    #     # ngroup.r = 1 # 1 means on
-    #     # d0 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_sigma, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
-    #
-    #     # alternatively, calculate distances like so:
-    #     neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
-    #     elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
-    #     d0 = dst.cdist(elec_pos, neuron_pos)
-    #     ngroup.r = clip(100/(4*pi*d0), a_min=0, amax=1) # clip the values, r is NOT a gain
-    #     # ngroup.r = 1
-    # else:
-    #     ngroup.r = 0 # int -> same init. val. for all neurons
+    # CA1 populations get stimulated
+    if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
+        print("[!] Stimulation applied @", ngroup.name)
 
-    neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
-    elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
-    d0 = dst.cdist(elec_pos, neuron_pos)
-    ngroup.r = clip(100/(4*pi*d0), a_min=0, a_max=1) # clip the values, r is NOT a gain
+        # calculate the distance
+        # ngroup.r = 1 # 1 means on
+        # d0 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_sigma, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
+
+        # alternatively, calculate distances like so:
+        neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
+        elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
+        d0 = dst.cdist(elec_pos, neuron_pos)
+        # ngroup.r = clip(100/(4*pi*d0), a_min=0, amax=1) # clip the values, r is NOT a gain
+        ngroup.r = 1
+    else:
+        ngroup.r = 0 # int -> same init. val. for all neurons
+
+    # neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
+    # elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
+    # d0 = dst.cdist(elec_pos, neuron_pos)
+    # ngroup.r = clip(100/(4*pi*d0), a_min=0, a_max=1) # clip the values, r is NOT a gain
 
 
 # DEBUGGING DISTANCES
@@ -574,179 +575,10 @@ print('[\u2022]\tRate monitors: done')
 
 
 
-# Stimulation and other inputs
-# -------------------------------------------------------------#
-print('\n[20] Inputs and Stimulation...')
-print('-'*32)
-tv = linspace(0, settings.duration/second, int(settings.duration/(settings.stim_dt))+1)
-# xstim = settings.I_stim * logical_and(tv>settings.t_stim/second, tv<settings.t_stim/second+0.01)
-# inputs_stim = TimedArray(xstim, dt=settings.dt_stim)
-
-# generate stimulation signal
-if settings.I_stim[0]:
-    print(bcolors.GREEN + '[+]' + bcolors.ENDC + ' Stimulation ON')
-    xstim, tv_stim = stimulation.generate_stim(duration=settings.stim_duration,
-                                      dt=settings.stim_dt,
-                                      I_stim=settings.I_stim,
-                                      stim_on=settings.stim_onset,
-                                      nr_of_trains=settings.nr_of_trains,
-                                      nr_of_pulses=settings.nr_of_pulses,
-                                      stim_freq=settings.stim_freq,
-                                      pulse_width=settings.pulse_width,
-                                      pulse_freq=settings.pulse_freq,
-                                      ipi=settings.stim_ipi)
-    # inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
-else:
-    print(bcolors.RED + '[-]' + bcolors.ENDC + ' No stimulation defined; using empty TimedArray')
-    xstim = zeros(tv.shape)
-    tv_stim = tv
-
-inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
-
-
-f_rhythm = 6
-inp_theta_sin = 1*sin(2*pi*f_rhythm*tv)
-inp_theta_rect = (-cos(2*pi*f_rhythm*tv)+1)/2
-trail_zeros = zeros(int(200*ms/(settings.stim_dt*second)))
-inp_theta_slow = concatenate((trail_zeros, inp_theta_rect))
-inp_theta = TimedArray(inp_theta_slow*nA, dt=settings.stim_dt*second) # external theta (TESTING)
-
-
-
-# Kuramoto Oscillators (MS)
-# -------------------------------------------------------------#
-print('\n[30] Kuramoto Oscillators...')
-print('-'*32)
-
-# Make the necessary groups
-# f0 = settings.f0 # settings.f0 does not work inside equations
-# sigma = settings.sigma
-G_K = NeuronGroup(settings.N_Kur,
-    model=kuramoto_eqs_stim,
-    threshold='True',
-    method='euler',
-    name='Kuramoto_oscillators_N_%d' % settings.N_Kur)
-#G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
-#G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
-theta0 = 2*pi*rand(settings.N_Kur) # uniform U~[0,2π]
-omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur)) # ~N(2πf0,σ)
-G_K.Theta = theta0
-G_K.omega = omega0
-G_K.kN = settings.kN_frac
-G_K.G_in = settings.k_gain
-G_K.offset = settings.offset
-G_flat.append(G_K) # append to the group list!
-print('[\u2022]\tOscillators group: done')
-
-syn_kuramoto =  Synapses(G_K, G_K, on_pre=syn_kuramoto_eqs, method='euler', name='Kuramoto_intra')
-syn_kuramoto.connect(condition='i!=j')
-print('[\u2022]\tSynapses: done')
-
-# Kuramoto order parameter group
-G_pop_avg = NeuronGroup(1,
-    model=pop_avg_eqs,
-    #method='euler',
-    name='Kuramoto_averaging')
-r0 = 1/settings.N_Kur * sum(exp(1j*G_K.Theta))
-G_pop_avg.x = real(r0)  # avoid division by zero
-G_pop_avg.y = imag(r0)
-G_pop_avg.G_out = settings.r_gain
-G_flat.append(G_pop_avg) # append to the group list!
-syn_avg = Synapses(G_K, G_pop_avg, syn_avg_eqs, name='Kuramoto_avg')
-syn_avg.connect()
-print('[\u2022]\tOrder parameter group: done')
-
-
-
-# Firing Rate Filter Population
-# -------------------------------------------------------------#
-# Make the spikes-to-rates group
-print('\n[31] Spikes-to-Rates Filter...')
-print('-'*32)
-
-G_S2R = NeuronGroup(1,
-    model=firing_rate_filter_eqs,
-    method='exact',
-    #method='integ_method',
-    name='S2R_filter',
-    namespace=filter_params)
-G_S2R.Y = 0 # initial conditions
-G_flat.append(G_S2R) # append to the group list!
-print('[\u2022]\tGroup: done')
-
-
-
-# Connections
-# -------------------------------------------------------------#
-print('\n[32] Connecting oscillators and filters...')
-print('-'*32)
-
-# CA1 spikes-to-rates synapses
-# find the CA1-E group
-G_CA1_E = None
-for g in G_flat:
-    if g.name=='CA1_pyCAN':
-        G_CA1_E = g
-        break
-
-# connect the CA1-E group to the low-pass-filter spikes-2-rates (S2R) group
-if G_CA1_E:
-    syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='Y_post += (1/tauFR)/N_incoming', namespace=filter_params)
-    syn_CA1_2_rates.connect()
-print('[\u2022]\tCA1-to-S2R: done')
-
-# connect the S2R group to the Kuramoto oscillators by linking input X to firing rates (drive)
-G_K.X = linked_var(G_S2R, 'drive')
-print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
-
-# connect the Kuramoto ensemble rhythm to the I_exc variable in EC_E and EC_I (Kuramoto output as input to EC_E/I pop.)
-'''for g in G_flat:
-    if g.name=='EC_pyCAN' or g.name=='EC_inh':
-        print('>> Setting input rhythm for group ', g.name)
-        g.I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-'''
-# avoid linking when using a fixed theta input sin : TESTING
-# G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-# G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_zero')
-G_flat[0].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-G_flat[1].I_exc = linked_var(G_pop_avg, 'rhythm_rect')
-
-
-
-# Monitors
-# -------------------------------------------------------------#
-# Kuramoto monitors
-print('\n[33] Kuramoto and Filter Monitors...')
-print('-'*32)
-
-state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True)
-state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
-print('[\u2022]\tState monitor [Theta]: done')
-
-# spikes2rates monitor (vout)
-state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
-print('[\u2022]\tState monitor [drive]: done')
-
-'''
-G_CA1_E, G_CA1_I = None, None
-for g in G_flat:
-    if g.name=='CA1_pyCAN':
-        G_CA1_E = g
-    if g.name=='CA1_inh':
-        G_CA1_I = g
-    if G_CA1_E and G_CA1_I:
-        break
-
-mon_tmp_E = StateMonitor(G_CA1_E, [], record=True)
-mon_tmp_I = StateMonitor(G_CA1_I, [], record=True)
-'''
-
-
-
 # Add groups for monitoring the avg Vm
 # -------------------------------------------------------------#
 # Average Vm per group per area
-print('\n[34] Vm average groups...')
+print('\n[20] Vm average groups...')
 print('-'*32)
 
 G_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
@@ -778,17 +610,196 @@ for area_idx in range(4):
 
 
 
+# Make the spikes-to-rates group
+# -------------------------------------------------------------#
+print('\n[30] Spikes-to-rates group...')
+print('-'*32)
+
+G_S2R = NeuronGroup(1,
+    model=firing_rate_filter_eqs,
+    method='exact',
+    #method='integ_method',
+    name='S2R_filter',
+    namespace=filter_params)
+G_S2R.Y = 0 # initial conditions
+print('[\u2022]\tGroup: done')
+
+print('\n[31] Making the synapses...')
+# find the CA1-E group
+G_CA1_E = None
+for g in G_flat:
+    if g.name=='CA1_pyCAN':
+        G_CA1_E = g
+        break
+
+# connect the CA1-E group to the low-pass-filter spikes-2-rates (S2R) group
+if G_CA1_E:
+    syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='Y_post += (1/tauFR)/N_incoming', namespace=filter_params)
+    syn_CA1_2_rates.connect()
+print('[\u2022]\tConnecting CA1-to-S2R: done')
+
+# spikes2rates monitor (vout)
+print('\n[32] Adding monitors...')
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
+print('[\u2022]\tState monitor [drive]: done')
+
+
+
+# Inputs
+# -------------------------------------------------------------#
+print('\n[40] Inputs...')
+print('-'*32)
+
+G_inputs = []
+syn_inputs = []
+state_mon_inputs = []
+
+print('[+] Time-vector')
+tv = linspace(0, settings.duration/second, int(settings.duration/(settings.dt))+1)
+
+if settings.fixed_input_enabled:
+    # Fixed input
+    print('\n[41] Making the fixed input group...')
+
+    A0 = settings.fixed_input_low
+    A1 = settings.fixed_input_high
+    f_rhythm = settings.fixed_input_frequency
+
+    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using fixed input at %dHz | range [%d, %d]' % (f_rhythm, A0, A1))
+
+    # Make the input TimedArray
+    inp_theta_rect = (A1-A0)*(sin(2*pi*f_rhythm/Hz*tv-pi/2)+1)/2+A0
+    trail_zeros = zeros(int(settings.fixed_input_delay/(settings.dt*second)))
+    inp_theta_delayed = concatenate((trail_zeros, inp_theta_rect/nA))
+    inp_theta = TimedArray(inp_theta_delayed*nA, dt=settings.dt) # external theta (TESTING)
+    # THERE WAS A 0.5 GAIN HERE!!!
+
+    # Make the input group and append it to the list
+    G_input = NeuronGroup(1, model=fixed_input_TA_eqs,
+            threshold='False',
+            method='euler',
+            name='Fixed_input_%dHz' % f_rhythm)
+    G_inputs.append(G_input)
+    print('[\u2022]\tFixed input group: done')
+
+    # state monitor
+    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True)
+    state_mon_inputs.append(state_mon_theta_rhytm)
+    print('[\u2022]\tState monitor [rhythm]: done')
+
+else:
+    # Kuramoto Oscillators
+    print('\n[41] Making the Kuramoto oscillators group...')
+
+    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using dynamic input; Kuramoto oscillators of size N=%d w/ f0 = %dHz | rhythm gain: %d' % (settings.N_Kur, settings.f0, settings.r_gain))
+
+    # Make the necessary groups
+    # f0 = settings.f0 # settings.f0 does not work inside equations
+    # sigma = settings.sigma
+    G_K = NeuronGroup(settings.N_Kur,
+        model=kuramoto_eqs_stim,
+        threshold='True',
+        method='euler',
+        name='Kuramoto_oscillators_N_%d' % settings.N_Kur)
+    #G_K.Theta = '2*pi*rand()' # uniform U~[0,2π]
+    #G_K.omega = '2*pi*(f0+sigma*randn())' # normal N~(f0,σ)
+    theta0 = 2*pi*rand(settings.N_Kur) # uniform U~[0,2π]
+    omega0 = 2*pi*(settings.f0 + settings.sigma*randn(settings.N_Kur)) # ~N(2πf0,σ)
+    G_K.Theta = theta0
+    G_K.omega = omega0
+    G_K.kN = settings.kN_frac
+    G_K.G_in = settings.k_gain
+    G_K.offset = settings.offset
+    print('[\u2022]\tKuramoto oscillators group: done')
+
+    syn_kuramoto =  Synapses(G_K, G_K, on_pre=syn_kuramoto_eqs, method='euler', name='Kuramoto_intra')
+    syn_kuramoto.connect(condition='i!=j')
+    syn_inputs.append(syn_kuramoto)
+    print('[\u2022]\tSynapses (Kuramoto): done')
+
+    # Kuramoto order parameter group
+    G_pop_avg = NeuronGroup(1,
+        model=pop_avg_eqs,
+        #method='euler',
+        name='Kuramoto_averaging')
+    r0 = 1/settings.N_Kur * sum(exp(1j*G_K.Theta))
+    G_pop_avg.x = real(r0)  # avoid division by zero
+    G_pop_avg.y = imag(r0)
+    G_pop_avg.G_out = settings.r_gain
+    G_input = G_pop_avg # G_input as alias for G_pop_avg
+    G_inputs.append(G_input) # append to the group list!
+    print('[\u2022]\tOrder parameter group: done')
+
+    syn_avg = Synapses(G_K, G_pop_avg, syn_avg_eqs, name='Kuramoto_avg')
+    syn_avg.connect()
+    syn_inputs.append(syn_avg)
+    print('[\u2022]\tSynapses (OP): done')
+
+    # Connections
+    print('\n[42] Connecting oscillators and filters...')
+    print('-'*32)
+
+    # connect the S2R group to the Kuramoto oscillators by linking input X to firing rates (drive)
+    G_K.X = linked_var(G_S2R, 'drive')
+    print('[\u2022]\tLinking S2R to Kuramoto oscillators: done')
+
+    # Monitors
+    # Kuramoto monitors
+    print('\n[43] Kuramoto and Filter Monitors...')
+    print('-'*32)
+
+    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True)
+    state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
+    state_mon_inputs.append(state_mon_kuramoto)
+    state_mon_inputs.append(state_mon_order_param)
+    print('[\u2022]\tState monitor [Theta]: done')
+
+
+# connect the fixed input to the I_exc variable in EC_E and EC_I
+for g in G_flat:
+    if g.name=='EC_pyCAN' or g.name=='EC_inh':
+        print('[+] Linking input (theta rhythm) to group ', g.name)
+        g.I_exc = linked_var(G_input, 'rhythm')
+print('[\u2022]\tLinking input rhythm: done')
+print('[\u2022]\tInputs: done')
+
+
+
+# Stimulation and other inputs
+# -------------------------------------------------------------#
+print('\n[50] Stimulation...')
+print('-'*32)
+
+# generate stimulation signal
+if settings.I_stim[0]:
+    print(bcolors.GREEN + '[+]' + bcolors.ENDC + ' Stimulation ON')
+    xstim, tv_stim = stimulation.generate_stim(duration=settings.stim_duration,
+                                      dt=settings.stim_dt,
+                                      I_stim=settings.I_stim,
+                                      stim_on=settings.stim_onset,
+                                      nr_of_trains=settings.nr_of_trains,
+                                      nr_of_pulses=settings.nr_of_pulses,
+                                      stim_freq=settings.stim_freq,
+                                      pulse_width=settings.pulse_width,
+                                      pulse_freq=settings.pulse_freq,
+                                      ipi=settings.stim_ipi)
+else:
+    print(bcolors.RED + '[-]' + bcolors.ENDC + ' No stimulation defined; using empty TimedArray')
+    xstim = zeros(tv.shape)
+    tv_stim = tv
+
+inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
+
+
+
 # Create the Network
 # -------------------------------------------------------------#
-print('\n[40] Connecting the network...')
+print('\n[60] Connecting the network...')
 print('-'*32)
 
 net = Network()
 net.add(G_all) # add groups
-net.add(G_Vm_avg)
-net.add(G_K)
-net.add(G_pop_avg)
-net.add(G_S2R)
+net.add(G_inputs)
 net.add(G_Vm_avg)
 print('[\u2022]\tNetwork groups: done')
 
@@ -804,10 +815,7 @@ for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
     if syn_Vm_avg !=0:
         net.add(syn_Vm_avg)
 
-net.add(syn_kuramoto) # kuramoto intra-synapses
-net.add(syn_avg) # kuramoto population average (order parameter) synapses
-net.add(syn_CA1_2_rates) # CA1 spikes2rates
-net.add(syn_Vm_avg_all) # Vm synapses
+net.add(syn_inputs) # synapses avout inputs
 print('[\u2022]\tNetwork connections: done')
 
 net.add(state_mon_E_all) # monitors
@@ -816,18 +824,9 @@ net.add(spike_mon_E_all)
 net.add(spike_mon_I_all)
 net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
-net.add(state_mon_kuramoto)
-net.add(state_mon_order_param)
-net.add(state_mon_s2r)
-# net.add(state_mon_noise_all)
+net.add(state_mon_inputs)
 net.add(state_mon_Vm_avg)
 print('[\u2022]\tNetwork monitors: done')
-
-# net.add(state_mon_Vm_EC_exc, state_mon_Vm_EC_inh, state_mon_Vm_CA1_exc, state_mon_Vm_CA1_inh)
-# print('[\u2022]\tVm monitors: done')
-#
-# net.add(state_mon_EC_ICAN)
-# print('[\u2022]\tEC I_CAN monitor: done')
 
 
 
@@ -836,34 +835,35 @@ print('[\u2022]\tNetwork monitors: done')
 defaultclock.dt = settings.dt
 tstep = defaultclock.dt
 
-print('\n[50] Starting simulation...')
+print('\n[70] Starting simulation...')
 print('-'*32)
 
 start = time.time()
 t_elapsed = 0*ms
+net.run(settings.duration, report='text', report_period=10*second, profile=True)
 
-# Theta OFF
-print("[+] Theta off; nothing happening")
-G_K.kN = 0
-G_pop_avg.G_out = 0.
-t_run = 500*ms
-net.run(t_run, report='text', report_period=10*second, profile=True)
-t_elapsed += t_run
-
-# Theta ON + stim
-print("[+] Theta on + stim.")
-G_K.kN = settings.kN_frac
-G_pop_avg.G_out = settings.r_gain
-t_run = settings.duration - 1.5*second
-net.run(t_run, report='text', report_period=10*second, profile=True)
-t_elapsed += t_run
-
-# Theta off
-print("[+] Theta off | relaxation")
-G_pop_avg.G_out = 0.
-t_run = 1*second
-net.run(t_run, report='text', report_period=10*second, profile=True)
-t_elapsed += t_run
+# # Theta OFF
+# print("[+] Theta off; nothing happening")
+# G_K.kN = 0
+# G_pop_avg.G_out = 0.
+# t_run = 200*ms
+# net.run(t_run, report='text', report_period=10*second, profile=True)
+# t_elapsed += t_run
+#
+# # Theta ON + stim
+# print("[+] Theta on + stim.")
+# G_K.kN = settings.kN_frac
+# G_pop_avg.G_out = settings.r_gain
+# t_run = settings.duration - (500*ms + t_elapsed)
+# net.run(t_run, report='text', report_period=10*second, profile=True)
+# t_elapsed += t_runinp_theta
+#
+# # Theta OFF
+# print("[+] Theta off | relaxation")
+# G_pop_avg.G_out = 0.
+# t_run = settings.duration - t_elapsed
+# net.run(t_run, report='text', report_period=10*second, profile=True)
+# t_elapsed += t_run
 
 end = time.time()
 print('-'*32)
@@ -873,7 +873,7 @@ print()
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
 
 
-print('\n[51] Mean firing rates...')
+print('\n[71] Mean firing rates...')
 print('-'*32)
 
 for area in range(len(G_all)):
@@ -888,11 +888,15 @@ for area in range(len(G_all)):
 
 # Plot the results
 # -------------------------------------------------------------#
-print('\n[60] Post-simulation actions')
+print('\n[80] Post-simulation actions')
 print('-'*32)
 
-print('\n[61] Plotting results...')
+print('\n[81] Plotting results...')
 tight_layout()
+
+# Plot the 3D shape
+print("[+] Saving figure 'figures/anatomy.png'")
+fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
 
 # raster plot of all regions
 # raster_fig, raster_axs, fig_name = plot_raster_all(spike_mon_E_all, spike_mon_I_all)
@@ -909,38 +913,41 @@ for s in range(samples):
     r[s] = 1/N_Kur * sum(exp(1j*state_mon_kuramoto.Theta[:,s])) # order parameter r(t)
 '''
 
-# kuramoto order parameter plots
-kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(state_mon_order_param)
-plot_watermark(kuramoto_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-print("[+] Saving figure 'figures/%s'" %fig_name)
-kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
-
-# Plot more stuff
-fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
-plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-print("[+] Saving figure 'figures/%s'" %fig_name)
-fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
-
-# newer version
-fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
-plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-print("[+] Saving figure 'figures/%s'" %fig_name)
-fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
-
 # Fig2 version
-fig2, axs2, fig_name = plot_fig2_all(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv_stim, xstim)
-plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+if settings.fixed_input_enabled:
+    # Plot the non-Kuramoto theta drive
+    fig_theta, ax_theta = subplots(1,1, figsize=(12,9))
+    ax_theta.plot(tv, inp_theta_delayed[:len(tv)])
+    print("[+] Saving figure 'figures/theta_inp.png'")
+    fig_theta.savefig(os.path.join(dirs['figures'], 'theta_inp.png'))
+
+    fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_theta_rhytm, tv_stim, xstim)
+    plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+else:
+    # kuramoto order parameter plots
+    kuramoto_fig, kuramoto_axs, fig_name = plot_kuramoto(state_mon_order_param)
+    plot_watermark(kuramoto_fig, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+    print("[+] Saving figure 'figures/%s'" %fig_name)
+    kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
+
+    fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_theta_rhytm, tv_stim, xstim, mode="phase")
+    plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+
 print("[+] Saving figure 'figures/%s'" %fig_name)
 fig2.savefig(os.path.join(dirs['figures'], fig_name))
 
 
-# Plot the 3D shape
-fig_anat.savefig(os.path.join(dirs['figures'], 'anatomy.png'))
-
-# Plot the non-Kuramoto theta drive
-fig_theta, ax_theta = subplots(1,1, figsize=(12,9))
-ax_theta.plot(tv, inp_theta_slow[:len(tv)])
-fig_theta.savefig(os.path.join(dirs['figures'], 'theta_inp.png'))
+# # Plot more stuff
+# fig_extra, extra_axs, fig_name = plot_network_output(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
+# plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+# print("[+] Saving figure 'figures/%s'" %fig_name)
+# fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
+#
+# # newer version
+# fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
+# plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+# print("[+] Saving figure 'figures/%s'" %fig_name)
+# fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # tight_layout()
 #show()
@@ -949,14 +956,16 @@ fig_theta.savefig(os.path.join(dirs['figures'], 'theta_inp.png'))
 
 # Save the results as .txt files (rows: time | cols: data)
 # -------------------------------------------------------------#
-print('\n[62] Saving results...')
+print('\n[82] Saving results...')
 
-# Kuramoto monitors
-print("[+] Saving Kuramoto monitor data")
-# np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm_rect.T/nA, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
+# if not using fixed input
+if not settings.fixed_input_enabled:
+    # Kuramoto monitors
+    print("[+] Saving Kuramoto monitor data")
+    # np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm_rect.T/nA, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
 
 # CA1 firing rate
 print("[+] Saving CA1 firing rate")
@@ -977,7 +986,7 @@ for StM in make_flat(state_mon_Vm_avg):
 
 # Save the spikes and their times
 # -------------------------------------------------------------#
-print("\n[63] Saving spikes in time....")
+print("\n[83] Saving spikes in time....")
 SM_i = []
 SM_t = []
 for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
@@ -998,7 +1007,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
 
 # Save the positions of the neurons in npy files
 # -------------------------------------------------------------#
-print("\n[64] Saving neuron positions...")
+print("\n[84] Saving neuron positions...")
 for G in G_flat:
     try:
         print("[+] Saving group ", G.name)
@@ -1010,19 +1019,8 @@ for G in G_flat:
         print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
         continue
 
-# Save the membrane voltages for EC/CA1 in npy files
-# -------------------------------------------------------------#
-# np.save(os.path.join(dirs['data'], 'Vm_EC_E'), state_mon_Vm_EC_exc.v)
-# np.save(os.path.join(dirs['data'], 'Vm_EC_I'), state_mon_Vm_EC_inh.v)
-# np.save(os.path.join(dirs['data'], 'Vm_CA1_E'), state_mon_Vm_CA1_exc.v)
-# np.save(os.path.join(dirs['data'], 'Vm_CA1_I'), state_mon_Vm_CA1_inh.v)
 
-# np.save(os.path.join(dirs['data'], 'EC_I_CAN'), state_mon_EC_ICAN.I_CAN)
-
-# Save the alternative theta input
-# -------------------------------------------------------------#
-# np.save(os.path.join(dirs['data'], 'inp_theta'), inp_theta_slow)
-
+# print("\n[85] Cleanup...")
 # print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
 # clear_cache('cython')
 
