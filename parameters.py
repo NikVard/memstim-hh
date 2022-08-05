@@ -15,8 +15,10 @@ from numpy import pi
 # Constants
 # noise_exc = 10e-06
 # noise_inh = 1e-06
-noise_exc = 0.
-noise_inh = 0.
+noise_exc = 10. # uV
+noise_inh = 1. # uV
+noise_exc = 0. # uV
+noise_inh = 0. # uV
 
 # Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
@@ -26,8 +28,8 @@ b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
 I_in = 0.22 # 0.22 input
-stim_amplitude = [10.] # nA
-stim_onset = 1.5 # sec
+stim_amplitude = [1.] # nA
+stim_onset = 1.333 # sec
 
 noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
 noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
@@ -96,17 +98,6 @@ _data = {
         }
     },
 
-    # Kuramoto oscillator parameters
-    "Kuramoto" : {
-        "N"             : 250,
-        "f0"            : 6.,
-        "sigma"         : 0.5,  # normal std
-        "kN"            : 15,
-        "gain_reset"    : 4.0,
-        "gain_rhythm"   : np.around(I_in, 2), # nA
-        "offset"        : -0*pi/2
-    },
-
     # connectivity parameters
     "connectivity" : {
         "intra" : { # intra-area conn. probabilities per area |
@@ -145,9 +136,29 @@ _data = {
     #     "gmax_i"    : 600.
     # },
 
+    # input parameters
+    "fixed_input" : {
+        "enabled"       : 1,                # [1=yes | 0=no]
+        "low"           : 0.0,              # A0
+        "high"          : 1.0,              # A1
+        "frequency"     : 6.0,              # Hz
+        "delay"         : 0.25,             # seconds
+    },
+
+    # Kuramoto oscillators parameters
+    "Kuramoto" : {
+        "N"             : 250,
+        "f0"            : 6.,
+        "sigma"         : 0.5,  # normal std
+        "kN"            : 15,
+        "gain_reset"    : 4.0,
+        "gain_rhythm"   : np.around(I_in, 2), # nA
+        "offset"        : -0*pi/2
+    },
+
     # stimulation parameters
     "stimulation" : {
-        "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
+        "target"        : "EC",             # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 3.,               # [sec]

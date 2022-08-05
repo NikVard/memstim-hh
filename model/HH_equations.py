@@ -18,7 +18,7 @@ Implementation Notes
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
 py_CAN_inp_eqs = '''
-    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_CAN = ((gCAN) * (size)) * mCAN**2 * (v + 20.*mV) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
             mCANInf = alpha2 / (alpha2 + (0.0002*ms**-1)) : 1
@@ -68,7 +68,7 @@ py_CAN_inp_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
@@ -135,7 +135,7 @@ py_CAN_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
@@ -195,7 +195,7 @@ py_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
@@ -211,7 +211,7 @@ py_eqs = '''
 """ Inhibitory Neuron Types """
 """ ------------------------------------------------------------------------ """
 inh_inp_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + G_sin*I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     Vm = (- I_leak - I_K - I_Na) / ((1*ufarad*cm**-2) * (size))*tstep : volt
     I_leak = ((0.1e-3*siemens*cm**-2) * (size)) * (v - (-65.*mV)) : amp
     I_K = ((9e-3*siemens*cm**-2) * (size)) * (n**4) * (v - (-90.*mV)) : amp
@@ -239,7 +239,7 @@ inh_inp_eqs = '''
         dhi/dt = -hi/(10.*ms) : siemens
 
 
-    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_inh * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
@@ -285,7 +285,7 @@ inh_eqs = '''
         dhi/dt = - hi / (10.*ms) : siemens
 
 
-    noise = sigma * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_inh * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
