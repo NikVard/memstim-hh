@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 
 # figures
-/figures
-*.png
+#/figures
+#*.png
 *.pdf
 
 # backups
