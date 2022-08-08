@@ -339,7 +339,7 @@ if __name__  == "__main__":
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
         # _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
-        _data["stimulation"]["I"] = np.round(val,1)
+        _data["stimulation"]["I"] = [np.round(val,1)]
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
