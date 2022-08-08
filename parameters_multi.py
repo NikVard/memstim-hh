@@ -12,20 +12,12 @@ import subprocess
 import numpy as np
 from numpy import pi
 
-# Constants
-noise_exc = 10e-06
-noise_inh = 1e-06
-
-# Default parameters
+Constants
+# noise_exc = 10. # uV
+# noise_inh = 1. # uV
+noise_exc = 0. # uV
+noise_inh = 0. # uV
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
-a = b = c = d = 0. # connections
-# a = 1.5 # 13
-# b = 0.2 # 0.14
-# c = 1.5 # 1.1
-# d = 0.25 # 0.2
-I_in = 0.22 # 0.22 input
-stim_amplitude = [10.] # nA
-stim_onset = 1.5 # sec
 
 noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
 noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
@@ -38,6 +30,17 @@ noise_CA3_inh = 0. #
 noise_CA1_exc = 0. # 0.0031
 noise_CA1_inh = 0. #
 
+# Default parameters
+a = b = c = d = 0. # connections
+a = 13. # 13
+b = 0.14 # 0.14
+c = 1.1 # 1.1
+d = 0.2 # 0.2
+I_in = 0.22 # 0.22 input
+stim_amplitude = [0.] # nA
+stim_onset = 1.333 # sec
+
+# Default parameters
 _data = {
     "seed_val"  : 42,       # Reproducibility
 
@@ -47,61 +50,50 @@ _data = {
             "E" : {
                 "N"     : int(10e3),
                 "type"  : "PyCAN",
-                "noise" : np.around(noise_EC_exc, 6)        # Volts
+                "noise" : noise_exc     # Volts
             },
             "I" : {
                 "N"     : int(1e3),
                 "type"  : "Inh",
-                "noise" : np.around(noise_EC_inh, 6)
+                "noise" : noise_inh
             }
         },
         "DG"    : {
             "E" : {
                 "N"     : int(10e3),
                 "type"  : "Py",
-                "noise" : np.around(noise_DG_exc, 6)
+                "noise" : noise_exc
             },
             "I" : {
                 "N"     : int(0.1e3),
                 "type"  : "Inh",
-                "noise" : np.around(noise_DG_inh, 6)
+                "noise" : noise_inh
             }
         },
         "CA3"   : {
             "E" : {
                 "N"     : int(1e3),
                 "type"  : "PyCAN",
-                "noise" : np.around(noise_CA3_exc, 6)
+                "noise" : noise_exc
             },
             "I" : {
                 "N"     : int(0.1e3),
                 "type"  : "Inh",
-                "noise" : np.around(noise_CA3_inh, 6)
+                "noise" : noise_inh
             }
         },
         "CA1"   : {
             "E" : {
                 "N"     : int(10e3),
                 "type"  : "PyCAN",
-                "noise" : np.around(noise_CA1_exc, 6)
+                "noise" : noise_exc
             },
             "I" : {
                 "N"     : int(1e3),
                 "type"  : "Inh",
-                "noise" : np.around(noise_CA1_inh, 6)
+                "noise" : noise_inh
             }
         }
-    },
-
-    # Kuramoto oscillator parameters
-    "Kuramoto" : {
-        "N"             : 250,
-        "f0"            : 6.,
-        "sigma"         : 0.5,  # normal std
-        "kN"            : 15,
-        "gain_reset"    : 1.75,
-        "gain_rhythm"   : np.around(I_in, 2), # nA
-        "offset"        : -0*pi/2
     },
 
     # connectivity parameters
@@ -142,9 +134,29 @@ _data = {
     #     "gmax_i" : 60.
     # },
 
+    # input parameters
+    "fixed_input" : {
+        "enabled"       : 1,                # [1=yes | 0=no]
+        "low"           : 0.0,              # A0
+        "high"          : 1.0,              # A1
+        "frequency"     : 6.0,              # Hz
+        "delay"         : 0.25,             # seconds
+    },
+
+    # Kuramoto oscillator parameters
+    "Kuramoto" : {
+        "N"             : 250,
+        "f0"            : 6.,
+        "sigma"         : 0.5,  # normal std
+        "kN"            : 15,
+        "gain_reset"    : 1.75,
+        "gain_rhythm"   : np.around(I_in, 2), # nA
+        "offset"        : -0*pi/2
+    },
+
     # stimulation parameters
     "stimulation" : {
-        "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
+        "target"        : "EC",             # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 2.,               # [sec]
@@ -296,8 +308,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.0, 0.21
-    vals = np.arange(vmin, vmax, 0.01)
+    vmin,vmax = 0.0, 1.
+    vals = np.arange(vmin, vmax, 0.1)
     cnt = 0
     stim_t_off = 1.0
     for val in vals:
@@ -317,7 +329,8 @@ if __name__  == "__main__":
         # _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
-        _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
+        # _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
+        _data["stimulation"]["I"] = np.round(val,1)
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
