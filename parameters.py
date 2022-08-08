@@ -13,23 +13,11 @@ import numpy as np
 from numpy import pi
 
 # Constants
-# noise_exc = 10e-06
-# noise_inh = 1e-06
 noise_exc = 10. # uV
 noise_inh = 1. # uV
 noise_exc = 0. # uV
 noise_inh = 0. # uV
-
-# Default parameters
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
-a = b = c = d = 0. # connections
-a = 13. # 13
-b = 0.14 # 0.14
-c = 1.1 # 1.1
-d = 0.2 # 0.2
-I_in = 0.22 # 0.22 input
-stim_amplitude = [1.] # nA
-stim_onset = 1.333 # sec
 
 noise_EC_exc = noise_DG_exc = noise_CA3_exc = noise_CA1_exc = 0.0
 noise_EC_inh = noise_DG_inh = noise_CA3_inh = noise_CA1_inh = 0.0
@@ -41,6 +29,16 @@ noise_CA3_exc = 0. # 0.003
 noise_CA3_inh = 0. #
 noise_CA1_exc = 0. # 0.0031
 noise_CA1_inh = 0. #
+
+# Default parameters
+a = b = c = d = 0. # connections
+a = 13. # 13
+b = 0.14 # 0.14
+c = 1.1 # 1.1
+d = 0.2 # 0.2
+I_in = 0.22 # 0.22 input
+stim_amplitude = [1.] # nA
+stim_onset = 1.333 # sec
 
 # Default parameters
 _data = {
