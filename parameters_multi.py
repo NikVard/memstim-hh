@@ -263,6 +263,11 @@ if __name__  == "__main__":
                         type=str, nargs='?',
                         help='Parameters file (json format)')
 
+    parser.add_argument('-po', '--parameters_old',
+                        action='store_true',
+                        default=False,
+                        help='Set this to generate default parameters file instead.')
+
     parser.add_argument('-o', '--output-directory',
                         nargs='?',
                         type=str,
@@ -270,6 +275,10 @@ if __name__  == "__main__":
                         help='Output directory')
 
     args = parser.parse_args()
+
+    # Delete custom connectivity
+    if args.parameters_old:
+        del _data["connectivity"]["inter_custom"]
 
     # Make directories
     basedir = args.output_directory
