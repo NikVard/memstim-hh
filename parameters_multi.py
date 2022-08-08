@@ -138,7 +138,7 @@ _data = {
     "fixed_input" : {
         "enabled"       : 1,                # [1=yes | 0=no]
         "low"           : 0.0,              # A0
-        "high"          : 1.0,              # A1
+        "high"          : 0.15,             # A1
         "frequency"     : 6.0,              # Hz
         "delay"         : 0.25,             # seconds
     },
