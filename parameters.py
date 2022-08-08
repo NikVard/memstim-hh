@@ -259,17 +259,31 @@ if __name__  == "__main__":
 
     parser = argparse.ArgumentParser(
         description='Generate parameters file using JSON format')
-    parser.add_argument('parameters_file',
+    parser.add_argument('-f', '--filename',
                         default='default',
                         type=str, nargs='?',
                         help='Parameters file (json format)')
+
     parser.add_argument('-po', '--parameters_old',
                         action='store_true',
                         default=False,
                         help='Set this to generate default parameters file instead.')
+
+    parser.add_argument('-o', '--output-directory',
+                        nargs='?',
+                        type=str,
+                        default='configs',
+                        help='Output directory')
+
     args = parser.parse_args()
 
-    filename = "./configs/{0}.json".format(args.parameters_file)
+    filename = os.path.join(args.output_directory, "{0}.json".format(args.filename))
+
+    # Make directories
+    basedir = args.output_directory
+    if not os.path.isdir(basedir):
+        print('[+] Creating directory', basedir)
+        os.makedirs(basedir)
 
     # Delete custom connectivity
     if args.parameters_old:
