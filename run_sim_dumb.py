@@ -103,7 +103,7 @@ if not os.path.isdir(dirs['results']):
     os.makedirs(dirs['results'])
 
 if settings.I_stim[0]:
-    dirs['stim'] = os.path.join(dirs['results'], '{stimamp:d}_nA'.format(stimamp=int(settings.I_stim[0])))
+    dirs['stim'] = os.path.join(dirs['results'], '{stimamp:d}_nA'.format(stimamp=round(settings.I_stim[0],1)))
     if not os.path.isdir(dirs['stim']):
         print('[+] Creating directory', dirs['stim'])
         os.makedirs(dirs['stim'])
