@@ -12,7 +12,7 @@ import subprocess
 import numpy as np
 from numpy import pi
 
-Constants
+# Constants
 # noise_exc = 10. # uV
 # noise_inh = 1. # uV
 noise_exc = 0. # uV

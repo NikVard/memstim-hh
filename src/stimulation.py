@@ -44,7 +44,7 @@ def generate_stim(duration, dt=1e-4, stim_on=.2, I_stim=[1.], nr_of_trains=5, nr
             raise ValueError('Pulse width is too large for given pulse frequency.')
 
         # make the pulse
-        pulse = np.zeros((1,pd_samples), dtype="int")
+        pulse = np.zeros((1,pd_samples), dtype="float")
         pulse[0,:pw_samples] = I0           # ON state
 
     elif len(I_stim) == 2:
@@ -64,7 +64,7 @@ def generate_stim(duration, dt=1e-4, stim_on=.2, I_stim=[1.], nr_of_trains=5, nr
             raise ValueError('Current settings do not lead to charge-balanced pulses.')
 
         # make the pulse
-        pulse = np.zeros((1,pd_samples), dtype="int")
+        pulse = np.zeros((1,pd_samples), dtype="float")
         idx = 0
         pulse[0,0:idx+pw_samples[0]] = I0[0]
         idx += pw_samples[0]
@@ -82,7 +82,7 @@ def generate_stim(duration, dt=1e-4, stim_on=.2, I_stim=[1.], nr_of_trains=5, nr
 
     # step 4: create the stimulation waveform
     tv = np.linspace(0, duration, int(duration/dt)+1)
-    stimulation = np.zeros(tv.shape, dtype="int")
+    stimulation = np.zeros(tv.shape, dtype="float")
 
     # find the nearest time value to the stimulation start time
     def find_nearest(array, value):
