@@ -1072,7 +1072,10 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, input_mon, tv_stim, in
 
     # vertical lines at x-points
     pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
-    fval = 1/(np.mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    if pks.size > 0:
+        fval = 1/(np.mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    else:
+        fval = 0.
 
     # for peak in pks:
         # if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
