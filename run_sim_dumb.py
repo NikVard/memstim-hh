@@ -81,7 +81,7 @@ try:
     data = parameters.load(filename)
     print('Using "{0}"'.format(filename))
 except Exception as e:
-    print(bcolors.RED + '[!]' + e + ' Using "default.json"' + bcolors.ENDC)
+    print(bcolors.RED + '[!]' + "Error code " + str(e.errno) + ": " + e.strerror + ' | Using "default.json"' + bcolors.ENDC)
     data = parameters._data
     filename = os.path.join('configs', 'default.json')
 parameters.dump(data)
@@ -665,7 +665,7 @@ if settings.fixed_input_enabled:
     A1 = settings.fixed_input_high
     f_rhythm = settings.fixed_input_frequency
 
-    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using fixed input at %dHz | range [%d, %d]' % (f_rhythm, A0, A1))
+    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using fixed input at %dHz | range [%.2f, %.2f]' % (f_rhythm, A0, A1))
 
     # Make the input TimedArray
     inp_theta_rect = (A1-A0)*(sin(2*pi*f_rhythm/Hz*tv-pi/2)+1)/2+A0
