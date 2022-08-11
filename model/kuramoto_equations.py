@@ -38,9 +38,9 @@ pop_avg_eqs = '''
     # Rhythms
     rhythm_default = coherence * cos(phase) : 1
     rhythm_positive = coherence * (cos(phase)+1)/2 : 1
-    rhythm_abs = abs(rhythm_default) : amp
-    rhythm_rect = rhythm_positive : amp
-    rhythm_zero = 0*rhythm : amp   # for debugging
+    rhythm_abs = abs(rhythm_default) : 1
+    rhythm_rect = rhythm_positive : 1
+    rhythm_zero = 0.*rhythm : amp   # for debugging
 
     # Output selection
     rhythm = G_out*rhythm_rect : amp

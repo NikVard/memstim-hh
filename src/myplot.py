@@ -172,7 +172,7 @@ def plot_kuramoto(order_param_mon):
 
     #axs[0].plot(kuramoto_mon.t/second, mean(sin(kuramoto_mon.Theta), axis=0), label='Mean theta')
     #axs[0].plot(kuramoto_mon.t/second, imag(r), '--', label='sin(Im(r))')
-    axs[0].plot(order_param_mon.t/second, order_param_mon.rhythm_rect[0], '-', label='Generated theta rhythm')
+    axs[0].plot(order_param_mon.t/second, order_param_mon.rhythm[0], '-', label='Generated theta rhythm')
     axs[1].plot(order_param_mon.t/second, order_param_mon.phase[0], '-', label='Avg. phase')
     axs[2].plot(order_param_mon.t/second, order_param_mon.coherence[0], '-', label='Coherence (|r|)')
 
@@ -673,7 +673,7 @@ def plot_fig2(spike_mon_E_all, spike_mon_I_all, rate_mon, input_mon, tv_stim, in
         G_rates = GridSpecFromSubplotSpec(1, 1, hspace=0.6, subplot_spec=G_outer[2,0])
         G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[3,0])
         G_specg_cbars = GridSpecFromSubplotSpec(1, 1, hspace=0.3, subplot_spec=G_outer[3,1])
-    elif (mode == "kuramoto_oscillators"):
+    else:
         G_outer = GridSpec(5, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
                             wspace=0.05, hspace=0.3,
                             height_ratios=(0.1, 0.1, 0.3, 0.2, 0.3),
