@@ -710,6 +710,7 @@ else:
     G_K.kN = settings.kN_frac
     G_K.G_in = settings.k_gain
     G_K.offset = settings.offset
+    G_inputs.append(G_K) # append to the group list!
     print('[\u2022]\tKuramoto oscillators group: done')
 
     syn_kuramoto =  Synapses(G_K, G_K, on_pre=syn_kuramoto_eqs, method='euler', name='Kuramoto_intra')
@@ -930,7 +931,7 @@ else:
     print("[+] Saving figure 'figures/%s'" %fig_name)
     kuramoto_fig.savefig(os.path.join(dirs['figures'], fig_name))
 
-    fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_theta_rhytm, tv_stim, xstim, mode="phase")
+    fig2, axs2, fig_name = plot_fig2(spike_mon_E_all, spike_mon_I_all, state_mon_s2r, state_mon_order_param, tv_stim, xstim, mode="phase")
     plot_watermark(fig2, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 
 print("[+] Saving figure 'figures/%s'" %fig_name)
