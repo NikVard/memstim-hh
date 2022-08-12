@@ -149,6 +149,12 @@ if not os.path.isdir(dirs['spikes']):
     print('[+] Creating directory', dirs['spikes'])
     os.makedirs(dirs['spikes'])
 
+dirs['currents'] = os.path.join(dirs['data'], 'currents')
+if not os.path.isdir(dirs['currents']):
+    print('[+] Creating directory', dirs['currents'])
+    os.makedirs(dirs['currents'])
+
+
 # Copy the configuration file on the results directory for safekeeping
 copyfile(filename, os.path.join(dirs['base'], 'parameters_bak.json'))
 
@@ -561,18 +567,6 @@ rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] 
 rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('[\u2022]\tRate monitors: done')
 
-# state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
-# print('[\u2022]\tNoise monitors: done')
-
-# state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
-# state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
-# state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
-# state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
-# print('[\u2022]\tVm monitors: done')
-
-# state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
-# print('[\u2022]\tEC I_CAN monitor: done')
-
 
 
 # Add groups for monitoring the avg Vm
@@ -793,9 +787,34 @@ inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Inpu
 
 
 
+# Add any extra monitors here
+# -------------------------------------------------------------#
+print('\n[60] Adding extra monitors...')
+
+# state_mon_EC_E_curr = StateMonitor(G_all[0][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_exc', 'I_stim', 'Ca_i'], record=np.arange(4995,5006), name='EC_E_currents')
+# print('[\u2022]\tState monitor [EC-E currents]: done')
+
+# state_mon_CA1_E_curr = StateMonitor(G_all[3][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_stim', 'Ca_i'], record=np.concatenate((np.arange(4995,5006), np.array([8310]))), name='CA1_E_currents')
+# print('[\u2022]\tState monitor [CA1-E currents]: done')
+
+
+# state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
+# print('[\u2022]\tNoise monitors: done')
+
+# state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
+# state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+# state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
+# state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+# print('[\u2022]\tVm monitors: done')
+
+# state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
+# print('[\u2022]\tEC I_CAN monitor: done')
+
+
+
 # Create the Network
 # -------------------------------------------------------------#
-print('\n[60] Connecting the network...')
+print('\n[70] Connecting the network...')
 print('-'*32)
 
 net = Network()
@@ -827,6 +846,7 @@ net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
 net.add(state_mon_inputs)
 net.add(state_mon_Vm_avg)
+# net.add(state_mon_EC_E_curr, state_mon_CA1_E_curr)
 print('[\u2022]\tNetwork monitors: done')
 
 
@@ -836,7 +856,7 @@ print('[\u2022]\tNetwork monitors: done')
 defaultclock.dt = settings.dt
 tstep = defaultclock.dt
 
-print('\n[70] Starting simulation...')
+print('\n[80] Starting simulation...')
 print('-'*32)
 
 start = time.time()
@@ -874,7 +894,7 @@ print()
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
 
 
-print('\n[71] Mean firing rates...')
+print('\n[81] Mean firing rates...')
 print('-'*32)
 
 for area in range(len(G_all)):
@@ -889,10 +909,10 @@ for area in range(len(G_all)):
 
 # Plot the results
 # -------------------------------------------------------------#
-print('\n[80] Post-simulation actions')
+print('\n[90] Post-simulation actions')
 print('-'*32)
 
-print('\n[81] Plotting results...')
+print('\n[91] Plotting results...')
 tight_layout()
 
 # Plot the 3D shape
@@ -957,7 +977,7 @@ fig2.savefig(os.path.join(dirs['figures'], fig_name))
 
 # Save the results as .txt files (rows: time | cols: data)
 # -------------------------------------------------------------#
-print('\n[82] Saving results...')
+print('\n[92] Saving results...')
 
 # if not using fixed input
 if not settings.fixed_input_enabled:
@@ -983,11 +1003,39 @@ for StM in make_flat(state_mon_Vm_avg):
     print("[\u2022]\tStateMon: ", StM.name)
     np.savetxt(os.path.join(dirs['data'], StM.name+'.txt'), StM.sum_v, fmt='%.8f')
 
+# Current monitors
+# print("[+] Saving EC-E currents")
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_CAN.txt'), state_mon_EC_E_curr.I_CAN, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_M.txt'), state_mon_EC_E_curr.I_M, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_leak.txt'), state_mon_EC_E_curr.I_leak, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_K.txt'), state_mon_EC_E_curr.I_K, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_Na.txt'), state_mon_EC_E_curr.I_Na, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_Ca.txt'), state_mon_EC_E_curr.I_Ca, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_SynE.txt'), state_mon_EC_E_curr.I_SynE, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_SynI.txt'), state_mon_EC_E_curr.I_SynI, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_SynExt.txt'), state_mon_EC_E_curr.I_SynExt, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_SynHipp.txt'), state_mon_EC_E_curr.I_SynHipp, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_exc.txt'), state_mon_EC_E_curr.I_exc, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_stim.txt'), state_mon_EC_E_curr.I_stim, fmt='%.8f')
+#
+# print("[+] Saving EC-E currents")
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_CAN.txt'), state_mon_CA1_E_curr.I_CAN, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_M.txt'), state_mon_CA1_E_curr.I_M, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_leak.txt'), state_mon_CA1_E_curr.I_leak, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_K.txt'), state_mon_CA1_E_curr.I_K, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Na.txt'), state_mon_CA1_E_curr.I_Na, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Ca.txt'), state_mon_CA1_E_curr.I_Ca, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynE.txt'), state_mon_CA1_E_curr.I_SynE, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynI.txt'), state_mon_CA1_E_curr.I_SynI, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_stim.txt'), state_mon_CA1_E_curr.I_stim, fmt='%.8f')
+
 
 
 # Save the spikes and their times
 # -------------------------------------------------------------#
-print("\n[83] Saving spikes in time....")
+print("\n[93] Saving spikes in time....")
 SM_i = []
 SM_t = []
 for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
@@ -1008,7 +1056,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
 
 # Save the positions of the neurons in npy files
 # -------------------------------------------------------------#
-print("\n[84] Saving neuron positions...")
+print("\n[94] Saving neuron positions...")
 for G in G_flat:
     try:
         print("[+] Saving group ", G.name)
