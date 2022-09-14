@@ -98,15 +98,15 @@ def my_specgram(signal: np.ndarray,
         Array of frequency values for the first axis of the returned spectrogram
     t: numpy.ndarray
         Array of time values for the second axis of the returned spectrogram
-    sxx: numpy.ndarray
+    Sxx: numpy.ndarray
         Power spectrogram of the input signal with axes [frequency, time]
     """
     k = 3
     nfft = 2**k * window_width # np.ceil(np.log2(window_width))
     f, t, Sxx = sig.spectrogram(x=signal,
+                                fs=fs,
                                 nfft=nfft,
                                 detrend=False,
-                                fs=fs,
                                 window=sig.windows.hann(M=window_width, sym=False),
                                 # nperseg=window_width,
                                 noverlap=window_overlap,
@@ -117,6 +117,49 @@ def my_specgram(signal: np.ndarray,
     return f, t, Sxx
     # ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
 
+
+def my_PSD(signal: np.ndarray,
+                   fs: int,
+                   window_width: int,
+                   window_overlap: int
+                   **kwargs: dict) -> (np.ndarray, np.ndarray):
+    """
+    Computes the Power Spectral Density (PSD) of the specified signal using Welch's method.
+
+    A periodic Hann window with the specified width and overlap is used.
+
+    Parameters
+    ----------
+    signal: numpy.ndarray
+        The input signal
+    fs: int
+        Sampling frequency of the input signal
+    window_width: int
+        Width of the Hann windows in samples
+    window_overlap: int
+        Overlap between Hann windows in samples
+    kwargs: dict
+        Extra arguments to pass to signal.welch(); for more info, refer to the scipy documentation.
+
+    Returns
+    -------
+    f: numpy.ndarray
+        Array of frequency values for the first axis of the PSD
+    Pxx: numpy.ndarray
+        PSD of the input signal.
+    """
+    k = 3
+    nfft = 2**k * window_width # np.ceil(np.log2(window_width))
+    f, Pxx = sig.welch(x=signal,
+                        fs=fs
+                        nfft=nfft,
+                        window=sig.windows.hann(M=window_width, sym=False),
+                        nperseg=window_width,
+                        noverlap=window_overlap,
+                        **kwargs)
+
+    return f, Pxx
+    
 
 def add_sizebar(ax, xlocs, ylocs, bcolor, text):
     """ Add a sizebar to the provided axis """
