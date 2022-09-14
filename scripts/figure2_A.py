@@ -47,7 +47,7 @@ def add_sizebar(ax, xlocs, ylocs, bcolor, text):
 
 
 def myround(x, base=100):
-    """ Rounding function to closest *base* """
+    """ Round x to closest *base* """
     val = int(base * round(x/base))
     return val if val > 0 else base*1
 
