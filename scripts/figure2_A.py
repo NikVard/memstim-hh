@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+from pathlib import Path
+
 import json
 
 import numpy as np
@@ -16,150 +19,17 @@ from matplotlib.lines import Line2D
 from matplotlib import font_manager as fm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
-fontprops = fm.FontProperties(size=12, family='monospace')
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = Path(script_dir).parent
+sys.path.insert(0, os.path.abspath(parent_dir))
 
+from src.freq_analysis import *
+
+fontprops = fm.FontProperties(size=12, family='monospace')
 
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
-
-def my_FR(spikes: np.ndarray,
-            duration: int,
-            window_size: float,
-            overlap: float) -> (np.ndarray, np.ndarray):
-    """
-    Compute the firing rate using a windowed moving average.
-
-    Parameters
-    ----------
-    spikes: numpy.ndarray
-        The spike times (Brian2 format, in ms)
-    duration: int
-        The duration of the recording (in seconds)
-    window_size: float
-        Width of the moving average window (in seconds)
-    overlap: float
-        Desired overlap between the windows (percentage, in [0., 1.))
-
-    Returns
-    -------
-    t: numpy.ndarray
-        Array of time values for the computed firing rate. These are the window centers.
-    FR: numpy.ndarray
-        Spikes per window (needs to be normalized)
-    """
-
-    # Calculate new sampling times
-    win_step = window_size * round(1. - overlap, 4)
-    # fs_n = int(1/win_step)
-
-    # First center is at the middle of the first window
-    c0 = window_size/2
-    cN = duration-c0
-
-    # centers
-    centers = np.arange(c0, cN+win_step, win_step)
-
-    # Calculate windowed FR
-    counts = []
-    for center in centers:
-        cl = center - c0
-        ch = center + c0
-        spike_cnt = np.count_nonzero(np.where((spikes >= cl) & (spikes < ch)))
-        counts.append(spike_cnt)
-
-    # return centers and spike counts per window
-    return centers, np.array(counts)
-
-
-def my_specgram(signal: np.ndarray,
-                   fs: int,
-                   window_width: int,
-                   window_overlap: int) -> (np.ndarray, np.ndarray, np.ndarray):
-    """
-    Computes the power spectrum of the specified signal.
-
-    A periodic Hann window with the specified width and overlap is used.
-
-    Parameters
-    ----------
-    signal: numpy.ndarray
-        The input signal
-    fs: int
-        Sampling frequency of the input signal
-    window_width: int
-        Width of the Hann windows in samples
-    window_overlap: int
-        Overlap between Hann windows in samples
-
-    Returns
-    -------
-    f: numpy.ndarray
-        Array of frequency values for the first axis of the returned spectrogram
-    t: numpy.ndarray
-        Array of time values for the second axis of the returned spectrogram
-    Sxx: numpy.ndarray
-        Power spectrogram of the input signal with axes [frequency, time]
-    """
-    k = 3
-    nfft = 2**k * window_width # np.ceil(np.log2(window_width))
-    f, t, Sxx = sig.spectrogram(x=signal,
-                                fs=fs,
-                                nfft=nfft,
-                                detrend=False,
-                                window=sig.windows.hann(M=window_width, sym=False),
-                                # nperseg=window_width,
-                                noverlap=window_overlap,
-                                return_onesided=True,
-                                scaling='spectrum',
-                                mode='magnitude')
-
-    return f, t, Sxx
-    # ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
-
-
-def my_PSD(signal: np.ndarray,
-                   fs: int,
-                   window_width: int,
-                   window_overlap: int
-                   **kwargs: dict) -> (np.ndarray, np.ndarray):
-    """
-    Computes the Power Spectral Density (PSD) of the specified signal using Welch's method.
-
-    A periodic Hann window with the specified width and overlap is used.
-
-    Parameters
-    ----------
-    signal: numpy.ndarray
-        The input signal
-    fs: int
-        Sampling frequency of the input signal
-    window_width: int
-        Width of the Hann windows in samples
-    window_overlap: int
-        Overlap between Hann windows in samples
-    kwargs: dict
-        Extra arguments to pass to signal.welch(); for more info, refer to the scipy documentation.
-
-    Returns
-    -------
-    f: numpy.ndarray
-        Array of frequency values for the first axis of the PSD
-    Pxx: numpy.ndarray
-        PSD of the input signal.
-    """
-    k = 3
-    nfft = 2**k * window_width # np.ceil(np.log2(window_width))
-    f, Pxx = sig.welch(x=signal,
-                        fs=fs
-                        nfft=nfft,
-                        window=sig.windows.hann(M=window_width, sym=False),
-                        nperseg=window_width,
-                        noverlap=window_overlap,
-                        **kwargs)
-
-    return f, Pxx
-    
 
 def add_sizebar(ax, xlocs, ylocs, bcolor, text):
     """ Add a sizebar to the provided axis """
@@ -616,10 +486,10 @@ if __name__ == "__main__":
 
         # load t-i arrays for this area
         print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
-        i_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0]))
-        t_exc = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0]))
-        i_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1]))
-        t_inh = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1]))
+        i_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0])))
+        t_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0])))
+        i_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1])))
+        t_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1])))
 
         i_exc = i_exc.astype(int)
         t_exc = t_exc*ms
@@ -753,7 +623,7 @@ if __name__ == "__main__":
     # ==================
     if args.order_parameter:
         print('[+] Plotting order parameter...')
-        data = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/order_param_mon_coherence.txt')
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data','order_param_mon_coherence.txt'))
 
         # asymptote
         ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
@@ -763,7 +633,7 @@ if __name__ == "__main__":
 
     else:
         print('[+] Plotting phase...')
-        data = np.loadtxt('/home/nikos/Documents/projects/Python/memstim-hh/results/analysis/current/desc/data/order_param_mon_phase.txt')
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc', 'data','order_param_mon_phase.txt'))
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 
@@ -785,10 +655,10 @@ if __name__ == "__main__":
     tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # SAVE THE NON-NORMALIZED FR SIGNALS
-    np.savetxt(os.path.join('test_FRs', 'FR_inh.txt'), FR_inh, fmt='%.8f')
-    np.savetxt(os.path.join('test_FRs', 'tv_inh.txt'), tv_inh_FR, fmt='%.8f')
-    np.savetxt(os.path.join('test_FRs', 'FR_exc.txt'), FR_exc, fmt='%.8f')
-    np.savetxt(os.path.join('test_FRs', 'tv_exc.txt'), tv_exc_FR, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'FR_inh.txt'), FR_inh, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'tv_inh.txt'), tv_inh_FR, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'FR_exc.txt'), FR_exc, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'tv_exc.txt'), tv_exc_FR, fmt='%.8f')
 
     # Normalize the FRs
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
@@ -932,8 +802,8 @@ if __name__ == "__main__":
     print('[+] Saving the figures...')
     # fig.savefig('figures/' + args.figure_name + '.svg', transparent=True, dpi=600, format='svg')
     # fig.savefig('figures/' + args.figure_name + '.eps', transparent=True, dpi=600, format='eps', bbox_inches='tight')
-    fig.savefig('figures/' + args.figure_name + '.png', transparent=True, dpi=600, format='png', bbox_inches='tight')
-    fig.savefig('figures/' + args.figure_name + '.pdf', transparent=True, dpi=600, format='pdf', bbox_inches='tight')
+    fig.savefig(os.path.join(parent_dir, 'figures', args.figure_name + '.png'), transparent=True, dpi=600, format='png', bbox_inches='tight')
+    fig.savefig(os.path.join(parent_dir, 'figures', args.figure_name + '.pdf'), transparent=True, dpi=600, format='pdf', bbox_inches='tight')
     # fig.savefig('figures/' + args.figure_name + '.pdf')
 
 
@@ -962,7 +832,7 @@ if __name__ == "__main__":
         line_animation = animation.FuncAnimation(fig, update_line, frames=F, interval=1e3/framerate, blit=True)
 
         print('[+] Saving the video...')
-        line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.mp4', fps=framerate, extra_args=['-vcodec', 'libx264'])
+        line_animation.save(os.path.join(parent_dir, 'figures', 'test.mp4'), fps=framerate, extra_args=['-vcodec', 'libx264'])
         # save animation at 30 frames per second
         # line_animation.save('/home/nikos/Documents/projects/Python/memstim-hh/figures/test.gif', writer='imagemagick', fps=framerate)
 
