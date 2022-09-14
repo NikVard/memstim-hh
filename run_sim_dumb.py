@@ -685,7 +685,7 @@ else:
     # Kuramoto Oscillators
     print('\n[41] Making the Kuramoto oscillators group...')
 
-    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using dynamic input; Kuramoto oscillators of size N=%d w/ f0 = %dHz | rhythm gain: %d' % (settings.N_Kur, settings.f0, settings.r_gain))
+    print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Using dynamic input; Kuramoto oscillators of size N=%d w/ f0 = %.2f Hz | rhythm gain: %.2f nA | reset gain: %.2f' % (settings.N_Kur, settings.f0, settings.r_gain/nA, settings.k_gain))
 
     # Make the necessary groups
     # f0 = settings.f0 # settings.f0 does not work inside equations
@@ -753,7 +753,7 @@ else:
 # connect the fixed input to the I_exc variable in EC_E and EC_I
 for g in G_flat:
     if g.name=='EC_pyCAN' or g.name=='EC_inh':
-        print('[+] Linking input (theta rhythm) to group ', g.name)
+        print('[+]\tLinking input (theta rhythm) to group ', g.name)
         g.I_exc = linked_var(G_input, 'rhythm')
 print('[\u2022]\tLinking input rhythm: done')
 print('[\u2022]\tInputs: done')
@@ -819,6 +819,7 @@ print('-'*32)
 
 net = Network()
 net.add(G_all) # add groups
+net.add(G_S2R) # was missing
 net.add(G_inputs)
 net.add(G_Vm_avg)
 print('[\u2022]\tNetwork groups: done')
@@ -835,6 +836,7 @@ for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
     if syn_Vm_avg !=0:
         net.add(syn_Vm_avg)
 
+net.add(syn_CA1_2_rates)
 net.add(syn_inputs) # synapses avout inputs
 print('[\u2022]\tNetwork connections: done')
 
@@ -844,6 +846,7 @@ net.add(spike_mon_E_all)
 net.add(spike_mon_I_all)
 net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
+net.add(state_mon_s2r)
 net.add(state_mon_inputs)
 net.add(state_mon_Vm_avg)
 # net.add(state_mon_EC_E_curr, state_mon_CA1_E_curr)
@@ -1059,7 +1062,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
 print("\n[94] Saving neuron positions...")
 for G in G_flat:
     try:
-        print("[+] Saving group ", G.name)
+        print("[+] Saving group", G.name)
         fname = '{group}'.format(group=G.name)
         pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
         np.save(os.path.join(dirs['positions'], fname), pos)
