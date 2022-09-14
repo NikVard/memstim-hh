@@ -89,13 +89,13 @@ def my_FR(spikes: np.ndarray,
     Parameters
     ----------
     spikes: numpy.ndarray
-        The spike times (Brian2 format, in ms)
+        The spike times (*not* Brian2 format, in -unitless- seconds)
     duration: int
-        The duration of the recording (in seconds)
+        The duration of the recording (in -unitless- seconds)
     window_size: float
-        Width of the moving average window (in seconds)
+        Width of the moving average window (in -unitless- seconds)
     overlap: float
-        Desired overlap between the windows (percentage, in [0., 1.))
+        Desired overlap between the windows (percentage in [0., 1.))
 
     Returns
     -------
