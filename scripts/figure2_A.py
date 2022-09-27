@@ -766,8 +766,8 @@ if __name__ == "__main__":
     # ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=11, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', bbox=props)
 
     # w/ white outline
-    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=10, transform=ax_specg_inh.transAxes, color=c_inh, verticalalignment='top', path_effects=[patheffects.withStroke(linewidth=1, foreground='white', capstyle="round")])
-    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=10, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', path_effects=[patheffects.withStroke(linewidth=1, foreground='white', capstyle="round")])
+    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=fsize, transform=ax_specg_inh.transAxes, color=c_inh, verticalalignment='top', path_effects=[patheffects.withStroke(linewidth=1, foreground='white', capstyle="round")])
+    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=fsize, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', path_effects=[patheffects.withStroke(linewidth=1, foreground='white', capstyle="round")])
 
     # data_inh, freqs_inh, bins_inh, im_inh = ax_specg_inh.specgram(FR_inh_norm, NFFT=window_width, pad_to=2048, Fs=fs_FR, noverlap=noverlap, scale='linear', window=sig.windows.hann(M=window_width, sym=False), cmap=newcmap_inh)
     # # ax_specg_inh.axis('tight')
