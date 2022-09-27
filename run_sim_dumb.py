@@ -1023,17 +1023,17 @@ for StM in make_flat(state_mon_Vm_avg):
 # np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_stim.txt'), state_mon_EC_E_curr.I_stim, fmt='%.8f')
 
 print("[+] Saving CA1-E currents")
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_CAN.txt'), state_mon_CA1_E_curr.I_CAN, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_M.txt'), state_mon_CA1_E_curr.I_M, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_leak.txt'), state_mon_CA1_E_curr.I_leak, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_K.txt'), state_mon_CA1_E_curr.I_K, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Na.txt'), state_mon_CA1_E_curr.I_Na, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Ca.txt'), state_mon_CA1_E_curr.I_Ca, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynE.txt'), state_mon_CA1_E_curr.I_SynE, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynI.txt'), state_mon_CA1_E_curr.I_SynI, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp, fmt='%.8f')
-np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_stim.txt'), state_mon_CA1_E_curr.I_stim, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_CAN.txt'), state_mon_CA1_E_curr.I_CAN/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_M.txt'), state_mon_CA1_E_curr.I_M/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_leak.txt'), state_mon_CA1_E_curr.I_leak/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_K.txt'), state_mon_CA1_E_curr.I_K/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Na.txt'), state_mon_CA1_E_curr.I_Na/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Ca.txt'), state_mon_CA1_E_curr.I_Ca/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynE.txt'), state_mon_CA1_E_curr.I_SynE/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynI.txt'), state_mon_CA1_E_curr.I_SynI/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp/nA, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_stim.txt'), state_mon_CA1_E_curr.I_stim/nA, fmt='%.8f')
 
 
 
