@@ -131,7 +131,9 @@ def my_FR(spikes: np.ndarray,
 def my_specgram(signal: np.ndarray,
                    fs: int,
                    window_width: int,
-                   window_overlap: int) -> (np.ndarray, np.ndarray, np.ndarray):
+                   window_overlap: int,
+                   k: int = 1,
+                   **kwargs: dict) -> (np.ndarray, np.ndarray, np.ndarray):
     """
     Computes the power spectrum of the specified signal.
 
@@ -147,6 +149,10 @@ def my_specgram(signal: np.ndarray,
         Width of the Hann windows in samples
     window_overlap: int
         Overlap between Hann windows in samples
+    k: int
+        Used in the nfft calculation; round to (nearest power of 2)+k
+    kwargs: dict
+        Extra arguments to pass to signal.spectrogram(); for more info, refer to the scipy documentation.
 
     Returns
     -------
@@ -157,18 +163,15 @@ def my_specgram(signal: np.ndarray,
     Sxx: numpy.ndarray
         Power spectrogram of the input signal with axes [frequency, time]
     """
-    k = 3
-    nfft = 2**k * window_width # np.ceil(np.log2(window_width))
+    nfft = 2**((window_width-1).bit_length()+k) # np.ceil(np.log2(window_width))
     f, t, Sxx = sig.spectrogram(x=signal,
                                 fs=fs,
                                 nfft=nfft,
-                                detrend=False,
+                                # detrend=False,
                                 window=sig.windows.hann(M=window_width, sym=False),
                                 # nperseg=window_width,
                                 noverlap=window_overlap,
-                                return_onesided=True,
-                                scaling='spectrum',
-                                mode='magnitude')
+                                **kwargs)
 
     return f, t, Sxx
     # ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
@@ -178,6 +181,7 @@ def my_PSD(signal: np.ndarray,
                    fs: int,
                    window_width: int,
                    window_overlap: int,
+                   k: int = 1,
                    **kwargs: dict) -> (np.ndarray, np.ndarray):
     """
     Computes the Power Spectral Density (PSD) of the specified signal using Welch's method.
@@ -194,6 +198,8 @@ def my_PSD(signal: np.ndarray,
         Width of the Hann windows in samples
     window_overlap: int
         Overlap between Hann windows in samples
+    k: int
+        Used in the nfft calculation; round to (nearest power of 2)+k
     kwargs: dict
         Extra arguments to pass to signal.welch(); for more info, refer to the scipy documentation.
 
@@ -204,12 +210,12 @@ def my_PSD(signal: np.ndarray,
     Pxx: numpy.ndarray
         PSD of the input signal.
     """
-    k = 3
-    nfft = 2**k * window_width # np.ceil(np.log2(window_width))
+    nfft = 2**((window_width-1).bit_length()+k) # np.ceil(np.log2(window_width))
     f, Pxx = sig.welch(x=signal,
                         fs=fs,
                         nfft=nfft,
                         window=sig.windows.hann(M=window_width, sym=False),
+                        # window='boxcar',
                         nperseg=window_width,
                         noverlap=window_overlap,
                         **kwargs)
