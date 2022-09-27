@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="./results_PRC_I_10"
+RESBASE="/beegfs/nvardala/results_fig3_quantify"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
@@ -21,7 +21,7 @@ fi
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/PRC_I_10"
+CONF_DIRS="configs/fig3_quantify"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
