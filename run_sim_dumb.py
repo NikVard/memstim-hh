@@ -219,7 +219,7 @@ G_E = NeuronGroup(N=settings.N_EC[0],
     name='EC_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_EC[0]*uvolt
+# G_E.sigma = settings.sigma_EC[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -243,7 +243,7 @@ G_I = NeuronGroup(N=settings.N_EC[1],
     method=integ_method,
     name='EC_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_EC[1]*uvolt
+# G_I.sigma = settings.sigma_EC[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -280,7 +280,7 @@ G_E = NeuronGroup(N=settings.N_DG[0],
     name='DG_py')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_DG[0]*uvolt
+# G_E.sigma = settings.sigma_DG[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -304,7 +304,7 @@ G_I = NeuronGroup(N=settings.N_DG[1],
     method=integ_method,
     name='DG_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_DG[1]*uvolt
+# G_I.sigma = settings.sigma_DG[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -341,7 +341,7 @@ G_E = NeuronGroup(N=settings.N_CA3[0],
     name='CA3_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_CA3[0]*uvolt
+# G_E.sigma = settings.sigma_CA3[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -365,7 +365,7 @@ G_I = NeuronGroup(N=settings.N_CA3[1],
     method=integ_method,
     name='CA3_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_CA3[1]*uvolt
+# G_I.sigma = settings.sigma_CA3[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -402,7 +402,7 @@ G_E = NeuronGroup(N=settings.N_CA1[0],
     name='CA1_pyCAN')
 G_E.size = cell_size_py
 G_E.glu = 1
-G_E.sigma = settings.sigma_CA1[0]*uvolt
+# G_E.sigma = settings.sigma_CA1[0]*uvolt
 G_E.x_soma = pos[:,0]*metre
 G_E.y_soma = pos[:,1]*metre
 G_E.z_soma = pos[:,2]*metre
@@ -426,7 +426,7 @@ G_I = NeuronGroup(N=settings.N_CA1[1],
     method=integ_method,
     name='CA1_inh')
 G_I.size = cell_size_inh
-G_I.sigma = settings.sigma_CA1[1]*uvolt
+# G_I.sigma = settings.sigma_CA1[1]*uvolt
 G_I.x_soma = pos[:,0]*metre
 G_I.y_soma = pos[:,1]*metre
 G_I.z_soma = pos[:,2]*metre
@@ -794,8 +794,8 @@ print('\n[60] Adding extra monitors...')
 # state_mon_EC_E_curr = StateMonitor(G_all[0][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_exc', 'I_stim', 'Ca_i'], record=np.arange(4995,5006), name='EC_E_currents')
 # print('[\u2022]\tState monitor [EC-E currents]: done')
 
-# state_mon_CA1_E_curr = StateMonitor(G_all[3][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_stim', 'Ca_i'], record=np.concatenate((np.arange(4995,5006), np.array([8310]))), name='CA1_E_currents')
-# print('[\u2022]\tState monitor [CA1-E currents]: done')
+state_mon_CA1_E_curr = StateMonitor(G_all[3][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_stim', 'Ca_i'], record=np.concatenate((np.arange(4995,5006), np.array([8310]))), name='CA1_E_currents')
+print('[\u2022]\tState monitor [CA1-E currents]: done')
 
 
 # state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
@@ -848,6 +848,7 @@ net.add(rate_mon_E_all)
 net.add(rate_mon_I_all)
 net.add(state_mon_s2r)
 net.add(state_mon_inputs)
+net.add(state_mon_CA1_E_curr)
 net.add(state_mon_Vm_avg)
 # net.add(state_mon_EC_E_curr, state_mon_CA1_E_curr)
 print('[\u2022]\tNetwork monitors: done')
@@ -1020,19 +1021,19 @@ for StM in make_flat(state_mon_Vm_avg):
 # np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_SynHipp.txt'), state_mon_EC_E_curr.I_SynHipp, fmt='%.8f')
 # np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_exc.txt'), state_mon_EC_E_curr.I_exc, fmt='%.8f')
 # np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'I_stim.txt'), state_mon_EC_E_curr.I_stim, fmt='%.8f')
-#
-# print("[+] Saving EC-E currents")
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_CAN.txt'), state_mon_CA1_E_curr.I_CAN, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_M.txt'), state_mon_CA1_E_curr.I_M, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_leak.txt'), state_mon_CA1_E_curr.I_leak, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_K.txt'), state_mon_CA1_E_curr.I_K, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Na.txt'), state_mon_CA1_E_curr.I_Na, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Ca.txt'), state_mon_CA1_E_curr.I_Ca, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynE.txt'), state_mon_CA1_E_curr.I_SynE, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynI.txt'), state_mon_CA1_E_curr.I_SynI, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_stim.txt'), state_mon_CA1_E_curr.I_stim, fmt='%.8f')
+
+print("[+] Saving CA1-E currents")
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_CAN.txt'), state_mon_CA1_E_curr.I_CAN, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_M.txt'), state_mon_CA1_E_curr.I_M, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_leak.txt'), state_mon_CA1_E_curr.I_leak, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_K.txt'), state_mon_CA1_E_curr.I_K, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Na.txt'), state_mon_CA1_E_curr.I_Na, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_Ca.txt'), state_mon_CA1_E_curr.I_Ca, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynE.txt'), state_mon_CA1_E_curr.I_SynE, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynI.txt'), state_mon_CA1_E_curr.I_SynI, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp, fmt='%.8f')
+np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'I_stim.txt'), state_mon_CA1_E_curr.I_stim, fmt='%.8f')
 
 
 
