@@ -36,7 +36,7 @@ a = 13. # 13
 b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
-I_in = 0.22 # 0.22 input
+I_in = 0.0 # 0.22 input gain Kuramoto
 stim_amplitude = [0.] # nA
 stim_onset = 1.333 # sec
 
@@ -136,7 +136,7 @@ _data = {
 
     # input parameters
     "fixed_input" : {
-        "enabled"       : 1,                # [1=yes | 0=no]
+        "enabled"       : 0,                # [1=yes | 0=no]
         "low"           : 0.0,              # A0
         "high"          : 0.15,             # A1
         "frequency"     : 6.0,              # Hz
@@ -156,7 +156,7 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "target"        : "EC",             # target area [EC | DG | CA3 | CA1]
+        "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 2.,               # [sec]
@@ -317,8 +317,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.0, 1.
-    vals = np.arange(vmin, vmax, 0.1)
+    vmin,vmax = 0.0, 12.5
+    vals = np.arange(vmin, vmax, 0.5)
     cnt = 0
     stim_t_off = 1.0
     for val in vals:
