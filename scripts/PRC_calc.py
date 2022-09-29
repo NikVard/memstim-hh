@@ -76,7 +76,7 @@ for root in dirs:
             curr_path = os.path.join(root, item)
             curr_path = os.path.join(curr_path, os.listdir(curr_path)[0])
 
-            frate = np.loadtxt(os.path.join(curr_path, 'data', 's2r_mon_drive.txt'))
+            # frate = np.loadtxt(os.path.join(curr_path, 'data', 's2r_mon_drive.txt'))
             phase = np.loadtxt(os.path.join(curr_path, 'data', 'order_param_mon_phase.txt'))
 
             # calculate d_phi
@@ -271,3 +271,6 @@ fig.tight_layout()
 
 # Show the figure
 plt.show()
+
+# Exit - no errors
+sys.exit(0)
