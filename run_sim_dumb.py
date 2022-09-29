@@ -453,17 +453,16 @@ for ngroup in G_flat:
     # CA1 populations get stimulated
     if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
         print("[!] Stimulation applied @", ngroup.name)
+        ngroup.r = 1 # 1 means on
 
         # calculate the distance
-        # ngroup.r = 1 # 1 means on
         # d0 = '1/({sigma}*(siemens/metre)*4*pi*sqrt((x_soma-{x0}*mm)**2 + (y_soma-{y0}*mm)**2 + (z_soma-{z0}*mm)**2))'.format(rho=settings.stim_sigma, x0=settings.stim_coordinates[0], y0=settings.stim_coordinates[1], z0=settings.stim_coordinates[2])
 
         # alternatively, calculate distances like so:
-        neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
-        elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
-        d0 = dst.cdist(elec_pos, neuron_pos)
+        # neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
+        # elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
+        # d0 = dst.cdist(elec_pos, neuron_pos)
         # ngroup.r = clip(100/(4*pi*d0), a_min=0, amax=1) # clip the values, r is NOT a gain
-        ngroup.r = 1
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
@@ -1005,7 +1004,7 @@ np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
 print("[+] Saving Vm avgs")
 for StM in make_flat(state_mon_Vm_avg):
     print("[\u2022]\tStateMon: ", StM.name)
-    np.savetxt(os.path.join(dirs['data'], StM.name+'.txt'), StM.sum_v, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], StM.name+'.txt'), StM.sum_v/mV, fmt='%.8f')
 
 # Current monitors
 # print("[+] Saving EC-E currents")

@@ -162,6 +162,11 @@ if __name__ == "__main__":
     ax_PSD.tick_params(axis='both', which='both', labelsize=9)
     axin_PSD.tick_params(axis='both', which='both', labelsize=9)
 
+    # Remove some ticks
+    ax_PSD.yaxis.set_major_locator(ticker.FixedLocator([0, 1000, 2000, 3000]))
+    ax_PSD.yaxis.set_minor_locator(ticker.FixedLocator([500, 1500, 2500]))
+    ax_PSD.yaxis.set_ticklabels([0, '', '', 3000])
+
     # Actually plotting
     ax_PSD.plot(psd_pac_inh.freqs, psd_pac_inh.psd[0], c=c_inh, label='Inhibitory', zorder=1, rasterized=False)
     ax_PSD.plot(psd_pac_exc.freqs, psd_pac_exc.psd[0], c=c_exc, label='Excitatory', zorder=2, rasterized=False)
@@ -271,7 +276,7 @@ if __name__ == "__main__":
     # ax1 = pp_obj.polar(ampbin_inh.squeeze().T, vecbin, pp_obj.yvec, subplot=121,
     #              title='Inhibitory', colorbar=False, **kw_plt)
     ax2 = pp_obj.polar(ampbin_exc.squeeze().T, vecbin, pp_obj.yvec,
-                 title='Excitatory', colorbar=False, **kw_plt)
+                 title='', colorbar=False, **kw_plt)
 
     # Title
     # ax2.set_title('Excitatory', fontsize=11)
