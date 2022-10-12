@@ -1,8 +1,79 @@
 import numpy as np
 from scipy import signal as sig
 
-# Functions examples from https://www.programcreek.com/python/example/100546/scipy.signal.spectrogram
+# Filtering functions
+def butter_lowpass(lowcut, fs, order=8, sos=False):
+    ''' Create a lowpass butterworth filter '''
+    nyq = 0.5 * fs
+    low = lowcut / nyq
 
+    if sos:
+        sos_out = sig.butter(order, low, analog=False, btype='low', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, low, analog=False, btype='low', output='ba')
+    return b, a
+
+def butter_highpass(highcut, fs, order=8, sos=False):
+    ''' Create a highpass butterworth filter '''
+    nyq = 0.5 * fs
+    high = highcut / nyq
+
+    if sos:
+        sos_out = sig.butter(order, high, analog=False, btype='high', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, high, analog=False, btype='high', output='ba')
+    return b, a
+
+def butter_bandpass(lowcut, highcut, fs, order=8, sos=False):
+    ''' Create a bandpass butterworth filter '''
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+
+    if sos:
+        sos_out = sig.butter(order, [low, high], analog=False, btype='band', output='sos')
+        return sos_out
+
+    b, a = sig.butter(order, [low, high], analog=False, btype='band', output='ba')
+    return b, a
+
+
+def butter_lowpass_filter(data, lowcut, fs, order=5, sos=False):
+    ''' Lowpass filter the data '''
+    if sos:
+        sos_out = butter_lowpass(lowcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_lowpass(lowcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
+
+def butter_highpass_filter(data, highcut, fs, order=5, sos=False):
+    ''' Highpass filter the data '''
+    if sos:
+        sos_out = butter_highpass(highcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_highpass(highcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, sos=False):
+    ''' Bandpass filter the data '''
+    if sos:
+        sos_out = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
+        y = sig.sosfiltfilt(sos_out, data)
+    else:
+        b, a = butter_bandpass(lowcut, highcut, fs, order=order, sos=sos)
+        y = sig.filtfilt(b, a, data)
+
+    return y
+
+# Functions examples from https://www.programcreek.com/python/example/100546/scipy.signal.spectrogram
 def power_spectrum(signal: np.ndarray,
                    fs: int,
                    window_width: int,
@@ -221,3 +292,63 @@ def my_PSD(signal: np.ndarray,
                         **kwargs)
 
     return f, Pxx
+
+
+def my_modulation_index(sig_phase: np.ndarray,
+                        sig_amp: np.ndarray,
+                        nbins: int=18) -> (float, float):
+    """
+    Computes the Modulation Index between two signals. The formalism used is the
+    one provided in the following paper:
+
+        # REF #
+        Tort AB, Komorowski R, Eichenbaum H, Kopell N. Measuring phase-amplitude coupling between neuronal oscillations of different frequencies. J Neurophysiol. 2010 Aug;104(2):1195-210. doi: 10.1152/jn.00106.2010. Epub 2010 May 12. Erratum in: J Neurophysiol. 2010 Oct;104(4):2302. PubMed PMID: 20463205; PubMed Central PMCID: PMC2941206.
+        # --- #
+
+    Modulation Index (MI) is returned as a single number; the computation is based in the Kullback-Leibler distance. More details in the paper (p. 1196-7).
+
+    Parameters
+    ----------
+    sig_phase: numpy.ndarray
+        The phase signal xfp(t)
+    sig_amp: numpy.ndarray
+        The amplitude signal xfA(t).
+    nbins: int
+        Number of phase bins
+
+    Returns
+    -------
+    MI: float
+        Modulation Index, as computed in the paper by Tort et al. (2010)
+    dist_KL: float
+        Kullback-Leibler distance.
+    """
+
+    # Make the bins
+    bin_edges = np.linspace(-np.pi, np.pi, nbins+1)
+    bin_centers = bin_edges[1:] - np.diff(bin_edges)/2
+
+    # Allocate to bins using their indices
+    idx_bin = np.digitize(sig_phase, bin_edges)
+    bin_amp = np.zeros(nbins)
+    for bin in np.arange(nbins):
+        if np.any(idx_bin == bin):
+            bin_amp[bin] = np.mean(sig_amp[idx_bin == bin])
+
+    # Hist. normalization step - get P(j) vals
+    P_amp = bin_amp / np.sum(bin_amp)
+
+    # Kullback-Leibler distance & modulation index (MI)
+    Q_amp = np.ones(nbins) / nbins
+
+    # In the special case where observed probability in a bin is 0, this tweak
+    # allows computing a meaningful KL distance nonetheless
+    P_amp[np.where(P_amp == 0)] = 2.2e-10
+
+    # Kullback-Leibler distance
+    dist_KL = np.sum(P_amp * np.log(P_amp / Q_amp))
+
+    # Modulation Index
+    MI = dist_KL / np.log(nbins)
+
+    return MI, dist_KL

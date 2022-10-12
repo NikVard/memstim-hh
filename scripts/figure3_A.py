@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib import font_manager as fm
+from matplotlib import ticker
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,12 +29,30 @@ mplb.rcParams['ps.fonttype'] = 42
 mplb.rcParams['axes.titlesize'] = 11
 mplb.rcParams['axes.labelsize'] = 9
 
+def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, rot, ha, va):
+    """ Add a sizebar to the provided axis """
+    ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)
+
+    # add the text
+    if type(text) is list:
+        # bottom text
+        ax.text(x=textx[0], y=texty[0], s=text[0], rotation=rot[0], fontsize=fsize, va=va, ha=ha, clip_on=False)
+
+        # top text
+        ax.text(x=textx[1], y=texty[1], s=text[1], rotation=rot[1], fontsize=fsize, va=va, ha=ha, clip_on=False)
+    else:
+        ax.text(x=textx, y=texty, s=text, rotation=rot, fontsize=fsize, va=va, ha=ha, clip_on=False)
 
 # main program
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Generate figure 3A from paper')
+
+    parser.add_argument('-ra', '--rasters-all',
+                        action='store_true',
+                        default=False,
+                        help='Set to plot all rasters instead of only for CA1.')
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
@@ -56,41 +75,93 @@ if __name__ == "__main__":
     overlap_FR = 0.9
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
+    td = 100*ms # distance between consecutive spikes to count as a separate burst
 
     # Area names and sizes
     areas = [['EC_pyCAN', 'EC_inh'], ['DG_py', 'DG_inh'], ['CA3_pyCAN', 'CA3_inh'], ['CA1_pyCAN', 'CA1_inh']]
     area_labels = ['EC', 'DG', 'CA3', 'CA1']
     N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
 
-    # Directories
-    fig3_dir = os.path.join(parent_dir, 'results', 'analysis', 'current', 'fig3')
-    fig3_data = os.path.join(fig3_dir, 'data')
-    fig3_currents = os.path.join(fig3_data, 'currents')
-
     # Color selection
     c_inh = '#bf616a'
     c_exc = '#5e81ac'
+    c_ICAN = '#40916c'
+    # c_IM = '#1b4332'
+    c_IM = '#b76935'
+    c_w_ICAN = 'k'
+    c_wo_ICAN = 'k'
 
     # Figure sizes
-    fig_width = 7.5
-    fig_height = 8.5
+    fig_width = 5.5
+    fig_height = 4.0
+    if args.rasters_all:
+        fig_height = 8.5
 
-    # Font size
+    # Rasters
+    N_scaling = 200
+    N_gap = 5
+
+    # Firing rates plotting gap
+    rates_gap = 15 # Hz
+
+    # Limits
+    xlims = [1230, 1840]
+
+    # Text parameters
     fsize = 9
+    sizebar_off = 150 # sizebar offset
 
 
-    """ Plot Figure 3 of the paper - TODO: Add DOI"""
+    """ Plot Figure 3 of the paper - TODO: Add DOI """
     print('[+] Generating the figure...')
 
-    # Make a figure
-    fig = plt.figure(figsize=(fig_width,fig_height))
+    # Make a figure - TODO: Fix constrained_layout!!!
+    fig = plt.figure(figsize=(fig_width,fig_height), tight_layout=True)
 
-    # Use gridspecs
-    G_outer = GridSpec(4, 2, left=0.1, right=0.9, bottom=0.05, top=0.95,
-                        wspace=0.5, hspace=0.3, width_ratios=(0.5, 0.5), figure=fig)
-    G_panel_A = G_outer[:,0].subgridspec(4, 1, hspace=0.3)
-    G_panel_B = G_outer[:2,1].subgridspec(2, 1, hspace=0.3)
-    G_panel_C = G_outer[2:,1].subgridspec(1, 1, hspace=0.3)
+    # # Use gridspecs
+    # G_outer = GridSpec(1, 2, left=0.1, right=0.95, bottom=0.15, top=0.925,
+    #                     wspace=0.2, width_ratios=(0.5, 0.5), figure=fig)
+    # G_left = G_outer[0,0]
+    # if args.rasters_all:
+    #     G_panel_A = G_left.subgridspec(3, 1, hspace=0.2, height_ratios=(0.6, 0.2, 0.2))
+    #     G_rasters_A = G_panel_A[0].subgridspec(4, 1, hspace=0.1)
+    # else:
+    #     G_panel_A = G_left.subgridspec(3, 1, hspace=0.2, height_ratios=(0.35, 0.35, 0.3))
+    #     G_rasters_A = G_panel_A[0]
+    # G_FRs_A = G_panel_A[1]
+    # G_currents = G_panel_A[2]
+    #
+    # G_right = G_outer[0,1].subgridspec(2, 1, height_ratios=(0.74, 0.26))
+    # G_panel_B = G_right[0].subgridspec(2, 1, hspace=0.2, height_ratios=(0.5, 0.5))
+    # G_panel_C = G_right[1]
+    # if args.rasters_all:
+    #     G_rasters_B = G_panel_B[0].subgridspec(4, 1, hspace=0.1)
+    # else:
+    #     G_rasters_B = G_panel_B[0]
+    # G_FRs_B = G_panel_B[1]
+
+    # panel A]
+    if args.rasters_all:
+        G_outer = GridSpec(3, 2, #left=0.1, right=0.95, bottom=0.15, top=0.925,
+                           height_ratios=(0.6, 0.2, 0.2), width_ratios=(0.5, 0.5), figure=fig)
+        G_rasters_A = G_outer[0, 0].subgridspec(4, 1)
+    else:
+        G_outer = GridSpec(3, 2, #left=0.1, right=0.95, bottom=0.15, top=0.925,
+                           width_ratios=(0.5, 0.5), figure=fig)
+        G_rasters_A = G_outer[0, 0]
+    G_FRs_A = G_outer[1, 0]
+    G_currents = G_outer[2, 0]
+
+    # panel B
+    if args.rasters_all:
+        G_rasters_B = G_outer[0, 1].subgridspec(4, 1)
+    else:
+        G_rasters_B = G_outer[0, 1]
+    G_FRs_B = G_outer[1, 1]
+
+    # panel C
+    G_panel_C = G_outer[2, 1]
+
     G_outer.tight_layout(fig)
 
 
@@ -99,100 +170,294 @@ if __name__ == "__main__":
     axs = []
 
     # Panel A - I/E rates | I_CAN | I_M - case w/ currents
-    ax_A0 = fig.add_subplot(G_panel_A[0])
-    ax_A1 = fig.add_subplot(G_panel_A[1], sharex=ax_A0, sharey=ax_A0)
-    ax_A2 = fig.add_subplot(G_panel_A[2], sharex=ax_A0)
-    ax_A3 = fig.add_subplot(G_panel_A[3], sharex=ax_A0)
-    axs.append([ax_A0, ax_A1, ax_A2, ax_A3])
+    if args.rasters_all:
+        ax_A0_0 = fig.add_subplot(G_rasters_A[0]) # EC E/I rasters
+        ax_A0_1 = fig.add_subplot(G_rasters_A[1], sharex=ax_A0_0, sharey=ax_A0_0) # DG E/I rasters
+        ax_A0_2 = fig.add_subplot(G_rasters_A[2], sharex=ax_A0_0, sharey=ax_A0_0) # CA3 E/I rasters
+        ax_A0_3 = fig.add_subplot(G_rasters_A[3], sharex=ax_A0_0, sharey=ax_A0_0) # CA1 E/I rasters
+        axs.insert(0, [ax_A0_0, ax_A0_1, ax_A0_2, ax_A0_3])
+
+        # set label as area name
+        ax_A0_0.set_title(r'   Activity w/ $I_{CAN}$', loc='center')
+        # ax_A0_0.set_title(area_labels[0])
+        # ax_A0_1.set_title(area_labels[1])
+        # ax_A0_2.set_title(area_labels[2])
+        # ax_A0_3.set_title(area_labels[3])
+        ax_A0_0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=20.)
+        ax_A0_1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=20.)
+        ax_A0_2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=20.)
+        ax_A0_3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=20.)
+
+        # Set x-lims
+        ax_A0_0.set_xlim(xlims)
+
+        # Set y-lims
+        ax_A0_0.set_ylim([0, 2*N_scaling+N_gap+1])
+
+        # Hide x-y axes
+        ax_A0_0.xaxis.set_visible(False)
+        # ax_A0_0.yaxis.set_visible(False)
+        ax_A0_1.xaxis.set_visible(False)
+        # ax_A0_1.yaxis.set_visible(False)
+        ax_A0_2.xaxis.set_visible(False)
+        # ax_A0_2.yaxis.set_visible(False)
+        ax_A0_3.xaxis.set_visible(False)
+        # ax_A0_3.yaxis.set_visible(False)
+
+        # Hide some spines
+        ax_A0_0.spines['top'].set_visible(False)
+        ax_A0_0.spines['bottom'].set_visible(False)
+        ax_A0_0.spines['left'].set_visible(False)
+        ax_A0_0.spines['right'].set_visible(False)
+        ax_A0_1.spines['top'].set_visible(False)
+        ax_A0_1.spines['bottom'].set_visible(False)
+        ax_A0_1.spines['left'].set_visible(False)
+        ax_A0_1.spines['right'].set_visible(False)
+        ax_A0_2.spines['top'].set_visible(False)
+        ax_A0_2.spines['bottom'].set_visible(False)
+        ax_A0_2.spines['left'].set_visible(False)
+        ax_A0_2.spines['right'].set_visible(False)
+        ax_A0_3.spines['top'].set_visible(False)
+        ax_A0_3.spines['bottom'].set_visible(False)
+        ax_A0_3.spines['left'].set_visible(False)
+        ax_A0_3.spines['right'].set_visible(False)
+
+        # Fix the ytick locators
+        ax_A0_0.yaxis.set_major_locator(ticker.NullLocator())
+        ax_A0_0.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_A0_1.yaxis.set_major_locator(ticker.NullLocator())
+        ax_A0_1.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_A0_2.yaxis.set_major_locator(ticker.NullLocator())
+        ax_A0_2.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_A0_3.yaxis.set_major_locator(ticker.NullLocator())
+        ax_A0_3.yaxis.set_minor_locator(ticker.NullLocator())
+
+
+    else:
+        ax_A0 = fig.add_subplot(G_rasters_A)
+        axs.insert(0, [ax_A0])
+
+        # Set titles and x-y labels
+        # ax_A0.text(0.5, 1.2, 'I_CAN on', fontsize=12, horizontalalignment='center', verticalalignment='center', transform=ax_A0.transAxes, clip_on=False)
+        ax_A0.set_title(r'   Activity w/ $I_{CAN}$', loc='center')
+        # ax_A1.set_title('CA1 Firing Rates')
+        # ax_A2.set_title('CA1 Currents I_CAN / I_M')
+        ax_A0.set_ylabel('Neuron')
+
+        # Set x-lims
+        ax_A0.set_xlim(xlims)
+
+        # Set y-lims
+        ax_A0.set_ylim([0, 2*N_scaling+N_gap+1])
+
+        # Hide x-y axes
+        ax_A0.xaxis.set_visible(False)
+        # ax_A0.yaxis.set_visible(False)
+
+        # Hide some spines
+        ax_A0.spines['top'].set_visible(False)
+        ax_A0.spines['bottom'].set_visible(False)
+        ax_A0.spines['left'].set_visible(False)
+        ax_A0.spines['right'].set_visible(False)
+
+        # Fix the tick locators
+        ax_A0.xaxis.set_major_locator(ticker.NullLocator())
+        ax_A0.xaxis.set_minor_locator(ticker.NullLocator())
+        ax_A0.yaxis.set_major_locator(ticker.NullLocator())
+        ax_A0.yaxis.set_minor_locator(ticker.NullLocator())
+
+        # Remove tick labels
+        # ax0.xaxis.set_ticklabels([])
+        ax_A0.yaxis.set_ticklabels([])
+
+    # Other axes in panel A
+    ax_A1 = fig.add_subplot(G_FRs_A)
+    ax_A2 = fig.add_subplot(G_currents)
+    axs[0].append(ax_A1)
+    axs[0].append(ax_A2)
 
     # Set titles and x-y labels
-    ax_A0.text(0.5, 1.2, 'I_CAN on', fontsize=12, horizontalalignment='center', verticalalignment='center', transform=ax_A0.transAxes, clip_on=False)
-
-    ax_A0.set_title('CA1 Inhibitory FR')
-    ax_A1.set_title('CA1 Excitatory FR')
-    ax_A2.set_title('CA1 Excitatory I_CAN')
-    ax_A3.set_title('CA1 Excitatory I_M')
-
-    ax_A0.set_ylabel('FR [Hz]')
-    ax_A1.set_ylabel('FR [Hz]')
-    ax_A2.set_ylabel(r'I_{CAN} [nA]')
-    ax_A3.set_ylabel(r'I_{M} [nA]')
-    ax_A3.set_xlabel('Time [ms]')
+    ax_A1.set_ylabel('FR [Hz]', labelpad=20.)
+    ax_A2.set_ylabel(r'$I_{CAN , M}$ [nA]')
+    ax_A2.set_xlabel('Time [ms]')
 
     # Hide some spines
-    ax_A0.spines['top'].set_visible(False)
-    # ax_A0.spines['bottom'].set_visible(False)
-    # ax_A0.spines['left'].set_visible(False)
-    ax_A0.spines['right'].set_visible(False)
     ax_A1.spines['top'].set_visible(False)
-    # ax_A1.spines['bottom'].set_visible(False)
-    # ax_A1.spines['left'].set_visible(False)
+    ax_A1.spines['bottom'].set_visible(False)
+    ax_A1.spines['left'].set_visible(False)
     ax_A1.spines['right'].set_visible(False)
     ax_A2.spines['top'].set_visible(False)
     # ax_A2.spines['bottom'].set_visible(False)
-    # ax_A2.spines['left'].set_visible(False)
+    ax_A2.spines['left'].set_visible(False)
     ax_A2.spines['right'].set_visible(False)
-    ax_A3.spines['top'].set_visible(False)
-    # ax_A3.spines['bottom'].set_visible(False)
-    # ax_A3.spines['left'].set_visible(False)
-    ax_A3.spines['right'].set_visible(False)
+
+    # Set x-lims
+    ax_A1.set_xlim(xlims)
+    ax_A2.set_xlim(xlims)
+
+    # Set y-lims
+    # ax_A1.set_ylim(ylims)
+    # ax_A2.set_ylim(ylims)
 
     # Remove tick labels
-    # ax_A0.xaxis.set_ticklabels([])
-    # ax_A0.yaxis.set_ticklabels([])
-    # ax_A1.xaxis.set_ticklabels([])
-    # ax_A1.yaxis.set_ticklabels([])
-    # ax_A2.xaxis.set_ticklabels([])
-    # ax_A2.yaxis.set_ticklabels([])
-    # ax_A3.xaxis.set_ticklabels([])
-    # ax_A3.yaxis.set_ticklabels([])
-    plt.setp(ax_A0.get_xticklabels(), visible=False)
-    plt.setp(ax_A1.get_xticklabels(), visible=False)
-    plt.setp(ax_A2.get_xticklabels(), visible=False)
+    # plt.setp(ax_A0.get_xticklabels(), visible=False)
+    # plt.setp(ax_A1.get_xticklabels(), visible=False)
+    # plt.setp(ax_A2.get_xticklabels(), visible=True)
+
+    # ax_A1.xaxis.set_major_locator(ticker.FixedLocator(np.arange(1000, 2000, 100)))
+    # ax_A1.xaxis.set_minor_locator(ticker.FixedLocator(np.arange(1000, 2000, 100)+50))
+    major_locs = [1233, 1333, 1583, 1833]
+    minor_locs = np.concatenate(([1283], np.arange(1383, 1590, 50), np.arange(1583+50, 1833, 50)))
+    # ax_A1.xaxis.set_major_locator(ticker.FixedLocator(major_locs))
+    # ax_A1.xaxis.set_minor_locator(ticker.FixedLocator(minor_locs))
+    ax_A1.yaxis.set_major_locator(ticker.NullLocator())
+    ax_A1.yaxis.set_minor_locator(ticker.NullLocator())
+    ax_A2.xaxis.set_major_locator(ticker.FixedLocator(major_locs))
+    ax_A2.xaxis.set_minor_locator(ticker.FixedLocator(minor_locs))
+    # ax_A1.set_xticklabels([-50, 0, 250, 500])
+    ax_A2.set_xticklabels([-50, 0, 250, 500])
+    ax_A1.xaxis.set_major_locator(ticker.NullLocator())
+    ax_A1.xaxis.set_minor_locator(ticker.NullLocator())
+    # ax_A2.xaxis.set_major_locator(ticker.NullLocator())
+    # ax_A2.xaxis.set_minor_locator(ticker.NullLocator())
+
 
     # Panel B - I/E rates - case w/o currents
-    ax_B0 = fig.add_subplot(G_panel_B[0], sharex=ax_A0)
-    ax_B1 = fig.add_subplot(G_panel_B[1], sharex=ax_A0, sharey=ax_B0)
-    axs.append([ax_B0, ax_B1])
+    if args.rasters_all:
+        ax_B0_0 = fig.add_subplot(G_rasters_B[0], sharex=ax_A0_0, sharey=ax_A0_0)
+        ax_B0_1 = fig.add_subplot(G_rasters_B[1], sharex=ax_A0_0, sharey=ax_A0_0)
+        ax_B0_2 = fig.add_subplot(G_rasters_B[2], sharex=ax_A0_0, sharey=ax_A0_0)
+        ax_B0_3 = fig.add_subplot(G_rasters_B[3], sharex=ax_A0_0, sharey=ax_A0_0)
+        axs.insert(1, [ax_B0_0, ax_B0_1, ax_B0_2, ax_B0_3])
 
-    # Set titles and x-y labels
-    ax_B0.text(0.5, 1.2, 'I_CAN off', fontsize=12, horizontalalignment='center', verticalalignment='center', transform=ax_B0.transAxes, clip_on=False)
+        # Set titles and labels
+        ax_B0_0.set_title(r'    Activity w/o $I_{CAN}$', loc='center')
 
-    ax_B0.set_title('CA1 Inhibitory FR')
-    ax_B1.set_title('CA1 Excitatory FR')
+        # Set x-lims
+        ax_B0_0.set_xlim(xlims)
 
-    ax_B0.set_ylabel('FR [Hz]')
-    ax_B1.set_ylabel('FR [Hz]')
-    ax_B1.set_xlabel('Time [ms]')
+        # Set y-lims
+        ax_B0_0.set_ylim([0, 2*N_scaling+N_gap+1])
+
+        # Hide x-y axes
+        ax_B0_0.xaxis.set_visible(False)
+        # ax_B0_0.yaxis.set_visible(False)
+        ax_B0_1.xaxis.set_visible(False)
+        # ax_B0_1.yaxis.set_visible(False)
+        ax_B0_2.xaxis.set_visible(False)
+        # ax_B0_2.yaxis.set_visible(False)
+        ax_B0_3.xaxis.set_visible(False)
+        # ax_B0_3.yaxis.set_visible(False)
+
+        # Hide some spines
+        ax_B0_0.spines['top'].set_visible(False)
+        ax_B0_0.spines['bottom'].set_visible(False)
+        ax_B0_0.spines['left'].set_visible(False)
+        ax_B0_0.spines['right'].set_visible(False)
+        ax_B0_1.spines['top'].set_visible(False)
+        ax_B0_1.spines['bottom'].set_visible(False)
+        ax_B0_1.spines['left'].set_visible(False)
+        ax_B0_1.spines['right'].set_visible(False)
+        ax_B0_2.spines['top'].set_visible(False)
+        ax_B0_2.spines['bottom'].set_visible(False)
+        ax_B0_2.spines['left'].set_visible(False)
+        ax_B0_2.spines['right'].set_visible(False)
+        ax_B0_3.spines['top'].set_visible(False)
+        ax_B0_3.spines['bottom'].set_visible(False)
+        ax_B0_3.spines['left'].set_visible(False)
+        ax_B0_3.spines['right'].set_visible(False)
+
+        # Fix the ytick locators
+        ax_B0_0.yaxis.set_major_locator(ticker.NullLocator())
+        ax_B0_0.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_B0_1.yaxis.set_major_locator(ticker.NullLocator())
+        ax_B0_1.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_B0_2.yaxis.set_major_locator(ticker.NullLocator())
+        ax_B0_2.yaxis.set_minor_locator(ticker.NullLocator())
+        ax_B0_3.yaxis.set_major_locator(ticker.NullLocator())
+        ax_B0_3.yaxis.set_minor_locator(ticker.NullLocator())
+
+        # Remove tick labels
+        # ax_B0_0.xaxis.set_ticklabels([])
+        ax_B0_0.yaxis.set_ticklabels([])
+        # ax_B0_1.xaxis.set_ticklabels([])
+        ax_B0_1.yaxis.set_ticklabels([])
+        # ax_B0_2.xaxis.set_ticklabels([])
+        ax_B0_2.yaxis.set_ticklabels([])
+        # ax_B0_3.xaxis.set_ticklabels([])
+        ax_B0_3.yaxis.set_ticklabels([])
+
+    else:
+        ax_B0 = fig.add_subplot(G_rasters_B, sharex=ax_A0, sharey=ax_A0)
+        axs.insert(1, [ax_B0])
+
+        # Set titles and x-y labels
+        ax_B0.set_title(r'    Activity w/o $I_{CAN}$', loc='center')
+
+        # Hide x-y axes
+        ax_B0.xaxis.set_visible(False)
+        # ax_B0.yaxis.set_visible(False)
+
+        # Hide some spines
+        ax_B0.spines['top'].set_visible(False)
+        ax_B0.spines['bottom'].set_visible(False)
+        ax_B0.spines['left'].set_visible(False)
+        ax_B0.spines['right'].set_visible(False)
+
+        # Fix the tick locators
+        ax_B0.xaxis.set_major_locator(ticker.NullLocator())
+        ax_B0.xaxis.set_minor_locator(ticker.NullLocator())
+        ax_B0.yaxis.set_major_locator(ticker.NullLocator())
+        ax_B0.yaxis.set_minor_locator(ticker.NullLocator())
+
+        # Remove tick labels
+        # ax_B0.xaxis.set_ticklabels([])
+        ax_B0.yaxis.set_ticklabels([])
+
+    ax_B1 = fig.add_subplot(G_FRs_B, sharex=ax_A1, sharey=ax_A1)
+    axs[1].append(ax_B1)
 
     # Hide some spines
-    ax_B0.spines['top'].set_visible(False)
-    # ax_B0.spines['bottom'].set_visible(False)
-    # ax_B0.spines['left'].set_visible(False)
-    ax_B0.spines['right'].set_visible(False)
     ax_B1.spines['top'].set_visible(False)
-    # ax_B1.spines['bottom'].set_visible(False)
-    # ax_B1.spines['left'].set_visible(False)
+    ax_B1.spines['bottom'].set_visible(False)
+    ax_B1.spines['left'].set_visible(False)
     ax_B1.spines['right'].set_visible(False)
 
     # Remove tick labels
-    plt.setp(ax_B0.get_xticklabels(), visible=False)
+    # plt.setp(ax_B0.get_xticklabels(), visible=False)
+    # ax_B1.xaxis.set_major_locator(ticker.FixedLocator(np.arange(1000, 2000, 100)))
+    # ax_B1.xaxis.set_minor_locator(ticker.FixedLocator(np.arange(1000, 2000, 100)+50))
+
+    # Set x-lims
+    ax_B1.set_xlim(xlims)
 
 
     # Panel C - Quantification
-    ax_C0 = fig.add_subplot(G_panel_C[0])
-    ax_C02 = ax_C0.twinx()
-    axs.append([ax_C0])
+    ax_C0 = fig.add_subplot(G_panel_C)
+    axs.insert(2, [ax_C0])
 
     # Set titles and x-y labels
+    ax_C0.set_title('')
     ax_C0.set_xlabel('Stimulation amplitude [nA]')
-    ax_C0.set_ylabel('Spike count [spk/neuron]')
-    ax_C02.set_ylabel('Burst duration [ms]', color='r')
-
+    ax_C0.set_ylabel('Num. of Bursts')
+    # ax_C02.set_ylabel('Burst duration [ms]', color='r')
+    # ax_C1.set_ylabel('Spike count [spk/neuron]')
+    # ax_C1.set_xlabel('Stimulation amplitude [nA]')
 
     # Fix the ytick locators
-    # ax_C0.yaxis.set_major_locator(ticker.NullLocator())
-    # ax_C0.yaxis.set_minor_locator(ticker.NullLocator())
+    ax_C0.xaxis.set_major_locator(ticker.MultipleLocator(5))
+    ax_C0.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax_C0.yaxis.set_major_locator(ticker.FixedLocator([0, 1, 2, 3, 4]))
+    ax_C0.yaxis.set_minor_locator(ticker.NullLocator())
+
+    # set ylims
+    ax_C0.set_ylim([-0.1, 2.8])
+
+    # Hide some spines
+    ax_C0.spines['top'].set_visible(False)
+    # ax_C0.spines['bottom'].set_visible(False)
+    # ax_C0.spines['left'].set_visible(False)
+    ax_C0.spines['right'].set_visible(False)
 
 
     # Load the data
@@ -201,48 +466,165 @@ if __name__ == "__main__":
     dir_spikes = [os.path.join(dir_data[0], 'spikes'), os.path.join(dir_data[1], 'spikes')]
     dir_currents = [os.path.join(dir_data[0], 'currents'), os.path.join(dir_data[1], 'currents')]
 
+
     # Spikes
     print('[+] Loading the rasters...')
-    # 10nA w/ I_CAN
-    CA1_E_ICAN_t = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_pyCAN_spikemon_t.txt'))
-    CA1_E_ICAN_i = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_pyCAN_spikemon_i.txt'))
-    CA1_I_ICAN_t = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_inh_spikemon_t.txt'))
-    CA1_I_ICAN_i = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_inh_spikemon_i.txt'))
 
-    # 10nA w/o I_CAN
-    CA1_E_noICAN_t = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_pyCAN_spikemon_t.txt'))
-    CA1_E_noICAN_i = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_pyCAN_spikemon_i.txt'))
-    CA1_I_noICAN_t = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_inh_spikemon_t.txt'))
-    CA1_I_noICAN_i = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_inh_spikemon_i.txt'))
+    for area_idx in range(len(areas)):
+        if not args.rasters_all and area_idx<3:
+            continue;
 
-    # fix data
-    i_exc_ICAN = CA1_E_ICAN_i.astype(int)
-    t_exc_ICAN = CA1_E_ICAN_t*ms
-    i_inh_ICAN = CA1_I_ICAN_i.astype(int)
-    t_inh_ICAN = CA1_I_ICAN_t*ms
+        # load t-i arrays for this area
+        print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
 
-    i_exc_noICAN = CA1_E_noICAN_i.astype(int)
-    t_exc_noICAN = CA1_E_noICAN_t*ms
-    i_inh_noICAN = CA1_I_noICAN_i.astype(int)
-    t_inh_noICAN = CA1_I_noICAN_t*ms
+        print('[+]....ICAN ON')
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning, append=1)
+
+            # 10nA w/ I_CAN
+            i_exc_ICAN = np.loadtxt(os.path.join(dir_spikes[1], '{0}_spikemon_i.txt'.format(areas[area_idx][0])))
+            t_exc_ICAN = np.loadtxt(os.path.join(dir_spikes[1], '{0}_spikemon_t.txt'.format(areas[area_idx][0])))
+            i_inh_ICAN = np.loadtxt(os.path.join(dir_spikes[1], '{0}_spikemon_i.txt'.format(areas[area_idx][1])))
+            t_inh_ICAN = np.loadtxt(os.path.join(dir_spikes[1], '{0}_spikemon_t.txt'.format(areas[area_idx][1])))
+
+        print('[+]....ICAN OFF')
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning, append=1)
+
+            # 10nA w/o I_CAN
+            i_exc_noICAN = np.loadtxt(os.path.join(dir_spikes[0], '{0}_spikemon_i.txt'.format(areas[area_idx][0])))
+            t_exc_noICAN = np.loadtxt(os.path.join(dir_spikes[0], '{0}_spikemon_t.txt'.format(areas[area_idx][0])))
+            i_inh_noICAN = np.loadtxt(os.path.join(dir_spikes[0], '{0}_spikemon_i.txt'.format(areas[area_idx][1])))
+            t_inh_noICAN = np.loadtxt(os.path.join(dir_spikes[0], '{0}_spikemon_t.txt'.format(areas[area_idx][1])))
+
+        # CA1_E_ICAN_t = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_pyCAN_spikemon_t.txt'))
+        # CA1_E_ICAN_i = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_pyCAN_spikemon_i.txt'))
+        # CA1_I_ICAN_t = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_inh_spikemon_t.txt'))
+        # CA1_I_ICAN_i = np.loadtxt(os.path.join(dir_spikes[1], 'CA1_inh_spikemon_i.txt'))
+        #
+        # # 10nA w/o I_CAN
+        # CA1_E_noICAN_t = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_pyCAN_spikemon_t.txt'))
+        # CA1_E_noICAN_i = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_pyCAN_spikemon_i.txt'))
+        # CA1_I_noICAN_t = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_inh_spikemon_t.txt'))
+        # CA1_I_noICAN_i = np.loadtxt(os.path.join(dir_spikes[0], 'CA1_inh_spikemon_i.txt'))
+
+        # fix data
+        i_exc_ICAN = i_exc_ICAN.astype(int)
+        t_exc_ICAN = t_exc_ICAN*ms
+        i_inh_ICAN = i_inh_ICAN.astype(int)
+        t_inh_ICAN = t_inh_ICAN*ms
+
+        i_exc_noICAN = i_exc_noICAN.astype(int)
+        t_exc_noICAN = t_exc_noICAN*ms
+        i_inh_noICAN = i_inh_noICAN.astype(int)
+        t_inh_noICAN = t_inh_noICAN*ms
+
+        # downsample the rasters
+        N_exc = N_tot[3][0]
+        N_inh = N_tot[3][1]
+
+        exc_mixed = np.arange(0, N_exc, int(N_exc/N_scaling))
+        inh_mixed = np.arange(0, N_inh, int(N_inh/N_scaling))
+
+        idx_exc_ICAN = np.in1d(i_exc_ICAN, exc_mixed)
+        idx_inh_ICAN = np.in1d(i_inh_ICAN, inh_mixed)
+        idx_exc_noICAN = np.in1d(i_exc_noICAN, exc_mixed)
+        idx_inh_noICAN = np.in1d(i_inh_noICAN, inh_mixed)
+
+        i_exc_sub_ICAN = i_exc_ICAN[idx_exc_ICAN]
+        t_exc_sub_ICAN = t_exc_ICAN[idx_exc_ICAN]
+        i_inh_sub_ICAN = i_inh_ICAN[idx_inh_ICAN]
+        t_inh_sub_ICAN = t_inh_ICAN[idx_inh_ICAN]
+        i_exc_sub_noICAN = i_exc_noICAN[idx_exc_noICAN]
+        t_exc_sub_noICAN = t_exc_noICAN[idx_exc_noICAN]
+        i_inh_sub_noICAN = i_inh_noICAN[idx_inh_noICAN]
+        t_inh_sub_noICAN = t_inh_noICAN[idx_inh_noICAN]
+
+        # assign new neuron count numbers
+        cnt = 0
+        i_exc_sub_ICAN_new = np.copy(i_exc_sub_ICAN)
+        for ii in exc_mixed:
+            idx_tmp = np.where(i_exc_sub_ICAN == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_exc_sub_ICAN_new[idx_tmp] = cnt
+            cnt += 1
+        i_exc_sub_ICAN = i_exc_sub_ICAN_new
+
+        # cnt = 0
+        cnt += N_gap
+        i_inh_sub_ICAN_new = np.copy(i_inh_sub_ICAN)
+        for ii in inh_mixed:
+            idx_tmp = np.where(i_inh_sub_ICAN == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_inh_sub_ICAN_new[idx_tmp] = cnt
+            cnt += 1
+        i_inh_sub_ICAN = i_inh_sub_ICAN_new
+
+        # assign new neuron count numbers
+        cnt = 0
+        i_exc_sub_noICAN_new = np.copy(i_exc_sub_noICAN)
+        for ii in exc_mixed:
+            idx_tmp = np.where(i_exc_sub_noICAN == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_exc_sub_noICAN_new[idx_tmp] = cnt
+            cnt += 1
+        i_exc_sub_noICAN = i_exc_sub_noICAN_new
+
+        # cnt = 0
+        cnt += N_gap
+        i_inh_sub_noICAN_new = np.copy(i_inh_sub_noICAN)
+        for ii in inh_mixed:
+            idx_tmp = np.where(i_inh_sub_noICAN == ii)
+            # print('changing ', ii, 'to ', cnt)
+            i_inh_sub_noICAN_new[idx_tmp] = cnt
+            cnt += 1
+        i_inh_sub_noICAN = i_inh_sub_noICAN_new
+
+        # select axis
+        if args.rasters_all:
+            ax_curr_ICAN = axs[0][area_idx]
+            ax_curr_noICAN = axs[1][area_idx]
+        else:
+            ax_curr_ICAN = axs[0][0]
+            ax_curr_noICAN = axs[1][0]
+
+        print('[>] Plotting panel A - Rasters w/ ICAN')
+        ax_curr_ICAN.scatter(t_inh_sub_ICAN/ms, i_inh_sub_ICAN, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr_ICAN.scatter(t_exc_sub_ICAN/ms, i_exc_sub_ICAN, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+
+        print('[>] Plotting panel B - Rasters w/o ICAN')
+        ax_curr_noICAN.scatter(t_inh_sub_noICAN/ms, i_inh_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr_noICAN.scatter(t_exc_sub_noICAN/ms, i_exc_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+
+        # stimulation line
+        ax_curr_ICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+        ax_curr_noICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+
+        ax_curr_ICAN.set_xlim(xlims)
+        ax_curr_noICAN.set_xlim(xlims)
+
+    # Don't forget to mark the stimulation onset!
+    # add marker for stimulation onset
+    axs[0][0].scatter(x=1333, y=485, s=12.5, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
+    axs[1][0].scatter(x=1333, y=485, s=12.5, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
 
 
     # Calculate the FRs
-    print('[+] Calculating FRs...')
+    print('[+] Calculating CA1 FRs...')
     tv_inh_ICAN_FR, FR_inh_ICAN = my_FR(spikes=t_inh_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_ICAN_FR, FR_exc_ICAN = my_FR(spikes=t_exc_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_inh_noICAN_FR, FR_inh_noICAN = my_FR(spikes=t_inh_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_noICAN_FR, FR_exc_noICAN = my_FR(spikes=t_exc_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # Normalize the FRs
-    print('[+] Normalizing FRs...')
+    print('[+] Normalizing CA1 FRs...')
     FR_inh_ICAN_norm = (FR_inh_ICAN/winsize_FR)/N_tot[3][1]
     FR_exc_ICAN_norm = (FR_exc_ICAN/winsize_FR)/N_tot[3][0]
     FR_inh_noICAN_norm = (FR_inh_noICAN/winsize_FR)/N_tot[3][1]
     FR_exc_noICAN_norm = (FR_exc_noICAN/winsize_FR)/N_tot[3][0]
 
     # Currents
-    print('[+] Loading I_CAN / I_M currents...')
+    print('[+] Loading CA1-E I_CAN / I_M currents...')
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning, append=1)
         CA1_E_I_CAN = np.loadtxt(os.path.join(dir_currents[1], 'CA1_E_currents_I_CAN.txt'))
@@ -251,26 +633,59 @@ if __name__ == "__main__":
 
     # Plot panel A
     #------------------------
-    print('[>] Plotting panel A')
-    ax_A0.plot(tv_inh_ICAN_FR/ms, FR_inh_ICAN_norm, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
+    # print('[>] Plotting panel A - Rasters w/ ICAN')
+    # ax_A0.scatter(t_inh_sub_ICAN/ms, i_inh_sub_ICAN, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+    # ax_A0.scatter(t_exc_sub_ICAN/ms, i_exc_sub_ICAN, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+
+    print('[>] Plotting panel A - FRs w/ ICAN')
+    ax_A1.plot(tv_inh_ICAN_FR/ms, FR_inh_ICAN_norm+FR_exc_ICAN_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
     ax_A1.plot(tv_exc_ICAN_FR/ms, FR_exc_ICAN_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
-    ax_A2.plot(tv/ms, CA1_E_I_CAN[0], ls='-', linewidth=1.2, c='k', label='I_CAN')
-    ax_A3.plot(tv/ms, CA1_E_I_M[0], ls='-', linewidth=1.2, c='k', label='I_M')
+    # ax_A1.legend(loc='upper center', frameon=False, fontsize=8)
+
+    print('[>] Plotting panel A - Currents w/ ICAN')
+    ax_A2.plot(tv/ms, CA1_E_I_M[0], ls='-', linewidth=1.2, c=c_IM, label=r'$I_{M}$')
+    ax_A2.plot(tv/ms, CA1_E_I_CAN[0], ls='-', linewidth=1.2, c=c_ICAN, label=r'$I_{CAN}$')
+    ax_A2.legend(loc='upper right', frameon=False, fontsize=8)
+    ax_A2.set_ylim([-0.35, 0.7])
+
+    # stimulation line
+    ax_A1.axvline(x=1333, ymin=-0.5, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    ax_A2.axvline(x=1333, ymin=0, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+
+    # add a sizebar for the x-axis
+    xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
+    add_sizebar(ax_A1, xlims_sz, [-50, -50], 'black', '100ms', rot=0, textx=np.mean(xlims_sz), texty=-70, ha='center', va='top')
+
+    # add a sizebar for the y-axis
+    ylims_sz = [-50, 50]
+    add_sizebar(ax_A1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100Hz', rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
 
 
     # Plot panel B
     #------------------------
-    print('[>] Plotting panel B')
-    ax_B0.plot(tv_inh_noICAN_FR/ms, FR_inh_noICAN_norm, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
+    # print('[>] Plotting panel B - Rasters w/o ICAN')
+    # ax_B0.scatter(t_inh_sub_noICAN/ms, i_inh_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+    # ax_B0.scatter(t_exc_sub_noICAN/ms, i_exc_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+
+    print('[>] Plotting panel B - FRs w/ ICAN')
+    ax_B1.plot(tv_inh_noICAN_FR/ms, FR_inh_noICAN_norm+FR_exc_ICAN_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
     ax_B1.plot(tv_exc_noICAN_FR/ms, FR_exc_noICAN_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
+
+    # ax_B1.legend(loc='upper right', frameon=False, fontsize=8)
+    ax_B1.text(x=0.75, y=0.425, transform=ax_B1.transAxes, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+    ax_B1.text(x=0.75, y=0.1, transform=ax_B1.transAxes, s='Excitatory', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+
+    # stimulation line
+    # ax_B0.axvline(x=1333, ymin=-0.2, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    ax_B1.axvline(x=1333, ymin=0.1, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
 
 
     # Panel C - Quantification
     #------------------------
-    print('[>] Plotting panel C')
+    print('[>] Plotting panel C - Number of pulses / pulse duration')
     dir_cluster = os.path.join(parent_dir, 'results_cluster')
-    dir_ICAN = os.path.join(dir_cluster, 'results_noICAN_fig3_quantify')
-    dir_noICAN = os.path.join(dir_cluster, 'results_ICAN_fig3_quantify')
+    dir_ICAN = os.path.join(dir_cluster, 'results_ICAN_fig3_quantify')
+    dir_noICAN = os.path.join(dir_cluster, 'results_noICAN_fig3_quantify')
 
     # w/ ICAN
     print('[!+] Working on +I_CAN data')
@@ -279,6 +694,7 @@ if __name__ == "__main__":
     duration_ICAN = []
     spikes_cnt_ICAN = []
     xarr_ICAN = []
+    bnums_ICAN = []
 
     for item in os.listdir(dir_ICAN):
         print('[>] ', item)
@@ -322,13 +738,37 @@ if __name__ == "__main__":
         FR_exc_envelope = (FR_exc_norm > 10)
 
         # get number of bursts
-        num_bursts = (np.convolve([-10, 0, 10], FR_exc_envelope)>0).sum()//2
+        N_exc = N_tot[3][0]
+        N_inh = N_tot[3][1]
+        tn_exc = int(N_exc*0.1)
+        tn_inh = int(N_inh*0.1)
+        bnum = 0
+        spk_cnt_per_burst = 0
+        flag = False
+        if t_exc.size > 0:
+            tval_p = t_exc[0]
+            spk_cnt_per_burst += 1
+            for tval_c in t_exc[1:]:
+                if tval_c - tval_p <= td:   # spikes are close, is it a burst?
+                    if flag:    # we already adjusted the burst counter, continue
+                        continue
+                    spk_cnt_per_burst += 1
+
+                    if spk_cnt_per_burst >= tn_exc:
+                        bnum += 1
+                        flag = True
+                else:   # we take a large step, the spikes are too spread out, new burst?
+                    spk_cnt_per_burst = 0
+                    flag = False
+                tval_p = tval_c
+        bnums_ICAN.append(bnum)
+        # num_bursts = (np.convolve([-10, 0, 10], FR_exc_envelope)>0).sum()//2
 
         # get total burst duration
         dur_burst = np.count_nonzero(FR_exc_envelope)*dt/ms
 
         # append both values
-        duration_ICAN.append([num_bursts, dur_burst])
+        duration_ICAN.append([bnums_ICAN, dur_burst])
 
         # count spikes after t_onset
         t_stim = float(t_stim_dir.split("_")[1])*ms
@@ -338,8 +778,9 @@ if __name__ == "__main__":
 
         print('[+]....Spikes exc: ', spkcnt_exc)
         print('[+]....Spikes inh: ', spkcnt_inh)
+        if (t_exc.size>0):
+            print('[+]....Last spike: ', np.round(t_exc[-1],4))
         print()
-
 
 
     # w/o ICAN
@@ -350,6 +791,7 @@ if __name__ == "__main__":
     duration_noICAN = []
     spikes_cnt_noICAN = []
     xarr_noICAN = []
+    bnums_noICAN = []
 
     for item in os.listdir(dir_noICAN):
         print('[>] ', item)
@@ -393,13 +835,37 @@ if __name__ == "__main__":
         FR_exc_envelope = (FR_exc_norm > 10)
 
         # get number of bursts
-        num_bursts = (np.convolve([-10, 0, 10], FR_exc_envelope)>0).sum()//2
+        N_exc = N_tot[3][0]
+        N_inh = N_tot[3][1]
+        tn_exc = int(N_exc*0.1)
+        tn_inh = int(N_inh*0.1)
+        bnum = 0
+        spk_cnt_per_burst = 0
+        flag = False
+        if t_exc.size > 0:
+            tval_p = t_exc[0]
+            spk_cnt_per_burst += 1
+            for tval_c in t_exc[1:]:
+                if tval_c - tval_p <= td:   # spikes are close, is it a burst?
+                    if flag:    # we already adjusted the burst counter, continue
+                        continue
+                    spk_cnt_per_burst += 1
+
+                    if spk_cnt_per_burst >= tn_exc:
+                        bnum += 1
+                        flag = True
+                else:   # we take a large step, the spikes are too spread out, new burst?
+                    spk_cnt_per_burst = 0
+                    flag = False
+                tval_p = tval_c
+        bnums_noICAN.append(bnum)
+        # num_bursts = (np.convolve([-10, 0, 10], FR_exc_envelope)>0).sum()//2
 
         # get total burst duration
         dur_burst = np.count_nonzero(FR_exc_envelope)*dt/ms
 
         # append both values
-        duration_noICAN.append([num_bursts, dur_burst])
+        duration_noICAN.append([bnums_noICAN, dur_burst])
 
         # count spikes after t_onset
         t_stim = float(t_stim_dir.split("_")[1])*ms
@@ -409,6 +875,8 @@ if __name__ == "__main__":
 
         print('[-]....Spikes exc: ', spkcnt_exc)
         print('[-]....Spikes inh: ', spkcnt_inh)
+        if (t_exc.size>0):
+            print('[+]....Last spike: ', t_exc[-1].round(4), 'ms')
         print()
 
     # sort the arrays
@@ -416,15 +884,19 @@ if __name__ == "__main__":
     idx_noICAN = np.argsort(xarr_noICAN)
 
     # plot the E - w/ ICAN vs the E - w/o ICAN
-    ln01 = ax_C0.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(spikes_cnt_ICAN)[idx_ICAN,0]/N_tot[3][0], '-xk', label='Spike count w/ I_CAN')
-    ln02 = ax_C0.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(spikes_cnt_noICAN)[idx_noICAN,0]/N_tot[3][0], '-ok', label='Spike count w/ I_CAN')
-    ln10 = ax_C02.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(duration_ICAN)[idx_ICAN,1], '-xr', label='burst duration w/ I_CAN')
-    ln20 = ax_C02.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(duration_noICAN)[idx_noICAN,1], '-or', label='burst duration w/o I_CAN')
+    ln01 = ax_C0.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(bnums_ICAN)[idx_ICAN], linestyle='-', c=c_w_ICAN, label='w/ I_CAN')
+    ln02 = ax_C0.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(bnums_noICAN)[idx_noICAN], linestyle='--', c=c_wo_ICAN, alpha=1., label='w/o I_CAN')
+    # ln11 = ax_B1.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(spikes_cnt_ICAN)[idx_ICAN,0]/N_tot[3][0], linestyle='-', marker='x', c=c_w_ICAN)
+    # ln12 = ax_B1.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(spikes_cnt_noICAN)[idx_noICAN,0]/N_tot[3][0], linestyle='-', marker='o', c=c_wo_ICAN, alpha=0.6)
+    # ln10 = ax_B1.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(duration_ICAN)[idx_ICAN,1], '-xc', label='burst duration w/ I_CAN')
+    # ln20 = ax_B1.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(duration_noICAN)[idx_noICAN,1], '-og', label='burst duration w/o I_CAN')
 
     # one legend
-    lns = ln01+ln02+ln10+ln20
+    # lns = ln01+ln02+ln11+ln12
+    lns = ln01 + ln02
     labs = [l.get_label() for l in lns]
-    ax_C0.legend(lns, labs, loc=0, fontsize=8)
+    # ax_B0.legend(lns, labs, loc=0, fontsize=8)
+    ax_C0.legend(loc='upper left', fontsize=8, frameon=False)
 
 
     # Save and show the figure

@@ -10,6 +10,7 @@ Implementation Notes
     | 1: I removed the {Vm = ...} equations; were not used anywhere in the original model
     | 2: Stimulation is weighed by distance {r} from the electrode position
     | 3: Re-wrote the equations; simplified the alpham/betam for I_Na in the inhibitory equations set
+    | 4: Another implementation of the noise is given and explained nicely by Marcel Stimberg here: https://brian.discourse.group/t/implementation-of-stochastic-noise-in-a-hodgkin-huxley-model-but-as-a-current/787
 """
 
 
