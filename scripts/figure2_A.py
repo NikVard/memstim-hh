@@ -184,7 +184,7 @@ if __name__ == "__main__":
     fig = plt.figure(figsize=(fig_width,fig_height))
 
     # Use gridspecs
-    G_outer = GridSpec(5, 2, left=0.1, right=0.9, bottom=0.1, top=0.9,
+    G_outer = GridSpec(5, 2, left=0.075, right=0.925, bottom=0.075, top=0.925,
                         wspace=0.05, hspace=0.5, height_ratios=(0.1, 0.1, 0.3, 0.2, 0.3), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[0,0])
     G_order_param = G_phase = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[1,0])
@@ -284,7 +284,7 @@ if __name__ == "__main__":
 
         # set label as area name
         ax0.set_title('Rasters')
-        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=25.)
+        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=-1.)
 
         # set limits
         ax0.set_xlim(xlims_raster)
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     # ax_specg_exc.set_ylim(ylims_freq)
 
     # Set the ticks
-    specg_freq_majors = [10, 40, 120]
+    specg_freq_majors = [10, 60, 120]
     ax_specg_inh.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
     ax_specg_exc.yaxis.set_major_locator(ticker.FixedLocator(specg_freq_majors))
 
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     ax_specg_inh.xaxis.set_visible(False)
 
     # Set xlabel
-    ax_specg_exc.set_xlabel('Time [s]')
+    ax_specg_exc.set_xlabel('Time [s]', labelpad=-5.)
 
     # Hide some spines
     ax_specg_exc.spines['top'].set_visible(False)
@@ -579,8 +579,8 @@ if __name__ == "__main__":
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=xlims_rates[1]+100*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f}Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f}Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f} Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f} Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
         # Shade the areas
         ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
@@ -832,7 +832,7 @@ if __name__ == "__main__":
     # save the figure
     print('[+] Saving the figures...')
     fig.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    fig.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    fig.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '.pdf'), transparent=True, dpi=300, format='pdf', pad_inches=0)
 
 
     # Also make an animation

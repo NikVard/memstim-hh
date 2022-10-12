@@ -36,8 +36,9 @@ a = 13. # 13
 b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
-I_in = 0.22 # 0.22 input
-stim_amplitude = [1.] # nA
+I_in = 0.12 # 0.22 input
+stim_target = "CA1"
+stim_amplitude = [10.] # nA
 stim_onset = 1.333 # sec
 
 # Default parameters
@@ -136,7 +137,7 @@ _data = {
 
     # input parameters
     "fixed_input" : {
-        "enabled"       : 1,                # [1=yes | 0=no]
+        "enabled"       : 0,                # [1=yes | 0=no]
         "low"           : 0.0,              # A0
         "high"          : 1.0,              # A1
         "frequency"     : 6.0,              # Hz
@@ -156,7 +157,7 @@ _data = {
 
     # stimulation parameters
     "stimulation" : {
-        "target"        : "EC",             # target area [EC | DG | CA3 | CA1]
+        "target"        : stim_target,      # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
         "duration"      : 3.,               # [sec]

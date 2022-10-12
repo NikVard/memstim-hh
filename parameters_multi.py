@@ -37,7 +37,7 @@ b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
 I_in = 0.0 # 0.22 input gain Kuramoto
-stim_amplitude = [0.] # nA
+stim_amplitude = [10.] # nA
 stim_onset = 1.333 # sec
 
 # Default parameters
@@ -149,7 +149,7 @@ _data = {
         "f0"            : 6.,
         "sigma"         : 0.5,  # normal std
         "kN"            : 15,
-        "gain_reset"    : 1.75,
+        "gain_reset"    : 2.0,
         "gain_rhythm"   : np.around(I_in, 2), # nA
         "offset"        : -0*pi/2
     },
@@ -317,10 +317,11 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.0, 12.5
+    vmin,vmax = 0.0632, 0.2819
     vals = np.arange(vmin, vmax, 0.5)
+    vals = np.linspace(vmin, vmax, 17)
     cnt = 0
-    stim_t_off = 1.0
+    stim_t_off = 1.5
     for val in vals:
         # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
         # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
@@ -338,8 +339,8 @@ if __name__  == "__main__":
         # _data["areas"]["CA1"]["E"]["noise"] = np.around(val, 6)
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
-        # _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
-        _data["stimulation"]["I"] = [np.round(val,1)]
+        _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
+        # _data["stimulation"]["I"] = [np.round(val,1)]
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
