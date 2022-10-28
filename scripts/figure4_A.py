@@ -30,7 +30,7 @@ mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
 
 
-def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, rot, ha, va):
+def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
     """ Add a sizebar to the provided axis """
     ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     t_stim = 1.8*second/ms
 
     # Pre/Post stim PAC
-    tlims_pre = np.array([-1000, 0]) + t_stim
+    tlims_pre = np.array([-1100, -100]) + t_stim
     tlims_post = np.array([0, 1000]) + t_stim
 
     # Directories
@@ -126,8 +126,8 @@ if __name__ == "__main__":
     c_exc = '#5e81ac'
 
     # Figure sizes
-    fig_width = 5.5
-    fig_height = 4.0
+    fig_width = 7.5
+    fig_height = 3.0
     if args.rasters_all:
         fig_height = 8.5
 
@@ -141,12 +141,13 @@ if __name__ == "__main__":
     # Text parameters
     fsize_ticks = fsize_legends = 8
     fsize_xylabels = 9
+    fsize_titles = 10
     fsize_figtitles = 11
-    sizebar_off = 80 # sizebar offset
+    sizebar_off = 30 # sizebar offset
 
     # ax parameters
     xlims_rhythm = np.array([-500, 1000]) + t_stim
-    ylims_rhythm = [0,1]
+    ylims_rhythm = [-0.1,1.1]
 
     xlims_raster = xlims_rhythm
     ylims_raster = [0, 2*N_scaling+N_gap+1]
@@ -160,17 +161,24 @@ if __name__ == "__main__":
 
     # Using GridSpecs
     if args.rasters_all:
-        G_outer = GridSpec(4, 1, #left=0.1, right=0.95, bottom=0.15, top=0.925,
-                           height_ratios=(0.1, 0.4, 0.1, 0.4), figure=fig)
-        G_rasters = G_outer[1].subgridspec(4, 1)
+        G_outer = GridSpec(3, 2, #left=0.1, right=0.95, bottom=0.15, top=0.925,
+                           height_ratios=(0.1, 0.6, 0.3),
+                           width_ratios=(0.7, 0.3),
+                           # hspace=0.5, wspace=0.5,
+                           figure=fig)
+        G_rasters = G_outer[1,0].subgridspec(4, 1)
     else:
-        G_outer = GridSpec(4, 1, #left=0.1, right=0.95, bottom=0.15, top=0.925,
-                           height_ratios=(0.1, 0.2, 0.2, 0.5), figure=fig)
-        G_rasters = G_outer[1]
+        G_outer = GridSpec(3, 2, #left=0.05, right=0.99, bottom=0.2, top=0.9,
+                           height_ratios=(0.2, 0.4, 0.4),
+                           width_ratios=(0.6, 0.4),
+                           # hspace=0.1, wspace=0.5,
+                           figure=fig)
+        G_rasters = G_outer[1,0]
 
-    G_rhythm = G_outer[0]
-    G_FRs = G_outer[2]
-    G_PAC = G_outer[3].subgridspec(1, 2)
+    G_rhythm = G_outer[0,0]
+    G_FRs = G_outer[2,0]
+    G_PAC = G_outer[:,1]
+    # G_cbar = G_outer[:,2]
 
     G_outer.tight_layout(fig)
 
@@ -187,7 +195,7 @@ if __name__ == "__main__":
     # ax_rhythm.set_title(r'Input $\theta$ rhythm', loc='center', fontsize=fsize_figtitles)
 
     # Set the title
-    ax_rhythm.set_title('Theta Rhythm', loc='center', fontsize=fsize_figtitles)
+    # ax_rhythm.set_title('Theta Rhythm', loc='center', fontsize=fsize_figtitles)
 
     # Set the x-y limits
     ax_rhythm.set_xlim(xlims_rhythm)
@@ -301,6 +309,8 @@ if __name__ == "__main__":
         # ax0.xaxis.set_ticklabels([])
         ax0.yaxis.set_ticklabels([])
 
+    # Set the title
+    # ax0.set_title('Rasters', loc='center', fontsize=fsize_figtitles)
 
     # Axis for CA1 FRs
     ax_FRs = fig.add_subplot(G_FRs, sharex=ax_rhythm)
@@ -324,10 +334,12 @@ if __name__ == "__main__":
     ax_FRs.xaxis.set_ticklabels([])
     ax_FRs.yaxis.set_ticklabels([])
 
+    # Title
+    # ax_FRs.set_title('Post-stim. PAC', fontsize=fsize_titles)
+
     # Axes for pre/post PAC
-    ax_PAC_pre = fig.add_subplot(G_PAC[0])
-    ax_PAC_post = fig.add_subplot(G_PAC[1])
-    axs.insert(3, [ax_PAC_pre, ax_PAC_post])
+    ax_PAC = fig.add_subplot(G_PAC)
+    axs.insert(3, [ax_PAC])
 
 
     # Load and plot the data (panel A)
@@ -335,7 +347,7 @@ if __name__ == "__main__":
     print('[+] Loading theta rhythm...')
     rhythm = np.loadtxt(os.path.join(fig4_data, 'order_param_mon_rhythm.txt'))
 
-    print('[>] Plotting panel A - theta rhythm')
+    print('[>]....Plotting panel A - theta rhythm')
     ax_rhythm.plot(tv, rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # Don't forget to mark the stimulation onset!
@@ -343,7 +355,7 @@ if __name__ == "__main__":
     ax_rhythm.scatter(x=t_stim, y=1.25, s=12.5, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
 
     # stimulation line
-    ax_rhythm.axvline(x=t_stim, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    ax_rhythm.axvline(x=t_stim, ymin=-0.55, ymax=1., color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
 
     # Spikes
     print('[+] Loading rasters...')
@@ -411,12 +423,19 @@ if __name__ == "__main__":
         else:
             ax_curr = axs[1][0]
 
-        print('[>] Plotting panel A - Rasters')
-        ax_curr.scatter(t_inh_sub/ms, i_inh_sub, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
-        ax_curr.scatter(t_exc_sub/ms, i_exc_sub, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+        print('[>]....Plotting panel A - Rasters')
+        ax_curr.scatter(t_inh_sub/ms, i_inh_sub, s=0.55, linewidth=0., marker='o', facecolors=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_exc_sub/ms, i_exc_sub, s=0.55, linewidth=0., marker='o', facecolors=c_exc, edgecolors=None, alpha=1., rasterized=True)
 
         # stimulation line
-        ax_curr.axvline(x=t_stim, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+        ax_curr.axvline(x=t_stim, ymin=-0.55, ymax=1.55, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+
+
+
+    # add a sizebar for the x-axis
+    xlims_sz = [xlims_rhythm[0]+sizebar_off, xlims_rhythm[0]+sizebar_off+100]
+    add_sizebar(ax_curr, xlims_sz, [10, 10], 'black', '100ms', fsize=fsize_xylabels, rot=0, textx=np.mean(xlims_sz), texty=-100, ha='center', va='top')
+
 
     # Calculate the CA1 (last spikes loaded) FRs
     print('[+] Calculating CA1 FRs...')
@@ -425,10 +444,20 @@ if __name__ == "__main__":
 
     # Normalize the FRs
     print('[+] Normalizing CA1 FRs...')
+    np.random.seed(1337)
+    noise = np.random.rand(len(FR_exc))
     FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]
     FR_exc_norm = (FR_exc/winsize_FR)/N_tot[3][0]
 
-    print('[>] Plotting panel A - CA1 FRs')
+    # Add noise for PAC calculation (useful for MI)
+    FR_inh_norm += 0.1*FR_inh_norm.max()*noise
+    FR_exc_norm += 0.1*FR_exc_norm.max()*noise
+
+    # Remove the mean
+    FR_exc_norm -= FR_exc_norm.mean()
+    FR_inh_norm -= FR_inh_norm.mean()
+
+    print('[>]....Plotting panel A - CA1 FRs')
     ax_FRs.plot(tv_inh_FR/ms, FR_inh_norm+FR_exc_norm.max()+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
     ax_FRs.plot(tv_exc_FR/ms, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
 
@@ -437,8 +466,11 @@ if __name__ == "__main__":
     ax_FRs.text(x=0.1, y=0.1, transform=ax_FRs.transAxes, s='Excitatory', fontsize=fsize_legends, ha='center', color=c_exc, clip_on=False)
 
     # stimulation line
-    ax_FRs.axvline(x=t_stim, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    ax_FRs.axvline(x=t_stim, ymin=0.0, ymax=1.55, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
 
+    # add a sizebar for the y-axis
+    ylims_sz = [400, 600]
+    add_sizebar(ax_FRs, [xlims_rhythm[0]+sizebar_off, xlims_rhythm[0]+sizebar_off], ylims_sz, 'black', '200 Hz', fsize=fsize_xylabels, rot=90, textx=xlims_rhythm[0]+sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
 
 
     # Pre- vs post-stim PAC
@@ -446,8 +478,8 @@ if __name__ == "__main__":
     tidx_pre = np.logical_and(tv_exc_FR/ms>=tlims_pre[0], tv_exc_FR/ms<=tlims_pre[1])
     tidx_post = np.logical_and(tv_exc_FR/ms>=tlims_post[0], tv_exc_FR/ms<=tlims_post[1])
 
-    f_pha_PAC = (3, 12, 2, .2)
-    f_amp_PAC = (30, 190, 20, 2)
+    f_pha_PAC = (3, 8, 1, .1)
+    f_amp_PAC = (30, 90, 10, 1)
     pac_obj = Pac(idpac=(2, 0, 0), f_pha=f_pha_PAC, f_amp=f_amp_PAC)
 
     # filtering
@@ -466,23 +498,32 @@ if __name__ == "__main__":
     kw = dict(vmax=vmax+0.01, vmin=.04, cmap='viridis', interp=(0.5, 0.5), plotas='imshow', fz_title=11, fz_labels=9)
     # kw = dict(vmax=vmax, vmin=.04, cmap='viridis', plotas='contour', ncontours=5)
 
-    im_pre = ax_PAC_pre.pcolormesh(pac_exc_pre)
-    im_post = ax_PAC_post.pcolormesh(pac_exc_post)
+    # x-y axes
+    fxax = pac_obj.f_pha.mean(axis=1)
+    fyax = pac_obj.f_amp.mean(axis=1)
+
+    # Show the images
+    im_post = ax_PAC.pcolormesh(fxax, fyax, pac_exc_post, shading='auto', antialiased=False)
+
+    # set colorlims
+    vmin, vmax = 1.e-5, pac_exc_post.max()
+    im_post.set_clim(vmin,vmax)
 
     # plt.sca(ax_PAC)
     # pac_obj.comodulogram(pac_exc, title='PAC Excitatory [-1, 0]s', colorbar=False, **kw)
 
     # X and Y labels
-    xlbl = ax_PAC_pre.xaxis.get_label()
-    ylbl = ax_PAC_pre.yaxis.get_label()
+    xlbl = ax_PAC.xaxis.get_label()
+    ylbl = ax_PAC.yaxis.get_label()
 
-    ax_PAC_pre.set_xlabel('Phase frequency [Hz]')
-    ax_PAC_pre.set_ylabel('Amplitude frequency [Hz]')
+    ax_PAC.set_xlabel('Phase frequency [Hz]')
+    ax_PAC.set_ylabel('Amplitude frequency [Hz]')
 
+    # Titles
+    # ax_PAC.set_title('Post-stim. PAC', fontsize=fsize_titles)
 
     # Tick fontsizes
-    ax_PAC_pre.tick_params(axis='both', which='both', labelsize=fsize_ticks)
-    ax_PAC_pre.tick_params(axis='both', which='both', labelsize=fsize_ticks)
+    ax_PAC.tick_params(axis='both', which='both', labelsize=fsize_ticks)
 
     # plot the colorbar
     # im = plt.gca().get_children()[-2]
@@ -493,6 +534,11 @@ if __name__ == "__main__":
     # cb.ax.tick_params(labelsize=9)
     # cb.outline.set_visible(False)
 
+    # cbar_ax = fig.add_subplot(G_cbar)
+    cb = plt.colorbar(im_post, cax=None, ax=ax_PAC, ticks=[0., 0.1, 0.2, 0.3])
+    cb.set_label('PAC values', fontsize=9, rotation='vertical')
+    cb.ax.tick_params(labelsize=9)
+
     # manual adjustments
     # fig_PAC.subplots_adjust(left=0.2, right = 0.95, top=0.9, bottom=0.1)
 
@@ -501,12 +547,41 @@ if __name__ == "__main__":
     # ax_PAC.set_aspect('auto')
     # ax_PAC.set_aspect('auto')
 
+    # Calculate MI in a highlighted area
+    idx_x_high = np.logical_and((fxax>=5.5),(fxax<=6.5))
+    idx_y_high = np.logical_and((fyax>=50),(fyax<=70))
+    width_high = fxax[idx_x_high].max() - fxax[idx_x_high].min()
+    height_high = fyax[idx_y_high].max() - fyax[idx_y_high].min()
+
+    idx_x_low = np.logical_and((fxax>=3),(fxax<=5))
+    idx_y_low = np.logical_and((fyax>=50),(fyax<=70))
+    width_low = fxax[idx_x_low].max() - fxax[idx_x_low].min()
+    height_low = fyax[idx_y_low].max() - fyax[idx_y_low].min()
+
+    # Add a rectangular patch to highlight the PAC calculation on the post-stim condition
+    rect_high = mplb.patches.Rectangle((fxax[idx_x_high][0],fyax[idx_y_high][0]), width_high, height_high, linewidth=1, edgecolor='r', facecolor='none')
+    rect_low = mplb.patches.Rectangle((fxax[idx_x_low][0],fyax[idx_y_low][0]), width_low, height_low, linewidth=1, edgecolor='r', facecolor='none')
+
+    # Add the patch to the Axes
+    ax_PAC.add_patch(rect_high)
+    ax_PAC.add_patch(rect_low)
+
+    # Add text to indicate mean MI
+    ax_PAC.text(x=fxax[idx_x_high].max(), y=fyax[idx_y_high].max(), s='MI={0:.4f}'.format(pac_exc_post[idx_y_high][:,idx_x_high].mean()), color='white', fontsize=fsize_xylabels)
+    ax_PAC.text(x=fxax[idx_x_low].max(), y=fyax[idx_y_low].max(), s='MI={0:.4f}'.format(pac_exc_post[idx_y_low][:,idx_x_low].mean()), color='white', fontsize=fsize_xylabels)
+
+    # Overall
+    ax_PAC.text(x=0.6, y=0.9, s='MI={0:.4f}'.format(check_MI(FR_exc_norm[np.newaxis, tidx_post])), transform=ax_PAC.transAxes, color='white', fontsize=fsize_xylabels)
 
     # Print MI metrics
-    MI_I = check_MI(FR_inh_norm)
-    MI_E = check_MI(FR_exc_norm)
+    MI_I = check_MI(FR_inh_norm[np.newaxis, tidx_post])
+    MI_E = check_MI(FR_exc_norm[np.newaxis, tidx_post])
+    idx_x_custom  = np.logical_and((fxax>4),(fxax<12.1))
+    idx_y_custom = np.logical_and((fyax>30),(fyax<80.1))
+    print('[!] MI-E (avg. from TensorPAC): ', pac_exc_post[idx_y_custom][:,idx_x_custom].mean())
     print('[!] MI-I: ', MI_I)
     print('[!] MI-E: ', MI_E)
+
 
     # Save and show the figure
     print('[+] Saving the figure...')

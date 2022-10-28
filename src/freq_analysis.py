@@ -238,7 +238,7 @@ def my_specgram(signal: np.ndarray,
     f, t, Sxx = sig.spectrogram(x=signal,
                                 fs=fs,
                                 nfft=nfft,
-                                # detrend=False,
+                                detrend='constant',
                                 window=sig.windows.hann(M=window_width, sym=False),
                                 # nperseg=window_width,
                                 noverlap=window_overlap,
@@ -343,7 +343,7 @@ def my_modulation_index(sig_phase: np.ndarray,
 
     # In the special case where observed probability in a bin is 0, this tweak
     # allows computing a meaningful KL distance nonetheless
-    P_amp[np.where(P_amp == 0)] = 2.2e-10
+    P_amp[np.where(P_amp == 0)] = 1e-12
 
     # Kullback-Leibler distance
     dist_KL = np.sum(P_amp * np.log(P_amp / Q_amp))
@@ -352,3 +352,68 @@ def my_modulation_index(sig_phase: np.ndarray,
     MI = dist_KL / np.log(nbins)
 
     return MI, dist_KL
+
+
+def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, **kwargs):
+    """
+    Compute the average power of the signal x in a specific frequency band.
+    Code adapted from: https://raphaelvallat.com/bandpower.html
+
+    Parameters
+    ----------
+    data: 1d-array
+        Input signal in the time-domain.
+    fs: float
+        Sampling frequency of the data.
+    band: list
+        Lower and upper frequencies of the band of interest.
+    window_sec: float
+        Length of each window in seconds.
+        If None, window_sec = (1 / min(band)) * 2
+    relative: boolean
+        If True, return the relative power (= divided by the total power of the signal).
+        If False (default), return the absolute power.
+
+    Return
+    ------
+    bp : float
+        Absolute or relative band power.
+    """
+    from scipy.signal import welch
+    from scipy.integrate import simps
+    band = np.asarray(band)
+    low, high = band
+
+    # Define window length
+    if window_sec is not None:
+        window_width = int(window_sec * fs)
+    else:
+        window_width = int((2 / low) * fs)
+
+    # Calculate window overlap
+    window_overlap = int(overlap * window_width)
+
+    # Compute the modified periodogram (Welch)
+    nfft = 2**((window_width-1).bit_length()+1)
+    freqs, psd = sig.welch(x=data,
+                           fs=fs,
+                           nfft=nfft,
+                           window=sig.windows.hann(M=window_width, sym=False),
+                           # window='boxcar',
+                           nperseg=window_width,
+                           noverlap=window_overlap,
+                           **kwargs)
+
+    # Frequency resolution
+    freq_res = freqs[1] - freqs[0]
+
+    # Find closest indices of band in frequency vector
+    idx_band = np.logical_and(freqs >= low, freqs <= high)
+
+    # Integral approximation of the spectrum using Simpson's rule.
+    bp = simps(psd[idx_band], dx=freq_res)
+
+    if relative:
+        bp /= simps(psd, dx=freq_res)
+
+    return bp

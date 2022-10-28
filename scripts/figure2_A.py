@@ -599,8 +599,15 @@ if __name__ == "__main__":
     ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
-    pks, _ = sig.find_peaks(rhythm, distance=int(80*ms*fs))
-    fval = 1/(np.mean(pks[1:] - pks[0:-1])/fs) if len(pks)>1 else 1/(pks[0]/fs)
+    tlims = [t_stim+10*ms, 3.1]
+    pks, _ = sig.find_peaks(rhythm, distance=int(50*ms*fs))
+
+    # peak indices filtering (post-stim)
+    pks_idx = np.logical_and(pks>=tlims[0]*fs, pks<=tlims[1]*fs)
+    pks_new = pks[pks_idx]
+
+    # calculate the frequency
+    fval = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
 
     # for peak in pks:
         # if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
