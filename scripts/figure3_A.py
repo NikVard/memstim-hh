@@ -29,7 +29,7 @@ mplb.rcParams['ps.fonttype'] = 42
 mplb.rcParams['axes.titlesize'] = 11
 mplb.rcParams['axes.labelsize'] = 9
 
-def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, rot, ha, va):
+def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
     """ Add a sizebar to the provided axis """
     ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)
 
@@ -108,8 +108,11 @@ if __name__ == "__main__":
     xlims = [1230, 1840]
 
     # Text parameters
-    fsize = 9
-    sizebar_off = 150 # sizebar offset
+    fsize_ticks = fsize_legends = 8
+    fsize_xylabels = 9
+    fsize_titles = 10
+    fsize_figtitles = 11
+    sizebar_off = 50 # sizebar offset
 
 
     """ Plot Figure 3 of the paper - TODO: Add DOI """
@@ -143,11 +146,17 @@ if __name__ == "__main__":
     # panel A]
     if args.rasters_all:
         G_outer = GridSpec(3, 2, #left=0.1, right=0.95, bottom=0.15, top=0.925,
-                           height_ratios=(0.6, 0.2, 0.2), width_ratios=(0.5, 0.5), figure=fig)
+                           #hspace=0.1,
+                           height_ratios=(0.6, 0.2, 0.2),
+                           width_ratios=(0.5, 0.5),
+                           figure=fig)
         G_rasters_A = G_outer[0, 0].subgridspec(4, 1)
     else:
         G_outer = GridSpec(3, 2, #left=0.1, right=0.95, bottom=0.15, top=0.925,
-                           width_ratios=(0.5, 0.5), figure=fig)
+                           #hspace=0.1,
+                           height_ratios=(0.3, 0.35, 0.35),
+                           width_ratios=(0.5, 0.5),
+                           figure=fig)
         G_rasters_A = G_outer[0, 0]
     G_FRs_A = G_outer[1, 0]
     G_currents = G_outer[2, 0]
@@ -178,15 +187,15 @@ if __name__ == "__main__":
         axs.insert(0, [ax_A0_0, ax_A0_1, ax_A0_2, ax_A0_3])
 
         # set label as area name
-        ax_A0_0.set_title(r'   Activity w/ $I_{CAN}$', loc='center')
+        ax_A0_0.set_title(r'   Activity w/ $I_{CAN}$', loc='center', fontsize=fsize_titles)
         # ax_A0_0.set_title(area_labels[0])
         # ax_A0_1.set_title(area_labels[1])
         # ax_A0_2.set_title(area_labels[2])
         # ax_A0_3.set_title(area_labels[3])
-        ax_A0_0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=20.)
-        ax_A0_1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=20.)
-        ax_A0_2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=20.)
-        ax_A0_3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=20.)
+        ax_A0_0.set_ylabel(areas[0][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=20.)
+        ax_A0_1.set_ylabel(areas[1][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=20.)
+        ax_A0_2.set_ylabel(areas[2][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=20.)
+        ax_A0_3.set_ylabel(areas[3][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=20.)
 
         # Set x-lims
         ax_A0_0.set_xlim(xlims)
@@ -239,10 +248,10 @@ if __name__ == "__main__":
 
         # Set titles and x-y labels
         # ax_A0.text(0.5, 1.2, 'I_CAN on', fontsize=12, horizontalalignment='center', verticalalignment='center', transform=ax_A0.transAxes, clip_on=False)
-        ax_A0.set_title(r'   Activity w/ $I_{CAN}$', loc='center')
+        ax_A0.set_title(r'   Activity w/ $I_{CAN}$', fontsize=fsize_titles, loc='center')
         # ax_A1.set_title('CA1 Firing Rates')
         # ax_A2.set_title('CA1 Currents I_CAN / I_M')
-        ax_A0.set_ylabel('Neuron')
+        ax_A0.set_ylabel('Neuron', fontsize=fsize_xylabels)
 
         # Set x-lims
         ax_A0.set_xlim(xlims)
@@ -277,9 +286,9 @@ if __name__ == "__main__":
     axs[0].append(ax_A2)
 
     # Set titles and x-y labels
-    ax_A1.set_ylabel('FR [Hz]', labelpad=20.)
-    ax_A2.set_ylabel(r'$I_{CAN , M}$ [nA]')
-    ax_A2.set_xlabel('Time [ms]')
+    ax_A1.set_ylabel('Firing Rates [Hz]', fontsize=fsize_xylabels, labelpad=20.)
+    ax_A2.set_ylabel(r'$I_{CAN , M}$ [nA]', fontsize=fsize_xylabels)
+    ax_A2.set_xlabel('Time [ms]', fontsize=fsize_xylabels)
 
     # Hide some spines
     ax_A1.spines['top'].set_visible(False)
@@ -288,7 +297,7 @@ if __name__ == "__main__":
     ax_A1.spines['right'].set_visible(False)
     ax_A2.spines['top'].set_visible(False)
     # ax_A2.spines['bottom'].set_visible(False)
-    ax_A2.spines['left'].set_visible(False)
+    # ax_A2.spines['left'].set_visible(False)
     ax_A2.spines['right'].set_visible(False)
 
     # Set x-lims
@@ -321,6 +330,8 @@ if __name__ == "__main__":
     # ax_A2.xaxis.set_major_locator(ticker.NullLocator())
     # ax_A2.xaxis.set_minor_locator(ticker.NullLocator())
 
+    # Tick font sizes
+    ax_A2.tick_params(axis='both', which='major', labelsize=fsize_ticks)
 
     # Panel B - I/E rates - case w/o currents
     if args.rasters_all:
@@ -392,7 +403,7 @@ if __name__ == "__main__":
         axs.insert(1, [ax_B0])
 
         # Set titles and x-y labels
-        ax_B0.set_title(r'    Activity w/o $I_{CAN}$', loc='center')
+        ax_B0.set_title(r'    Activity w/o $I_{CAN}$', fontsize=fsize_titles, loc='center')
 
         # Hide x-y axes
         ax_B0.xaxis.set_visible(False)
@@ -438,8 +449,8 @@ if __name__ == "__main__":
 
     # Set titles and x-y labels
     ax_C0.set_title('')
-    ax_C0.set_xlabel('Stimulation amplitude [nA]')
-    ax_C0.set_ylabel('Num. of Bursts')
+    ax_C0.set_xlabel('Stimulation amplitude [nA]', fontsize=fsize_xylabels)
+    ax_C0.set_ylabel('# of Bursts', fontsize=fsize_xylabels)
     # ax_C02.set_ylabel('Burst duration [ms]', color='r')
     # ax_C1.set_ylabel('Spike count [spk/neuron]')
     # ax_C1.set_xlabel('Stimulation amplitude [nA]')
@@ -449,6 +460,9 @@ if __name__ == "__main__":
     ax_C0.xaxis.set_minor_locator(ticker.MultipleLocator(1))
     ax_C0.yaxis.set_major_locator(ticker.FixedLocator([0, 1, 2, 3, 4]))
     ax_C0.yaxis.set_minor_locator(ticker.NullLocator())
+
+    # Tick font sizes
+    ax_C0.tick_params(axis='both', which='major', labelsize=fsize_ticks)
 
     # set ylims
     ax_C0.set_ylim([-0.1, 2.8])
@@ -652,13 +666,13 @@ if __name__ == "__main__":
     ax_A1.axvline(x=1333, ymin=-0.5, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
     ax_A2.axvline(x=1333, ymin=0, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
 
-    # add a sizebar for the x-axis
-    xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
-    add_sizebar(ax_A1, xlims_sz, [-50, -50], 'black', '100ms', rot=0, textx=np.mean(xlims_sz), texty=-70, ha='center', va='top')
-
-    # add a sizebar for the y-axis
-    ylims_sz = [-50, 50]
-    add_sizebar(ax_A1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100Hz', rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
+    # # add a sizebar for the x-axis
+    # xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
+    # add_sizebar(ax_A1, xlims_sz, [-50, -50], 'black', '100ms', rot=0, textx=np.mean(xlims_sz), texty=-70, ha='center', va='top')
+    #
+    # # add a sizebar for the y-axis
+    # ylims_sz = [-50, 50]
+    # add_sizebar(ax_A1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100Hz', rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
 
 
     # Plot panel B
@@ -672,12 +686,20 @@ if __name__ == "__main__":
     ax_B1.plot(tv_exc_noICAN_FR/ms, FR_exc_noICAN_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
 
     # ax_B1.legend(loc='upper right', frameon=False, fontsize=8)
-    ax_B1.text(x=0.75, y=0.425, transform=ax_B1.transAxes, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-    ax_B1.text(x=0.75, y=0.1, transform=ax_B1.transAxes, s='Excitatory', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+    ax_B1.text(x=0.75, y=0.475, transform=ax_B1.transAxes, s='Inhibitory', fontsize=fsize_legends, ha='center', color=c_inh, clip_on=False)
+    ax_B1.text(x=0.75, y=0.125, transform=ax_B1.transAxes, s='Excitatory', fontsize=fsize_legends, ha='center', color=c_exc, clip_on=False)
 
     # stimulation line
     # ax_B0.axvline(x=1333, ymin=-0.2, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
     ax_B1.axvline(x=1333, ymin=0.1, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+
+    # add a sizebar for the x-axis
+    xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
+    add_sizebar(ax_B1, xlims_sz, [+175, +175], 'black', '100 ms', fsize=fsize_legends, rot=0, textx=np.mean(xlims_sz), texty=155, ha='center', va='top')
+
+    # add a sizebar for the y-axis
+    ylims_sz = [+175, +275]
+    add_sizebar(ax_B1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100 Hz', fsize=fsize_legends, rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
 
 
     # Panel C - Quantification

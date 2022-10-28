@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib as mplb
 import matplotlib.pyplot as plt
 from scipy import signal as sig
+from scipy import integrate
 from matplotlib import colors
 from matplotlib import ticker
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
@@ -99,6 +100,11 @@ if __name__ == "__main__":
     winstep_samples = int(winstep_PSD*fs_FR)
     noverlap = int(overlap_PSD*winsize_samples)
 
+    # Define delta lower and upper limits
+    theta_band = [3, 10]
+    gamma_low_band = [40, 80]
+    gamma_high_band = [80, 120]
+
     # Figure sizes
     fig_width = 2.3
     fig_height = 2.6
@@ -110,18 +116,41 @@ if __name__ == "__main__":
     print('[+] Normalizing the FRs...')
     FR_inh_norm = (FR_inh/winsize_FR)/N_CA1_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_CA1_exc
+    # FR_inh_norm += 10.*np.random.rand(len(FR_inh))
+    # FR_exc_norm += 10.*np.random.rand(len(FR_exc))
+
 
     # PSD calculations
     print('[+] Calculating PSDs...')
     PSD_args = {'detrend' : 'constant',
                 'return_onesided' : True,
                 'scaling' : 'density'}
-    fv, PSD_inh = my_PSD(FR_inh_norm, fs_FR, winsize_samples, noverlap, k=4, **PSD_args)
-    _, PSD_exc = my_PSD(FR_exc_norm, fs_FR, winsize_samples, noverlap, k=4, **PSD_args)
+    fv, PSD_inh = my_PSD(FR_inh_norm, fs_FR, winsize_samples, noverlap, k=6, **PSD_args)
+    _, PSD_exc = my_PSD(FR_exc_norm, fs_FR, winsize_samples, noverlap, k=6, **PSD_args)
 
     # Use the TensorPAC module to calculate the PSDs
     psd_pac_inh = PSD(FR_inh_norm[np.newaxis,tidx], fs_FR)
     psd_pac_exc = PSD(FR_exc_norm[np.newaxis,tidx], fs_FR)
+
+    # Find intersecting values in frequency vector
+    idx_theta = np.logical_and(psd_pac_inh.freqs >= theta_band[0], psd_pac_inh.freqs <= theta_band[1])
+    idx_gamma_low = np.logical_and(psd_pac_inh.freqs >= gamma_low_band[0], psd_pac_inh.freqs <= gamma_low_band[1])
+    idx_gamma_high = np.logical_and(psd_pac_inh.freqs >= gamma_high_band[0], psd_pac_inh.freqs <= gamma_high_band[1])
+
+    # Calculate the power in theta/gamma bands
+    # Compute the absolute power by approximating the area under the curve
+    df = fv[1] - fv[0]
+    theta_power_inh = integrate.simpson(psd_pac_inh.psd[0][idx_theta], dx=df)
+    low_gamma_power_inh = integrate.simpson(psd_pac_inh.psd[0][idx_gamma_low], dx=df)
+    theta_power_exc = integrate.simpson(psd_pac_exc.psd[0][idx_theta], dx=df)
+    low_gamma_power_exc = integrate.simpson(psd_pac_exc.psd[0][idx_gamma_low], dx=df)
+
+    print('*'+'='*32)
+    print('Absolute theta power [I]: %.3f uV^2' % theta_power_inh)
+    print('Absolute theta power [E]: %.3f uV^2' % theta_power_exc)
+    print('Absolute low-gamma power [I]: %.3f uV^2' % low_gamma_power_inh)
+    print('Absolute low-gamma power [E]: %.3f uV^2' % low_gamma_power_exc)
+    print('='*32+'*')
 
 
     # Plot the data
@@ -179,10 +208,13 @@ if __name__ == "__main__":
     axin_PSD.yaxis.set_ticklabels(['', ''])
     axin_PSD.tick_params(axis='y', which='both', labelsize=9, length=0, width=0)
 
-
     # Actually plotting
     ax_PSD.plot(psd_pac_inh.freqs, psd_pac_inh.psd[0], c=c_inh, label='Inhibitory', zorder=1, rasterized=False)
     ax_PSD.plot(psd_pac_exc.freqs, psd_pac_exc.psd[0], c=c_exc, label='Excitatory', zorder=2, rasterized=False)
+
+    # Fill areas below curve
+    # ax_PSD.fill_between(psd_pac_inh.freqs, psd_pac_inh.psd[0], where=idx_theta, color=c_inh, alpha=0.2)
+    # ax_PSD.fill_between(psd_pac_exc.freqs, psd_pac_exc.psd[0], where=idx_theta, color=c_exc, linestyle='--', linewidth=1.0, alpha=0.2)
 
     # inset
     axin_PSD.plot(psd_pac_inh.freqs, psd_pac_inh.psd[0], c=c_inh, label='Inhibitory', zorder=1, rasterized=False)
@@ -210,7 +242,7 @@ if __name__ == "__main__":
     # PAC test
     # Modulation Index
     f_pha_PAC = (3, 12, 2, .2)
-    f_amp_PAC = (30, 190, 20, 2)
+    f_amp_PAC = (30, 140, 20, 2)
     pac_obj = Pac(idpac=(2, 0, 0), f_pha=f_pha_PAC, f_amp=f_amp_PAC)
     # pac_obj = Pac(idpac=(2, 0, 0), f_pha=np.arange(4,13,2), f_amp=np.arange(30,121,2))
     # pac_obj = Pac(idpac=(2, 0, 0), f_pha='hres', f_amp='mres')
@@ -270,7 +302,7 @@ if __name__ == "__main__":
 
     # bins plot (sanity check)
     # define phase and amplitude filtering properties
-    kw_filt = dict(f_pha=[4, 12], f_amp=(30, 120, 20, 2), n_bins=36)
+    kw_filt = dict(f_pha=[4, 12], f_amp=(30, 140, 20, 2), n_bins=36)
     bin_exc = BinAmplitude(FR_exc_norm, fs_FR, **kw_filt)
     bin_inh = BinAmplitude(FR_inh_norm, fs_FR, **kw_filt)
 
@@ -285,7 +317,9 @@ if __name__ == "__main__":
 
 
     # PreferredPhase plot (sanity check #2)
-    pp_obj = PreferredPhase(f_pha=[4, 12], f_amp=(10, 140, 20, 2))
+    pp_obj = PreferredPhase(f_pha=[4, 6], f_amp=(30, 100, 10, 1))
+    pac_obj2 = Pac(idpac=(2, 0, 0), f_pha=[4, 6], f_amp=[50, 70])
+    # pp_obj = PreferredPhase(f_pha=f_pha_PAC, f_amp=f_amp_PAC)
     # pp_obj = PreferredPhase(f_pha=(3, 12, 2, .2), f_amp=(30, 120, 20, 2))
     pp_pha_exc = pp_obj.filter(fs_FR, FR_exc_norm[np.newaxis,tidx], ftype='phase')
     pp_amp_exc = pp_obj.filter(fs_FR, FR_exc_norm[np.newaxis,tidx], ftype='amplitude')
@@ -293,9 +327,14 @@ if __name__ == "__main__":
     pp_amp_inh = pp_obj.filter(fs_FR, FR_inh_norm[np.newaxis,tidx], ftype='amplitude')
 
     # compute the preferred phase (can reuse the amplitude computed above)
-    ampbin_exc, pp_exc, vecbin = pp_obj.fit(pp_pha_exc, pp_amp_exc, n_bins=72)
-    ampbin_inh, pp_inh, vecbin = pp_obj.fit(pp_pha_inh, pp_amp_inh, n_bins=72)
+    # Now, compute the PP :
+    ampbin_inh, pp_inh, polarvec_inh = pp_obj.fit(pp_pha_inh, pp_amp_inh, n_bins=72)
+    ampbin_exc, pp_exc, polarvec_exc = pp_obj.fit(pp_pha_exc, pp_amp_exc, n_bins=72)
 
+    # compute the MI in the [50,70]Hz band
+    xpac = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis,tidx])
+
+    # start plotting
     plt.figure('pref_phase')
     # plt.sca(ax_prefp)
     # kw_plt = dict(cmap='Spectral_r', interp=.1, cblabel='Amplitude bins',
@@ -304,8 +343,20 @@ if __name__ == "__main__":
                   vmin=0.012, vmax=0.03, y=1., fz_title=11, fz_labels=9)
     # ax1 = pp_obj.polar(ampbin_inh.squeeze().T, vecbin, pp_obj.yvec, subplot=121,
     #              title='Inhibitory', colorbar=False, **kw_plt)
-    ax_prefp = pp_obj.polar(ampbin_exc.squeeze().T, vecbin, pp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
+    ax_prefp = pp_obj.polar(ampbin_exc.squeeze().T, polarvec_exc, pp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
 
+    # Create the patches
+    p_low = mplb.patches.Rectangle((np.deg2rad(0), 50), np.deg2rad(360), 20, color=None, alpha=0.25, facecolor='grey', edgecolor='red', linewidth=1)
+    # p_high = mplb.patches.Rectangle((np.deg2rad(0), 110), np.deg2rad(360), 20, color=None, alpha=0.25, facecolor='grey', edgecolor='red', linewidth=1)
+
+    # Add them on the figure
+    ax_prefp.add_patch(p_low)
+    # ax_prefp.add_patch(p_high)
+
+    # add MI as a text
+    ax_prefp.text(x=np.deg2rad(-45), y=60, s=r'MI: {0:.2f}'.format(xpac.squeeze()), fontsize=fsize, ha='center', color='white', clip_on=True)
+
+    # Fix the label positions
     ax_prefp.set_rlabel_position(135)
     # ax_prefp.set_rlabel_position(90)
     for label in ax_prefp.get_ymajorticklabels():
@@ -321,6 +372,10 @@ if __name__ == "__main__":
     ax_prefp.tick_params(axis='both', which='both', labelsize=9)
     ax_prefp.tick_params(axis='x', which='both', rotation=90, pad=-0.5)
     ax_prefp.set_thetalim(-np.pi, np.pi)
+
+    # Set the xy-lims
+    # ax_prefp.set_xlim(37, 81)
+    ax_prefp.set_ylim(35, 95)
 
     # plot the colorbar
     # im = plt.gca().get_children()[0]
@@ -347,7 +402,6 @@ if __name__ == "__main__":
 
     # perfect circles
     ax_prefp.set_aspect(1)
-
 
     # plt.tight_layout()
 

@@ -135,5 +135,5 @@ fig.savefig(os.path.join('figures', 'fig1', 'kuramoto_1D.pdf'), transparent=True
 # Show the figure
 plt.show()
 
-# Exit normally
+# Exit properly
 sys.exit(0)
