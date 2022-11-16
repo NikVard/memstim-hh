@@ -11,6 +11,13 @@ import numpy as np
 import matplotlib as mplb
 import matplotlib.pyplot as plt
 
+# Other scripts and my stuff
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = Path(script_dir).parent
+sys.path.insert(0, os.path.abspath(parent_dir))
+
+from src.figure_plots_parameters import *
+
 # Set the random seed
 # np.random.seed(123)
 
@@ -81,8 +88,8 @@ ax[0].set_title('Low synchronization', fontsize=fsize_titles)
 ax[1].set_title('High synchronization', fontsize=fsize_titles)
 
 # Set text for order parameter
-ax[0].text(0.0, +0.25, 'r={:.2f}'.format(np.abs(z0)), ha='center', va='center', fontsize=10)
-ax[1].text(0.0, +0.25, 'r={:.2f}'.format(np.abs(z1)), ha='center', va='center', fontsize=10)
+ax[0].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z0)), ha='center', va='center', fontsize=fsize_misc)
+ax[1].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z1)), ha='center', va='center', fontsize=fsize_misc)
 
 # Remove axis
 ax[0].set_axis_off()
@@ -93,11 +100,6 @@ ax[0].set_xlim([-1.2,1.2])
 ax[0].set_ylim([-1.2,1.2])
 ax[1].set_xlim([-1.2,1.2])
 ax[1].set_ylim([-1.2,1.2])
-# ax[0].set_xlim([-1.5,1.5])
-# ax[0].set_ylim([-1.5,1.5])
-# ax[1].set_xlim([-1.5,1.5])
-# ax[1].set_ylim([-1.5,1.5])
-
 
 # Make the image gradient
 XY_triangle = [[-0.65, -1.1], [-0.65, -0.9], [-1.2, -0.9]]
@@ -112,7 +114,22 @@ img1 = ax[1].imshow(np.flip(np.linspace(0, 1, 51)).reshape(1, -1), cmap='Reds_r'
 t0 = plt.Polygon(XY_triangle, facecolor='none', edgecolor='black', lw=0.8, alpha=1., clip_on=False)
 t1 = plt.Polygon(XY_triangle, facecolor='none', edgecolor='black', lw=0.8, alpha=1., clip_on=False)
 
+# Make the arrows
+r = 0.8
+ctheta = np.pi/2
+dtheta = np.pi/8
+xs, ys = (r*np.cos(ctheta-dtheta), r*np.sin(ctheta-dtheta))
+xe, ye = (r*np.cos(ctheta+dtheta), r*np.sin(ctheta+dtheta))
+
+arr_style = "Simple, tail_width=0.5, head_width=5, head_length=5"
+kw = dict(arrowstyle=arr_style, color="k")
+
+arr0 = mplb.patches.FancyArrowPatch((xs, ys), (xe, ye), connectionstyle="arc3,rad=0.3", **kw)
+arr1 = mplb.patches.FancyArrowPatch((xs, ys), (xe, ye), connectionstyle="arc3,rad=0.3", **kw)
+
 # Add patches
+ax[0].add_patch(arr0)
+ax[1].add_patch(arr1)
 ax[0].add_patch(t0)
 ax[1].add_patch(t1)
 
@@ -121,8 +138,10 @@ img0.set_clip_path(t0)
 img1.set_clip_path(t1)
 
 # Add text
-ax[0].text(min_xy[0], min_xy[1], r'$\omega$ values', ha='center', va='center', fontsize=10)
-ax[1].text(min_xy[0], min_xy[1], r'$\omega$ values', ha='center', va='center', fontsize=10)
+ax[0].text(0, 0.7, r'$\omega$', ha='center', va='center', fontsize=fsize_misc)
+ax[1].text(0, 0.7, r'$\omega$', ha='center', va='center', fontsize=fsize_misc)
+ax[0].text(min_xy[0], min_xy[1], r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
+ax[1].text(min_xy[0], min_xy[1], r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
 
 # Set tight layout
 fig.tight_layout()

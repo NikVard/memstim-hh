@@ -411,6 +411,8 @@ def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, **kw
     idx_band = np.logical_and(freqs >= low, freqs <= high)
 
     # Integral approximation of the spectrum using Simpson's rule.
+    if psd.size > 1:
+        psd = psd.squeeze()
     bp = simps(psd[idx_band], dx=freq_res)
 
     if relative:
