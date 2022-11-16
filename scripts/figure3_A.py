@@ -251,7 +251,7 @@ if __name__ == "__main__":
         ax_A0.set_title(r'   Activity w/ $I_{CAN}$', fontsize=fsize_titles, loc='center')
         # ax_A1.set_title('CA1 Firing Rates')
         # ax_A2.set_title('CA1 Currents I_CAN / I_M')
-        ax_A0.set_ylabel('Neuron', fontsize=fsize_xylabels)
+        ax_A0.set_ylabel('Spiking Activity', fontsize=fsize_xylabels)
 
         # Set x-lims
         ax_A0.set_xlim(xlims)
@@ -610,17 +610,17 @@ if __name__ == "__main__":
         ax_curr_noICAN.scatter(t_inh_sub_noICAN/ms, i_inh_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
         ax_curr_noICAN.scatter(t_exc_sub_noICAN/ms, i_exc_sub_noICAN, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
 
-        # stimulation line
-        ax_curr_ICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
-        ax_curr_noICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+        # stimulation lines
+        ax_curr_ICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+        ax_curr_noICAN.axvline(x=1333, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
         ax_curr_ICAN.set_xlim(xlims)
         ax_curr_noICAN.set_xlim(xlims)
 
     # Don't forget to mark the stimulation onset!
     # add marker for stimulation onset
-    axs[0][0].scatter(x=1333, y=485, s=12.5, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
-    axs[1][0].scatter(x=1333, y=485, s=12.5, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
+    axs[0][0].scatter(x=1333, y=485, s=15, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
+    axs[1][0].scatter(x=1333, y=485, s=15, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
 
 
     # Calculate the FRs
@@ -662,9 +662,9 @@ if __name__ == "__main__":
     ax_A2.legend(loc='upper right', frameon=False, fontsize=8)
     ax_A2.set_ylim([-0.35, 0.7])
 
-    # stimulation line
-    ax_A1.axvline(x=1333, ymin=-0.5, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
-    ax_A2.axvline(x=1333, ymin=0, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    # stimulation lines
+    ax_A1.axvline(x=1333, ymin=-0.5, ymax=1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    ax_A2.axvline(x=1333, ymin=0, ymax=1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
     # # add a sizebar for the x-axis
     # xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
@@ -689,9 +689,9 @@ if __name__ == "__main__":
     ax_B1.text(x=0.75, y=0.475, transform=ax_B1.transAxes, s='Inhibitory', fontsize=fsize_legends, ha='center', color=c_inh, clip_on=False)
     ax_B1.text(x=0.75, y=0.125, transform=ax_B1.transAxes, s='Excitatory', fontsize=fsize_legends, ha='center', color=c_exc, clip_on=False)
 
-    # stimulation line
-    # ax_B0.axvline(x=1333, ymin=-0.2, ymax=1.1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
-    ax_B1.axvline(x=1333, ymin=0.1, ymax=1, color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=10, rasterized=False, clip_on=False)
+    # stimulation lines
+    ax_B0.axvline(x=1333, ymin=-0.2, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    ax_B1.axvline(x=1333, ymin=0.1, ymax=1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
     # add a sizebar for the x-axis
     xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
@@ -906,8 +906,8 @@ if __name__ == "__main__":
     idx_noICAN = np.argsort(xarr_noICAN)
 
     # plot the E - w/ ICAN vs the E - w/o ICAN
-    ln01 = ax_C0.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(bnums_ICAN)[idx_ICAN], linestyle='-', c=c_w_ICAN, label='w/ I_CAN')
-    ln02 = ax_C0.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(bnums_noICAN)[idx_noICAN], linestyle='--', c=c_wo_ICAN, alpha=1., label='w/o I_CAN')
+    ln01 = ax_C0.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(bnums_ICAN)[idx_ICAN], linestyle='-', c=c_w_ICAN, label=r'w/ $I_{CAN}$')
+    ln02 = ax_C0.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(bnums_noICAN)[idx_noICAN], linestyle='--', c=c_wo_ICAN, alpha=1., label=r'w/o $I_{CAN}$')
     # ln11 = ax_B1.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(spikes_cnt_ICAN)[idx_ICAN,0]/N_tot[3][0], linestyle='-', marker='x', c=c_w_ICAN)
     # ln12 = ax_B1.plot(np.array(xarr_noICAN)[idx_noICAN], np.array(spikes_cnt_noICAN)[idx_noICAN,0]/N_tot[3][0], linestyle='-', marker='o', c=c_wo_ICAN, alpha=0.6)
     # ln10 = ax_B1.plot(np.array(xarr_ICAN)[idx_ICAN], np.array(duration_ICAN)[idx_ICAN,1], '-xc', label='burst duration w/ I_CAN')

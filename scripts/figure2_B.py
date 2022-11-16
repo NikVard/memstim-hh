@@ -24,19 +24,134 @@ parent_dir = Path(script_dir).parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
-
+from src.figure_plots_parameters import *
 
 from tensorpac import Pac, EventRelatedPac, PreferredPhase
 from tensorpac.utils import PeakLockedTF, PSD, ITC, BinAmplitude
 
-
 fontprops = fm.FontProperties(size=12, family='monospace')
+
 
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
 mplb.rcParams['axes.titlesize'] = 11
 mplb.rcParams['axes.labelsize'] = 8
+
+
+def noise_test_plot(tv, fs, FR, noise, idxs, pac_obj, RND=False):
+    if RND:
+        noise = np.random.uniform(0, 10, FR.size)
+
+    # Add noise
+    FR_noise = FR + noise
+
+    # Filter using PAC toolbox
+    pha_nn = pac_obj.filter(fs, FR[np.newaxis, idxs], ftype='phase')
+    amp_nn = pac_obj.filter(fs, FR[np.newaxis, idxs], ftype='amplitude')
+    pha_noise = pac_obj.filter(fs, FR_noise[np.newaxis, idxs], ftype='phase')
+    amp_noise = pac_obj.filter(fs, FR_noise[np.newaxis, idxs], ftype='amplitude')
+    xval_nn = pac_obj.fit(pha_nn, amp_nn).mean(-1)
+    xval_noise = pac_obj.fit(pha_noise, amp_noise).mean(-1)
+
+    # Add MI as text
+    print('Noiseless MI:', xval_nn)
+    print('Noise MI:', xval_noise)
+
+    # Make figure
+    fig, axs = plt.subplots(3,1,figsize=(12,10))
+
+    # Plot
+    axs[0].plot(tv[idxs], FR_noise[idxs], label='noisy')
+    axs[0].plot(tv[idxs], FR[idxs]+150, label='noiseless')
+    axs[1].plot(tv[idxs], pha_noise.squeeze())
+    axs[1].plot(tv[idxs], pha_nn.squeeze())
+    axs[2].plot(tv[idxs], amp_noise.squeeze())
+    axs[2].plot(tv[idxs], amp_nn.squeeze())
+
+    # Add MI as text
+    print(xval_noise)
+    print(xval_nn)
+    axs[0].text(x=0.42, y=0.25, s='MI = {0}'.format(xval_noise.squeeze()), fontsize=10, ha='center', va='bottom', color='C0', transform=axs[0].transAxes)
+    axs[0].text(x=0.42, y=0.75, s='MI = {0}'.format(xval_nn.squeeze()), fontsize=10, ha='center', va='bottom', color='C1', transform=axs[0].transAxes)
+
+    # Show legend
+    axs[0].legend(loc=0)
+
+    # Pretty stuff
+    axs[0].set_title('Firing Rates')
+    axs[1].set_title('Phase')
+    axs[2].set_title('Amplitude')
+    axs[2].set_xlabel('Time [s]')
+    axs[0].set_ylabel('FRs [Hz]')
+    axs[1].set_ylabel('Phase [rad]')
+    axs[2].set_ylabel('Amplitude')
+
+    # apply tight layout
+    fig.set_tight_layout(True)
+
+    return fig,axs
+
+
+def check_MI_noisy(tv, fs, FR, noise, idxs, RND=False):
+    if RND:
+        noise = np.random.uniform(0, 10, FR.size)
+
+    # Add noise
+    FR_noise = FR + noise
+
+    # Define frequency ranges
+    f_pha = [3, 9]
+    f_amp0 = [20, 40]
+    f_amp1 = [40, 80]
+
+    # Make PAC objects
+    pac_obj0 = Pac(idpac=(2,0,0), f_pha=f_pha, f_amp=f_amp0)
+    pac_obj1 = Pac(idpac=(2,0,0), f_pha=f_pha, f_amp=f_amp1)
+
+    # Filter and fit
+    pha0 = pac_obj0.filter(fs, FR_noise[np.newaxis, idxs], ftype='phase')
+    amp0 = pac_obj0.filter(fs, FR_noise[np.newaxis, idxs], ftype='amplitude')
+    pha1 = pac_obj1.filter(fs, FR_noise[np.newaxis, idxs], ftype='phase')
+    amp1 = pac_obj1.filter(fs, FR_noise[np.newaxis, idxs], ftype='amplitude')
+    xval0 = pac_obj0.fit(pha0, amp0).mean(-1)
+    xval1 = pac_obj1.fit(pha1, amp1).mean(-1)
+
+    # Make the figures
+    fig, axs = plt.subplots(3, 1, figsize=(12,10))
+
+    # Plot the lines
+    axs[0].plot(tv[idxs], FR_noise[idxs], label='noisy')
+    axs[0].plot(tv[idxs], FR[idxs]+150, label='noiseless')
+    axs[1].plot(tv[idxs], pha0.squeeze(), label='[20,40]')
+    axs[1].plot(tv[idxs], pha1.squeeze(), label='[40,80]')
+    axs[2].plot(tv[idxs], amp0.squeeze())
+    axs[2].plot(tv[idxs], amp1.squeeze())
+
+    # Add MI as text
+    print(f_amp0, xval0)
+    print(f_amp1, xval1)
+    axs[2].text(x=0.42, y=0.65, s='MI = {0}'.format(xval0.squeeze()), fontsize=10, ha='center', va='bottom', color='C0', transform=axs[2].transAxes)
+    axs[2].text(x=0.42, y=0.75, s='MI = {0}'.format(xval1.squeeze()), fontsize=10, ha='center', va='bottom', color='C1', transform=axs[2].transAxes)
+
+    # Pretty plots
+    axs[0].set_title('Firing Rates')
+    axs[1].set_title('Phases')
+    axs[2].set_title('Amplitudes')
+    axs[2].set_xlabel('Time [s]')
+    axs[0].set_ylabel('FR [Hz]')
+    axs[1].set_ylabel('Phases [rad]')
+    axs[2].set_ylabel('Amplitudes')
+
+    # Show legends
+    axs[0].legend(loc=0)
+    axs[1].legend(loc=0)
+
+    # apply tight layout
+    fig.set_tight_layout(True)
+
+    return fig, axs
+
 
 # main program
 if __name__ == "__main__":
@@ -105,6 +220,14 @@ if __name__ == "__main__":
     gamma_low_band = [40, 80]
     gamma_high_band = [80, 120]
 
+    # Bands for PAC / PreferredPhase
+    f_pha_PAC = (3, 12, 2, .2)
+    f_amp_PAC = (30, 100, 10, 1)
+    f_pha_PP = [3, 9]
+    f_amp_PP = (20, 100, 10, 1)
+    f_pha_MI = [3, 9]
+    f_amp_MI = [40, 80]
+
     # Figure sizes
     fig_width = 2.3
     fig_height = 2.6
@@ -114,10 +237,11 @@ if __name__ == "__main__":
 
     # Normalize the FRs
     print('[+] Normalizing the FRs...')
+    noise = np.random.uniform(0, 10, FR_exc.size)
     FR_inh_norm = (FR_inh/winsize_FR)/N_CA1_inh
     FR_exc_norm = (FR_exc/winsize_FR)/N_CA1_exc
-    # FR_inh_norm += 10.*np.random.rand(len(FR_inh))
-    # FR_exc_norm += 10.*np.random.rand(len(FR_exc))
+    # FR_inh_norm += noise
+    # FR_exc_norm += noise
 
 
     # PSD calculations
@@ -131,6 +255,10 @@ if __name__ == "__main__":
     # Use the TensorPAC module to calculate the PSDs
     psd_pac_inh = PSD(FR_inh_norm[np.newaxis,tidx], fs_FR)
     psd_pac_exc = PSD(FR_exc_norm[np.newaxis,tidx], fs_FR)
+
+    # Calculate peaks
+    peaks_inh, props_inh = sig.find_peaks(psd_pac_inh.psd[0], prominence=1, threshold=psd_pac_inh.psd[0].max()*0.2)
+    peaks_exc, props_exc = sig.find_peaks(psd_pac_exc.psd[0], prominence=1, threshold=psd_pac_exc.psd[0].max()*0.2)
 
     # Find intersecting values in frequency vector
     idx_theta = np.logical_and(psd_pac_inh.freqs >= theta_band[0], psd_pac_inh.freqs <= theta_band[1])
@@ -146,10 +274,15 @@ if __name__ == "__main__":
     low_gamma_power_exc = integrate.simpson(psd_pac_exc.psd[0][idx_gamma_low], dx=df)
 
     print('*'+'='*32)
-    print('Absolute theta power [I]: %.3f uV^2' % theta_power_inh)
-    print('Absolute theta power [E]: %.3f uV^2' % theta_power_exc)
-    print('Absolute low-gamma power [I]: %.3f uV^2' % low_gamma_power_inh)
-    print('Absolute low-gamma power [E]: %.3f uV^2' % low_gamma_power_exc)
+    print('Absolute theta power [I]: {:.3f} uV^2'.format(theta_power_inh))
+    print('Absolute theta power [E]: {:.3f} uV^2'.format(theta_power_exc))
+    print('Absolute low-gamma power [I]: {:.3f} uV^2'.format(low_gamma_power_inh))
+    print('Absolute low-gamma power [E]: {:.3f} uV^2'.format(low_gamma_power_exc))
+    print('*'+'='*32)
+    print('Relative theta power [I]: {:.3%}'.format(theta_power_inh /integrate.simpson(psd_pac_inh.psd[0], dx=df)))
+    print('Relative theta power [E]: {:.3%}'.format(theta_power_exc / integrate.simpson(psd_pac_exc.psd[0], dx=df)))
+    print('Relative low-gamma power [I]: {:.3%}'.format(low_gamma_power_inh/integrate.simpson(psd_pac_inh.psd[0], dx=df)))
+    print('Relative low-gamma power [E]: {:.3%}'.format(low_gamma_power_exc/integrate.simpson(psd_pac_exc.psd[0], dx=df)))
     print('='*32+'*')
 
 
@@ -191,8 +324,8 @@ if __name__ == "__main__":
     ax_PSD.set_xlabel('Frequency [Hz]')
 
     # Tick fontsizes
-    ax_PSD.tick_params(axis='both', which='both', labelsize=9)
-    axin_PSD.tick_params(axis='both', which='both', labelsize=9)
+    ax_PSD.tick_params(axis='both', which='both', labelsize=fsize_ticks)
+    axin_PSD.tick_params(axis='both', which='both', labelsize=fsize_ticks)
 
     # Ticks of yaxis rotated
     # for tick in ax_PSD.get_yticklabels():
@@ -206,7 +339,7 @@ if __name__ == "__main__":
     axin_PSD.yaxis.set_major_locator(ticker.FixedLocator([0, 50]))
     axin_PSD.yaxis.set_minor_locator(ticker.FixedLocator([25]))
     axin_PSD.yaxis.set_ticklabels(['', ''])
-    axin_PSD.tick_params(axis='y', which='both', labelsize=9, length=0, width=0)
+    axin_PSD.tick_params(axis='y', which='both', labelsize=fsize_ticks, length=0, width=0)
 
     # Actually plotting
     ax_PSD.plot(psd_pac_inh.freqs, psd_pac_inh.psd[0], c=c_inh, label='Inhibitory', zorder=1, rasterized=False)
@@ -229,7 +362,7 @@ if __name__ == "__main__":
     axin_PSD.grid(which='major', alpha=0.5, linestyle='dotted', linewidth=1)
 
     # Legend
-    ax_PSD.legend(fontsize=8, frameon=False)
+    ax_PSD.legend(fontsize=fsize_legends, frameon=False)
 
     # Titles
     ax_PSD.set_title('CA1 Spectral Analysis')
@@ -241,8 +374,6 @@ if __name__ == "__main__":
 
     # PAC test
     # Modulation Index
-    f_pha_PAC = (3, 12, 2, .2)
-    f_amp_PAC = (30, 140, 20, 2)
     pac_obj = Pac(idpac=(2, 0, 0), f_pha=f_pha_PAC, f_amp=f_amp_PAC)
     # pac_obj = Pac(idpac=(2, 0, 0), f_pha=np.arange(4,13,2), f_amp=np.arange(30,121,2))
     # pac_obj = Pac(idpac=(2, 0, 0), f_pha='hres', f_amp='mres')
@@ -280,15 +411,15 @@ if __name__ == "__main__":
 
 
     # Tick fontsizes
-    ax_PAC.tick_params(axis='both', which='both', labelsize=9)
+    ax_PAC.tick_params(axis='both', which='both', labelsize=fsize_ticks)
 
     # plot the colorbar
     im = plt.gca().get_children()[-2]
     # cbar_ax = fig_PAC.add_axes([0.92, 0.1, 0.01, 0.8])
     cb = plt.colorbar(im, cax=None, ax=ax_PAC, location='bottom', pad=0.25, ticks=[0., 0.1, 0.2, 0.3], orientation='horizontal')
-    cb.set_label('PAC values', fontsize=9, rotation='horizontal')
+    cb.set_label('PAC values', fontsize=fsize_xylabels, rotation='horizontal')
 
-    cb.ax.tick_params(labelsize=9)
+    cb.ax.tick_params(labelsize=fsize_ticks)
     cb.outline.set_visible(False)
 
     # manual adjustments
@@ -309,16 +440,17 @@ if __name__ == "__main__":
     plt.figure('bins')
     plt.subplot(2,1,1)
     bin_exc.plot(normalize=True, color='blue', unit='deg')
-    plt.title('Excitatory', fontsize=18)
+    plt.title('Excitatory', fontsize=fsize_titles)
     plt.subplot(2,1,2)
     bin_inh.plot(normalize=True, color='red', unit='deg')
-    plt.title('Inhibitory', fontsize=18)
+    plt.title('Inhibitory', fontsize=fsize_titles)
     # plt.tight_layout()
 
 
     # PreferredPhase plot (sanity check #2)
-    pp_obj = PreferredPhase(f_pha=[4, 6], f_amp=(30, 100, 10, 1))
-    pac_obj2 = Pac(idpac=(2, 0, 0), f_pha=[4, 6], f_amp=[50, 70])
+    # pp_obj = PreferredPhase(f_pha=[3, 9], f_amp=(20, 100, 10, 1))
+    pp_obj = PreferredPhase(f_pha=f_pha_PP, f_amp=f_amp_PP)
+    pac_obj2 = Pac(idpac=(2, 0, 0), f_pha=f_pha_MI, f_amp=f_amp_MI)
     # pp_obj = PreferredPhase(f_pha=f_pha_PAC, f_amp=f_amp_PAC)
     # pp_obj = PreferredPhase(f_pha=(3, 12, 2, .2), f_amp=(30, 120, 20, 2))
     pp_pha_exc = pp_obj.filter(fs_FR, FR_exc_norm[np.newaxis,tidx], ftype='phase')
@@ -331,8 +463,8 @@ if __name__ == "__main__":
     ampbin_inh, pp_inh, polarvec_inh = pp_obj.fit(pp_pha_inh, pp_amp_inh, n_bins=72)
     ampbin_exc, pp_exc, polarvec_exc = pp_obj.fit(pp_pha_exc, pp_amp_exc, n_bins=72)
 
-    # compute the MI in the [50,70]Hz band
-    xpac = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis,tidx])
+    # compute the MI in the [40, 80] Hz band
+    xpac = pac_obj2.t(fs_FR, FR_exc_norm[np.newaxis,tidx])
 
     # start plotting
     plt.figure('pref_phase')
@@ -344,17 +476,25 @@ if __name__ == "__main__":
     # ax1 = pp_obj.polar(ampbin_inh.squeeze().T, vecbin, pp_obj.yvec, subplot=121,
     #              title='Inhibitory', colorbar=False, **kw_plt)
     ax_prefp = pp_obj.polar(ampbin_exc.squeeze().T, polarvec_exc, pp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
+    ax_prefp.yaxis.grid(linewidth=0.5, alpha=0.9)
 
     # Create the patches
-    p_low = mplb.patches.Rectangle((np.deg2rad(0), 50), np.deg2rad(360), 20, color=None, alpha=0.25, facecolor='grey', edgecolor='red', linewidth=1)
+    # p_low = mplb.patches.Rectangle((np.deg2rad(0), 50), np.deg2rad(360), 20, color=None, alpha=0.3, facecolor='white', edgecolor='red', linewidth=1)
     # p_high = mplb.patches.Rectangle((np.deg2rad(0), 110), np.deg2rad(360), 20, color=None, alpha=0.25, facecolor='grey', edgecolor='red', linewidth=1)
+    # p_low = mplb.patches.Rectangle((np.deg2rad(0), 30), np.deg2rad(360), 10, color=None, alpha=0.3, facecolor='black', edgecolor='white', linewidth=2)
+    # p_high = mplb.patches.Rectangle((np.deg2rad(0), 80), np.deg2rad(360), 20, color=None, alpha=0.3, facecolor='black', edgecolor='white', linewidth=2)
+    # p_show = mplb.patches.Rectangle((np.deg2rad(0), 40), np.deg2rad(360), 40, color=None, alpha=1., facecolor='none', edgecolor='white', linewidth=2)
 
     # Add them on the figure
-    ax_prefp.add_patch(p_low)
+    # ax_prefp.add_patch(p_low)
     # ax_prefp.add_patch(p_high)
+    # ax_prefp.add_patch(p_show)
 
     # add MI as a text
-    ax_prefp.text(x=np.deg2rad(-45), y=60, s=r'MI: {0:.2f}'.format(xpac.squeeze()), fontsize=fsize, ha='center', color='white', clip_on=True)
+    # mi_text = r'MI [3,7] vs [40,80]: {0:.2f}'.format(xpac.squeeze())
+    # mi_text = r'  MI: {0:.4f} // {1:.4E}'.format(xpac.squeeze(), xpac.squeeze())
+    mi_text = r'  MI: {0:.4f}'.format(xpac.squeeze())
+    ax_prefp.text(x=np.deg2rad(-90), y=70, s=mi_text, fontsize=fsize_misc, ha='center', va='bottom', color='white', clip_on=True)
 
     # Fix the label positions
     ax_prefp.set_rlabel_position(135)
@@ -363,19 +503,23 @@ if __name__ == "__main__":
         label.set_color('white')
 
     # Title
-    # ax_prefp.set_title('Excitatory', fontsize=11)
+    # ax_prefp.set_title('Excitatory', fontsize=fsize_titles)
 
     # Set the ticks
     ax_prefp.xaxis.set_ticklabels(['', '', '', r'$\theta_{peak}$', '', '', '', r'$\theta_{trough}$'])
-    ax_prefp.set_yticks([60, 120])
-    ax_prefp.yaxis.set_ticklabels(['60 Hz', '120 Hz'])
-    ax_prefp.tick_params(axis='both', which='both', labelsize=9)
-    ax_prefp.tick_params(axis='x', which='both', rotation=90, pad=-0.5)
+    ax_prefp.set_yticks([40, 60, 80, 100])
+    ax_prefp.yaxis.set_ticklabels(['40 Hz', '60 Hz', '80 Hz', '120 Hz'])
+    ax_prefp.tick_params(axis='both', which='both', labelsize=fsize_ticks)
+    ax_prefp.tick_params(axis='x', which='both', rotation=90, pad=-0.5, labelsize=fsize_misc)
     ax_prefp.set_thetalim(-np.pi, np.pi)
 
     # Set the xy-lims
     # ax_prefp.set_xlim(37, 81)
-    ax_prefp.set_ylim(35, 95)
+    ax_prefp.set_ylim(30, 90)
+
+    # Set origins
+    ax_prefp.set_rorigin(10)
+    # ax_prefp.set_theta_zero_location('W', offset=10)
 
     # plot the colorbar
     # im = plt.gca().get_children()[0]
@@ -386,8 +530,10 @@ if __name__ == "__main__":
     cb = plt.colorbar(im, cax=None, ax=ax_prefp, pad=0.05, location='bottom', orientation='horizontal')
     # cb.ax.set_yticks([0.012, 0.03])
     # cb.ax.set_yticklabels(['0', '1'])
-    cb.set_ticks([0.012, 0.03])
-    cb.set_ticklabels([0, 1])
+    clims = im.get_clim()
+    cb.set_ticks([min(clims), max(clims)])
+    cb.set_ticklabels(['min', 'max'])
+    cb.ax.tick_params(labelsize=fsize_ticks)
     # cb.set_label('Amplitude bins', fontsize=9, rotation='horizontal')
     cb.set_label('')
 

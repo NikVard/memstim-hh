@@ -24,6 +24,7 @@ parent_dir = Path(script_dir).parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
+from src.figure_plots_parameters import *
 
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
@@ -139,10 +140,6 @@ if __name__ == "__main__":
     rates_gap = 15 # Hz
 
     # Text parameters
-    fsize_ticks = fsize_legends = 8
-    fsize_xylabels = 9
-    fsize_titles = 10
-    fsize_figtitles = 11
     sizebar_off = 30 # sizebar offset
 
     # ax parameters
@@ -192,10 +189,10 @@ if __name__ == "__main__":
     axs.insert(0, [ax_rhythm])
 
     # set label as area name
-    # ax_rhythm.set_title(r'Input $\theta$ rhythm', loc='center', fontsize=fsize_figtitles)
+    # ax_rhythm.set_title(r'Input $\theta$ rhythm', loc='center', fontsize=fsize_titles)
 
     # Set the title
-    # ax_rhythm.set_title('Theta Rhythm', loc='center', fontsize=fsize_figtitles)
+    # ax_rhythm.set_title('Theta Rhythm', loc='center', fontsize=fsize_titles)
 
     # Set the x-y limits
     ax_rhythm.set_xlim(xlims_rhythm)
@@ -310,7 +307,7 @@ if __name__ == "__main__":
         ax0.yaxis.set_ticklabels([])
 
     # Set the title
-    # ax0.set_title('Rasters', loc='center', fontsize=fsize_figtitles)
+    # ax0.set_title('Rasters', loc='center', fontsize=fsize_titles)
 
     # Axis for CA1 FRs
     ax_FRs = fig.add_subplot(G_FRs, sharex=ax_rhythm)
@@ -449,7 +446,7 @@ if __name__ == "__main__":
     FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]
     FR_exc_norm = (FR_exc/winsize_FR)/N_tot[3][0]
 
-    # Add noise for PAC calculation (useful for MI)
+    # Add 10% noise for PAC calculation (useful for MI)
     FR_inh_norm += 0.1*FR_inh_norm.max()*noise
     FR_exc_norm += 0.1*FR_exc_norm.max()*noise
 
@@ -481,6 +478,7 @@ if __name__ == "__main__":
     f_pha_PAC = (3, 8, 1, .1)
     f_amp_PAC = (30, 90, 10, 1)
     pac_obj = Pac(idpac=(2, 0, 0), f_pha=f_pha_PAC, f_amp=f_amp_PAC)
+    pac_obj2 = Pac(idpac=(2,0,0), f_pha=[3,6], f_amp=[30,60])
 
     # filtering
     pha_exc_pre = pac_obj.filter(fs_FR, FR_exc_norm[np.newaxis,tidx_pre], ftype='phase')
@@ -491,6 +489,8 @@ if __name__ == "__main__":
     # compute PAC
     pac_exc_pre = pac_obj.fit(pha_exc_pre, amp_exc_pre).mean(-1)
     pac_exc_post = pac_obj.fit(pha_exc_post, amp_exc_post).mean(-1)
+    xpac_pre = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis, tidx_pre]).squeeze()
+    xpac_post = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis, tidx_post]).squeeze()
 
     # plot
     vmax = np.max([pac_exc_pre.max(), pac_exc_post.max()])

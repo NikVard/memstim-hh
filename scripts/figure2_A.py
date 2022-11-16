@@ -215,7 +215,7 @@ if __name__ == "__main__":
         axs.append([ax0, ax1, ax2, ax3])
 
         # set label as area name
-        ax0.set_title('Rasters')
+        ax0.set_title('CA1 Spiking Activity')
         # ax0.set_title(area_labels[0])
         # ax1.set_title(area_labels[1])
         # ax2.set_title(area_labels[2])
