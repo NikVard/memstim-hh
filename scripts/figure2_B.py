@@ -464,7 +464,7 @@ if __name__ == "__main__":
     ampbin_exc, pp_exc, polarvec_exc = pp_obj.fit(pp_pha_exc, pp_amp_exc, n_bins=72)
 
     # compute the MI in the [40, 80] Hz band
-    xpac = pac_obj2.t(fs_FR, FR_exc_norm[np.newaxis,tidx])
+    xpac = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis,tidx])
 
     # start plotting
     plt.figure('pref_phase')

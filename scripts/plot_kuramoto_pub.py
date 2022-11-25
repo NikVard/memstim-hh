@@ -63,7 +63,22 @@ z0 = 1/N[0] * np.sum(np.exp(1j*theta0))
 z1 = 1/N[1] * np.sum(np.exp(1j*theta1))
 
 # Plot
-fig, ax = plt.subplots(1, 2, figsize=(fig_width,fig_height))
+fig, ax = plt.subplots(1, 2, figsize=(fig_width,fig_height), constrained_layout=True)
+
+# Inset colorbars
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+axin_low = inset_axes(ax[0], width='40%', height='4%', loc='lower right',
+                        bbox_to_anchor=(0.26, 0.1, 1, 1),
+                        bbox_transform=ax[0].transAxes,
+                        borderpad=0)
+axin_high = inset_axes(ax[0], width='40%', height='4%', loc='lower right',
+                        bbox_to_anchor=(0.26, 0.05, 1, 1),
+                        bbox_transform=ax[0].transAxes,
+                        borderpad=0)
+
+# Tick locations
+axin_low.xaxis.set_ticks_position("bottom")
+axin_high.xaxis.set_ticks_position("bottom")
 
 # Equal aspect ratios
 ax[0].set_aspect('equal', adjustable='box')
@@ -76,8 +91,8 @@ ax[0].add_patch(circ0)
 ax[1].add_patch(circ1)
 
 # Scatters
-ax[0].scatter(X0, Y0, S0, omega0, vmin=0, vmax=1, cmap="Blues", edgecolor="white", zorder=10)
-ax[1].scatter(X1, Y1, S1, omega1, vmin=0, vmax=1, cmap="Reds", edgecolor="white", zorder=10)
+sc_low = ax[0].scatter(X0, Y0, S0, omega0, vmin=0, vmax=1, cmap="Blues", edgecolor="white", zorder=10)
+sc_high = ax[1].scatter(X1, Y1, S1, omega1, vmin=0, vmax=1, cmap="Reds", edgecolor="white", zorder=10)
 
 # order parameter
 ax[0].arrow(0, 0, np.real(z0), np.imag(z0), alpha=0.5, width=0.015, edgecolor='blue', facecolor='blue', lw=2, zorder=4, length_includes_head=True, head_length=0.06, head_width=0.06, shape='full')
@@ -86,10 +101,6 @@ ax[1].arrow(0, 0, np.real(z1), np.imag(z1), alpha=0.5, width=0.015, edgecolor='r
 # Set titles
 ax[0].set_title('Low synchronization', fontsize=fsize_titles)
 ax[1].set_title('High synchronization', fontsize=fsize_titles)
-
-# Set text for order parameter
-ax[0].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z0)), ha='center', va='center', fontsize=fsize_misc)
-ax[1].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z1)), ha='center', va='center', fontsize=fsize_misc)
 
 # Remove axis
 ax[0].set_axis_off()
@@ -100,19 +111,6 @@ ax[0].set_xlim([-1.2,1.2])
 ax[0].set_ylim([-1.2,1.2])
 ax[1].set_xlim([-1.2,1.2])
 ax[1].set_ylim([-1.2,1.2])
-
-# Make the image gradient
-XY_triangle = [[-0.65, -1.1], [-0.65, -0.9], [-1.2, -0.9]]
-min_xy = np.array(XY_triangle).min(axis=0)
-max_xy = np.array(XY_triangle).max(axis=0)
-
-# Omega patches for colormaps
-img0 = ax[0].imshow(np.flip(np.linspace(0, 1, 51)).reshape(1, -1), cmap='Blues_r', extent=[min_xy[0],max_xy[0],min_xy[1],max_xy[1]], transform=ax[0].transData, origin='lower')
-img1 = ax[1].imshow(np.flip(np.linspace(0, 1, 51)).reshape(1, -1), cmap='Reds_r', extent=[min_xy[0],max_xy[0],min_xy[1],max_xy[1]], transform=ax[1].transData, origin='lower')
-
-# Add the triangles
-t0 = plt.Polygon(XY_triangle, facecolor='none', edgecolor='black', lw=0.8, alpha=1., clip_on=False)
-t1 = plt.Polygon(XY_triangle, facecolor='none', edgecolor='black', lw=0.8, alpha=1., clip_on=False)
 
 # Make the arrows
 r = 0.8
@@ -130,21 +128,30 @@ arr1 = mplb.patches.FancyArrowPatch((xs, ys), (xe, ye), connectionstyle="arc3,ra
 # Add patches
 ax[0].add_patch(arr0)
 ax[1].add_patch(arr1)
-ax[0].add_patch(t0)
-ax[1].add_patch(t1)
 
-# Set clipping path
-img0.set_clip_path(t0)
-img1.set_clip_path(t1)
-
-# Add text
+# Add texts
+ax[0].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z0)), ha='center', va='center', fontsize=fsize_misc)
+ax[1].text(0.0, +0.25, 'r = {:.2f}'.format(np.abs(z1)), ha='center', va='center', fontsize=fsize_misc)
 ax[0].text(0, 0.7, r'$\omega$', ha='center', va='center', fontsize=fsize_misc)
 ax[1].text(0, 0.7, r'$\omega$', ha='center', va='center', fontsize=fsize_misc)
-ax[0].text(min_xy[0], min_xy[1], r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
-ax[1].text(min_xy[0], min_xy[1], r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
+
+
+# ax[0].text(-1.1, -1.1, r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
+# ax[1].text(-1.1, -1.1, r'Angular Velocity', ha='center', va='center', fontsize=fsize_misc)
+
+# Add colorbars
+cbar_low = fig.colorbar(sc_low, cax=axin_low, orientation='horizontal', ticks=[])
+cbar_high = fig.colorbar(sc_high, cax=axin_high, orientation='horizontal', ticks=[0, 1])
+
+# Set cbar titles
+cbar_low.ax.set_xlabel(r'Angular Velocities ($\omega$)', fontsize=fsize_xylabels)
+cbar_low.ax.xaxis.set_label_position('top')
+# cbar_high.ax.set_ylabel('Angular Velocity')
+cbar_high.ax.set_xticklabels(['min', 'max'])  # vertically oriented colorbar
+cbar_high.ax.tick_params(labelsize=fsize_ticks, length=2)
 
 # Set tight layout
-fig.tight_layout()
+# fig.tight_layout(True)
 
 # Save the figure
 print('[+] Saving the figure...')

@@ -559,13 +559,13 @@ if __name__ == "__main__":
 
         # inhibitory
         # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=0.55, linewidth=1., marker='|', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=0.55, linewidth=1., marker='o', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
         # excitatory
         # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=0.55, linewidth=1., marker='|', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=0.55, linewidth=1., marker='o', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
