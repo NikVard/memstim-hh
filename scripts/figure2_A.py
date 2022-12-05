@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as patheffects
 import matplotlib.animation as animation
 from scipy import signal as sig
+from tensorpac.utils import PSD
 from matplotlib import colors
 from matplotlib import ticker
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     # Timing
     second = 1
     ms = 1e-3
-    duration = 3.2*second
+    duration = 8*second
     dt = 0.1*ms
     fs = int(1/dt)
     winsize_FR = 5*ms
@@ -98,9 +99,9 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
+    tv = np.arange(0., duration, dt)
     t_stim = 2086.7*ms
-    t_lims = [950*ms, 2700*ms] # ms
-    # t_lims = [0*ms, 2000*ms] # ms
+    t_lims = [950*ms, 2700*ms] # ms : x-axs limits
     interp = 'nearest'
 
     # Area names and sizes
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     # Firing rates plotting gap
     rates_gap = 2 # Hz
 
-    # Power spectra parameters
+    # Firing Rate computation parameters
     window_size = 100*ms
     window_width = int(fs_FR*window_size) # samples
     overlap = 0.99 # percentage
@@ -492,10 +493,10 @@ if __name__ == "__main__":
 
         # load t-i arrays for this area
         print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
-        i_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0])))
-        t_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0])))
-        i_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1])))
-        t_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1])))
+        i_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0])))
+        t_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0])))
+        i_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1])))
+        t_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1])))
 
         i_exc = i_exc.astype(int)
         t_exc = t_exc*ms
@@ -559,13 +560,13 @@ if __name__ == "__main__":
 
         # inhibitory
         # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=0.55, linewidth=1., marker='o', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1., linewidth=1., marker='.', c=c_inh, edgecolors='none', alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
         # excitatory
         # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=0.55, linewidth=1., marker='o', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1., linewidth=1., marker='.', c=c_exc, edgecolors='none', alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
@@ -595,19 +596,32 @@ if __name__ == "__main__":
     # ==================
     print('[+] Plotting rhythm...')
 
-    rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2','data', 'order_param_mon_rhythm.txt'))
-    ax_rhythm.plot(np.arange(0.,duration,dt), rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
+    rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3','data', 'order_param_mon_rhythm.txt'))
+    ax_rhythm.plot(tv, rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
-    tlims = [t_stim+10*ms, 3.1]
+    tlims = [t_stim+10*ms, 8.0]
     pks, _ = sig.find_peaks(rhythm, distance=int(50*ms*fs))
 
     # peak indices filtering (post-stim)
     pks_idx = np.logical_and(pks>=tlims[0]*fs, pks<=tlims[1]*fs)
     pks_new = pks[pks_idx]
 
-    # calculate the frequency
-    fval = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
+    # calculate the frequency in the post-stim window
+    fval0 = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
+
+    # find the oscullation frequency in the post-stim window using TensorPAC toolbox
+    idx_post = (tv>=t_stim)
+    rhythm_post = rhythm[idx_post]
+    rhythm_PSD = PSD(rhythm_post[np.newaxis,:], fs)
+
+    # peak indicates most prominent] oscillation
+    idx_max_val_psd = np.argmax(rhythm_PSD.psd[0])
+    fval1 = rhythm_PSD.freqs[idx_max_val_psd]
+
+    # select which fval to show
+    fval_fin = fval0 # custom peak-based mean calculation
+    fval_fin = fval1 # tensorpac PSD argmax calculation
 
     # for peak in pks:
         # if (peak*dt >= t_lims[0]) & (peak*dt <= t_lims[1]):
@@ -626,7 +640,7 @@ if __name__ == "__main__":
     # ax_rhythm.annotate('Stimulation Pulse', xy=(t_stim, 1.2), xytext=(t_stim, 2.5), arrowprops=dict(facecolor='red', shrink=0.05))
 
     # text frequency label
-    ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval), fontsize=fsize, ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval_fin), fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
     add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'])
@@ -637,7 +651,7 @@ if __name__ == "__main__":
     # ==================
     if args.order_parameter:
         print('[+] Plotting order parameter...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data','order_param_mon_coherence.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data','order_param_mon_coherence.txt'))
 
         # asymptote
         ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
@@ -647,7 +661,7 @@ if __name__ == "__main__":
 
     else:
         print('[+] Plotting phase...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc2', 'data','order_param_mon_phase.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data','order_param_mon_phase.txt'))
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 

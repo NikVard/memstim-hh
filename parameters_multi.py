@@ -149,7 +149,7 @@ _data = {
         "f0"            : 6.,
         "sigma"         : 0.5,  # normal std
         "kN"            : 15,
-        "gain_reset"    : 4.0,
+        "gain_reset"    : 4.0,  # maybe 2?
         "gain_rhythm"   : np.around(I_in, 2), # nA
         "offset"        : -0*pi/2
     },
