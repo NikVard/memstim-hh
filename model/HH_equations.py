@@ -71,7 +71,6 @@ py_CAN_inp_eqs = '''
 
     noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
-
     x_soma : metre
     y_soma : metre
     z_soma : metre
