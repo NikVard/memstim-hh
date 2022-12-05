@@ -189,7 +189,7 @@ if __name__ == "__main__":
     # Timing
     second = 1
     ms = 1e-3
-    duration = 3*second
+    duration = 8*second
     dt = 0.1*ms
     fs = int(1/dt)
     t_lims = [950*ms, 2700*ms] # ms

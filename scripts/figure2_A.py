@@ -89,9 +89,9 @@ if __name__ == "__main__":
     print('[+] Setting up parameters...')
 
     # Timing
-    second = 1
+    second = 1.
     ms = 1e-3
-    duration = 8*second
+    duration = 12.*second
     dt = 0.1*ms
     fs = int(1/dt)
     winsize_FR = 5*ms
@@ -100,8 +100,11 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
     tv = np.arange(0., duration, dt)
-    t_stim = 2086.7*ms
-    t_lims = [950*ms, 2700*ms] # ms : x-axs limits
+    # t_stim = 2086.7*ms
+    t_stim = 10801.9*ms
+    t_lims = [8200*ms, 11200*ms] # ms : x-axs limits
+    t_lims_adj = [4000*ms, 9000*ms] # ms : calculate mean FRs in a 5-sec window
+    duration_adj = t_lims_adj[1] - t_lims_adj[0]
     interp = 'nearest'
 
     # Area names and sizes
@@ -164,6 +167,7 @@ if __name__ == "__main__":
     ylims_rates = [-1, 500]
 
     # Set spectrogram limits
+    # xlims_freq = [t-t_lims_adj[0] for t in t_lims]
     xlims_freq = [t for t in t_lims]
     # xlims_freq[0] += window_size/2
     # xlims_freq[1] += window_size/2
@@ -183,6 +187,7 @@ if __name__ == "__main__":
 
     # Make a figure
     fig = plt.figure(figsize=(fig_width,fig_height))
+    # fig.subplots_adjust(left=0.095, right = 0.98, top=0.925, bottom=0.1)
 
     # Use gridspecs
     G_outer = GridSpec(5, 2, left=0.075, right=0.925, bottom=0.075, top=0.925,
@@ -221,10 +226,10 @@ if __name__ == "__main__":
         # ax1.set_title(area_labels[1])
         # ax2.set_title(area_labels[2])
         # ax3.set_title(area_labels[3])
-        ax0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=25.)
-        ax1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=25.)
-        ax2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=25.)
-        ax3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=25.)
+        ax0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=15.)
+        ax1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=15.)
+        ax2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=15.)
+        ax3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=15.)
 
         # set limits
         # ax0.set_xlim([575, (duration-450*ms)/winsize])
@@ -285,7 +290,7 @@ if __name__ == "__main__":
 
         # set label as area name
         ax0.set_title('Rasters')
-        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=-1.)
+        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=15.)
 
         # set limits
         ax0.set_xlim(xlims_raster)
@@ -570,10 +575,6 @@ if __name__ == "__main__":
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
-        # Calculate mean firing rates
-        t_lims_adj = [1000*ms, 2000*ms]
-        duration_adj = t_lims_adj[1] - t_lims_adj[0]
-
         # FR_inh_mean = (len(t_inh)/duration)/N_inh
         # FR_exc_mean = (len(t_exc)/duration)/N_exc
         FR_inh_mean = (sum((t_inh>=t_lims_adj[0]) & (t_inh<t_lims_adj[1]))/duration_adj)/N_inh
@@ -584,36 +585,35 @@ if __name__ == "__main__":
         ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f} Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
 
         # Shade the areas
-        ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
-        ax_curr.fill_betweenx(y=[N_scaling+N_gap, ylims_raster[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_inh, alpha=0.1)
+        # ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
+        # ax_curr.fill_betweenx(y=[N_scaling+N_gap, ylims_raster[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_inh, alpha=0.1)
 
     # # add a sizebar for the y-axis
     # add_sizebar(axs[0][3], [t_lims[1]+20*ms, t_lims[1]+20*ms], [0, 100], 'black', '100pts')
 
 
-    # ==================
+    # =====================
     # Plot the input rhythm
-    # ==================
+    # =====================
     print('[+] Plotting rhythm...')
 
     rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3','data', 'order_param_mon_rhythm.txt'))
     ax_rhythm.plot(tv, rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
-    tlims = [t_stim+10*ms, 8.0]
     pks, _ = sig.find_peaks(rhythm, distance=int(50*ms*fs))
 
-    # peak indices filtering (post-stim)
-    pks_idx = np.logical_and(pks>=tlims[0]*fs, pks<=tlims[1]*fs)
+    # peak indices filtering (pre-stim)
+    pks_idx = np.logical_and(pks>=t_lims_adj[0]*fs, pks<=t_lims_adj[1]*fs)
     pks_new = pks[pks_idx]
 
     # calculate the frequency in the post-stim window
     fval0 = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
 
     # find the oscullation frequency in the post-stim window using TensorPAC toolbox
-    idx_post = (tv>=t_stim)
-    rhythm_post = rhythm[idx_post]
-    rhythm_PSD = PSD(rhythm_post[np.newaxis,:], fs)
+    idx_window = np.logical_and(tv>=t_lims_adj[0], tv<=t_lims_adj[1])
+    rhythm_window = rhythm[idx_window]
+    rhythm_PSD = PSD(rhythm_window[np.newaxis,:], fs)
 
     # peak indicates most prominent] oscillation
     idx_max_val_psd = np.argmax(rhythm_PSD.psd[0])
@@ -646,9 +646,9 @@ if __name__ == "__main__":
     add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'])
 
 
-    # ==================
+    # ================================
     # Plot the phase / order parameter
-    # ==================
+    # ================================
     if args.order_parameter:
         print('[+] Plotting order parameter...')
         data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data','order_param_mon_coherence.txt'))
@@ -670,15 +670,15 @@ if __name__ == "__main__":
 
         # text with stimulation phase [deg/rad]
         ax_common.scatter(x=t_stim, y=data[int(t_stim*fs)], s=12, marker='o', c='k')
-        ax_common.text(x=t_stim-75*ms, y=data[int(t_stim*fs)]+0.25, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
+        ax_common.text(x=t_stim-75*ms, y=data[int(t_stim*fs)]+0.45, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
 
     # Data plotting
     ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
 
-    # ==================
+    # ============
     # Plot CA1 FRs
-    # ==================
+    # ============
     tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
     tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
@@ -713,9 +713,9 @@ if __name__ == "__main__":
     add_sizebar(ax_rates, [xlims_rates[1]+sizebar_off, xlims_rates[1]+sizebar_off], [0, 100], 'black', '100Hz')
 
 
-    # ==================
+    # =====================
     # Plot the spectrograms
-    # ==================
+    # =====================
     specgram_kwargs = { 'return_onesided' : True,
                         'scaling' : 'density',
                         'mode' : 'magnitude' }

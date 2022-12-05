@@ -84,12 +84,12 @@ if __name__ == "__main__":
     fig_width = 7.5
     fig_height = 5.0
     fig = plt.figure(figsize=(fig_width, fig_height), tight_layout=False)
-    fig.subplots_adjust(left=0.2, right = 0.95, top=0.9, bottom=0.1)
+    fig.subplots_adjust(left=0.095, right = 0.98, top=0.925, bottom=0.1)
 
     # Add gridspecs
     gs_outer = fig.add_gridspec(2, 1, height_ratios=[0.4, 0.6]) # if you add wspace=<%> remove the tight_layout!!
     gs_top = GridSpecFromSubplotSpec(1, 1, subplot_spec=gs_outer[0])
-    gs_bottom = GridSpecFromSubplotSpec(1, 3, wspace=0.52, subplot_spec=gs_outer[1])
+    gs_bottom = GridSpecFromSubplotSpec(1, 3, width_ratios=[0.25, 0.4, 0.35], wspace=0.5, subplot_spec=gs_outer[1])
 
     # Organize the axes
     axs_top = []
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     # Setting xlims
     ax_PSD.set_xlim([0, 120])
     axin_PSD.set_xlim(37, 81)
-    axin_PSD.set_ylim(0, 60)
+    axin_PSD.set_ylim(0, 500)
 
     # Hide some spines
     ax_PSD.spines['top'].set_visible(False)
@@ -265,8 +265,8 @@ if __name__ == "__main__":
     axin_PSD.tick_params(axis='both', which='both', labelsize=fsize_ticks)
 
     # Remove some ticks
-    ax_PSD.yaxis.set_major_locator(ticker.FixedLocator([0, 500, 1000, 1500, 2000]))
-    ax_PSD.yaxis.set_minor_locator(ticker.FixedLocator([250, 750, 1250, 1750]))
+    ax_PSD.yaxis.set_major_locator(ticker.FixedLocator([0, 5000, 10000, 15000]))
+    ax_PSD.yaxis.set_minor_locator(ticker.FixedLocator([2500, 7500, 12500, 17500]))
     # ax_PSD.yaxis.set_ticklabels(['0', 'Max'])
     axin_PSD.xaxis.set_minor_locator(ticker.FixedLocator([50, 70]))
     axin_PSD.yaxis.set_major_locator(ticker.FixedLocator([0, 50]))
@@ -342,11 +342,12 @@ if __name__ == "__main__":
 
     # Set current axes
     plt.sca(ax_PAC)
-    pac_obj.comodulogram(pac_exc.mean(-1), title='PAC Excitatory [-1, 0]s', colorbar=False, **kw)
+    pac_obj.comodulogram(pac_exc.mean(-1), xlabel='Frequency for phase (Hz)', ylabel='Frequency for amplitude (Hz)', title='PAC Excitatory [-1, 0]s', colorbar=False, **kw)
 
 
     # Set tight_layout
     # gs_outer.tight_layout(fig)
+    # fig.tight_layout()
 
     """ Saving the figure """
     print('[+] Saving the figure...')
