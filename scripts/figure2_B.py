@@ -17,7 +17,6 @@ from scipy import integrate
 from matplotlib import colors
 from matplotlib import ticker
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
-from matplotlib import font_manager as fm
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = Path(script_dir).parent
@@ -29,14 +28,15 @@ from src.figure_plots_parameters import *
 from tensorpac import Pac, EventRelatedPac, PreferredPhase
 from tensorpac.utils import PeakLockedTF, PSD, ITC, BinAmplitude
 
-fontprops = fm.FontProperties(size=12, family='monospace')
-
+# Set font to Arial -- is this working?
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
 
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
-mplb.rcParams['axes.titlesize'] = 11
-mplb.rcParams['axes.labelsize'] = 8
+mplb.rcParams['axes.titlesize'] = fsize_titles
+mplb.rcParams['axes.labelsize'] = fsize_xylabels
 
 
 def noise_test_plot(tv, fs, FR, noise, idxs, pac_obj, RND=False):
@@ -285,7 +285,6 @@ if __name__ == "__main__":
     print('Relative low-gamma power [E]: {:.3%}'.format(low_gamma_power_exc/integrate.simpson(psd_pac_exc.psd[0], dx=df)))
     print('='*32+'*')
 
-
     # Plot the data
     #------------------------
     print('[>] Plotting the PSDs...')
@@ -467,15 +466,15 @@ if __name__ == "__main__":
     xpac = pac_obj2.filterfit(fs_FR, FR_exc_norm[np.newaxis,tidx])
 
     # start plotting
-    plt.figure('pref_phase')
-    # plt.sca(ax_prefp)
-    # kw_plt = dict(cmap='Spectral_r', interp=.1, cblabel='Amplitude bins',
-                  # vmin=0.012, vmax=0.03, y=1.05, fz_title=18)
+    fig_pp = plt.figure('pref_phase')
+    ax_prefp = fig_pp.add_subplot(111, projection='polar')
+    plt.sca(ax_prefp)
+
     kw_plt = dict(cmap='viridis', interp=.1, cblabel='Amplitude bins',
-                  vmin=0.012, vmax=0.03, y=1., fz_title=11, fz_labels=9)
+                  vmin=0.012, vmax=0.03, y=1., fz_title=fsize_titles, fz_labels=fsize_xylabels)
     # ax1 = pp_obj.polar(ampbin_inh.squeeze().T, vecbin, pp_obj.yvec, subplot=121,
     #              title='Inhibitory', colorbar=False, **kw_plt)
-    ax_prefp = pp_obj.polar(ampbin_exc.squeeze().T, polarvec_exc, pp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
+    pp_obj.polar(ampbin_exc.squeeze().T, polarvec_exc, pp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
     ax_prefp.yaxis.grid(linewidth=0.5, alpha=0.9)
 
     # Create the patches

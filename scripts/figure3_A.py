@@ -695,11 +695,11 @@ if __name__ == "__main__":
 
     # add a sizebar for the x-axis
     xlims_sz = [xlims[0]-sizebar_off, xlims[0]-sizebar_off+100]
-    add_sizebar(ax_B1, xlims_sz, [+175, +175], 'black', '100 ms', fsize=fsize_legends, rot=0, textx=np.mean(xlims_sz), texty=155, ha='center', va='top')
+    add_sizebar(ax_B1, xlims_sz, [+175, +175], 'black', '100 ms', fsize=fsize_misc, rot=0, textx=np.mean(xlims_sz), texty=155, ha='center', va='top')
 
     # add a sizebar for the y-axis
     ylims_sz = [+175, +275]
-    add_sizebar(ax_B1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100 Hz', fsize=fsize_legends, rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
+    add_sizebar(ax_B1, [xlims[0]-sizebar_off, xlims[0]-sizebar_off], ylims_sz, 'black', '100 Hz', fsize=fsize_misc, rot=90, textx=xlims[0]-sizebar_off-20, texty=np.mean(ylims_sz), ha='right', va='center')
 
 
     # Panel C - Quantification

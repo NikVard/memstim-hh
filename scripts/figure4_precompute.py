@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4')
+root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext')
 
 # get a list of the directories with oscillator amplitudes
 osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
@@ -33,7 +33,7 @@ osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
 # Timing parameters
 second = 1
 ms = 1e-3
-duration = 4*second
+duration = 10*second
 stim_onset = 1800*ms
 dt = 0.1*ms
 fs = int(1*second/dt)
@@ -59,7 +59,10 @@ osc_amps = np.array(osc_amps)
 # stim_amps = np.arange(1, 11, 1)
 stim_amps = []
 for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0])))[1]:
-    stim_amps.append(float(val.split('_')[0]))
+    if val == 'None':
+        continue
+    else:
+        stim_amps.append(float(val.split('_')[0]))
 stim_amps.sort()
 stim_amps = np.array(stim_amps)
 
@@ -85,7 +88,7 @@ gamma_heatmap_I = np.zeros((len(osc_amps), len(stim_amps)))
 # noise - uniform function instead [min/max]
 curr_state = np.random.get_state() # get current state
 np.random.seed(42) # fix the noise - reproducibility
-noise = np.random.uniform(0, 10, int((duration-0.005)*fs_FR)+1) # change max noise value
+noise = np.random.uniform(0, 10, int((duration-winsize_FR)*fs_FR)+2) # change max noise value
 np.random.set_state(curr_state) # resume state
 
 # Make a PAC object
@@ -98,6 +101,9 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
     curr_osc_amp = float(osc_amp_dir.split('_')[1])
     idx_osc_amp = np.where(osc_amps == curr_osc_amp) # index for heatmap
 
+    # if curr_osc_amp < 0.17:
+    #     continue
+
     # one step in
     curr_osc_dir = os.path.join(root_cluster, osc_amp_dir)
     print('osc: ', osc_amp_dir)
@@ -106,8 +112,14 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
     stim_amp_dirs = [dirname for dirname in sorted(os.listdir(curr_osc_dir)) if os.path.isdir(os.path.join(curr_osc_dir, dirname))]
 
     for stim_amp_dir in stim_amp_dirs:
+        if stim_amp_dir == 'None':
+            continue
+
         curr_stim_amp = float(stim_amp_dir.split('_')[0])
         idx_stim_amp = np.where(stim_amps == curr_stim_amp) # index for heatmap
+
+        # if curr_stim_amp < 7:
+        #     continue
 
         # one step in
         curr_stim_dir = os.path.join(curr_osc_dir, stim_amp_dir)
@@ -155,8 +167,8 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         FR_exc_norm_noise = FR_exc_norm + noise
 
         # get the post-stim indices
-        tlims_post = np.array([500, 1500]) + t_stim # avoid stim artifact
-        tidx_post = np.logical_and(tv_exc_FR/ms>=tlims_post[0], tv_exc_FR/ms<=tlims_post[1])
+        tlims_post = np.array([500, 5500]) + t_stim # avoid stim artifact | 5s window
+        tidx_post = np.logical_and(np.round(tv_exc_FR/ms,4)>tlims_post[0], np.round(tv_exc_FR/ms,4)<=tlims_post[1])
 
         # Use the TensorPAC module to calculate the PSDs
         psd_pac_inh = PSD(FR_inh_norm[np.newaxis,tidx_post], fs_FR)
@@ -167,11 +179,16 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         f_gamma_idxs = np.logical_and(psd_pac_inh.freqs>=gamma_band[0], psd_pac_inh.freqs<=gamma_band[1])
 
         # Calculate peaks - can use argmax or np.argwhere(np.abs(x-x.max())<1e-6)
-        peaks_inh, props_inh = sig.find_peaks(psd_pac_inh.psd[0], prominence=1, threshold=psd_pac_inh.psd[0].max()*0.2)
-        peaks_exc, props_exc = sig.find_peaks(psd_pac_exc.psd[0], prominence=1, threshold=psd_pac_exc.psd[0].max()*0.2)
+        peaks_inh, props_inh = sig.find_peaks(psd_pac_inh.psd[0], prominence=1)
+        peaks_exc, props_exc = sig.find_peaks(psd_pac_exc.psd[0], prominence=1)
 
         # Check if we have ~any~ peaks
         if peaks_inh.size > 0:
+            # Filter out peaks lower than 10% of signal max
+            threshold_inh = psd_pac_inh.psd[0].max()*0.1
+            idx_peaks_inh_filt = psd_pac_inh.psd[0][peaks_inh] > threshold_inh
+            peaks_inh = peaks_inh[idx_peaks_inh_filt]
+
             # All peaks to theta peaks
             idx_theta_peaks = np.argwhere(np.logical_and(psd_pac_inh.freqs[peaks_inh]>=theta_band[0], psd_pac_inh.freqs[peaks_inh]<=theta_band[1]))
 
@@ -188,6 +205,11 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
             peak_freqs_inh.extend(peak_theta_freq_inh)
 
         if peaks_exc.size > 0:
+            # Filter out peaks lower than 10% of signal max
+            threshold_exc = psd_pac_exc.psd[0].max()*0.1
+            idx_peaks_exc_filt = psd_pac_exc.psd[0][peaks_exc] > threshold_exc
+            peaks_exc = peaks_exc[idx_peaks_exc_filt]
+
             # All peaks to theta peaks
             idx_theta_peaks = np.argwhere(np.logical_and(psd_pac_exc.freqs[peaks_exc]>=theta_band[0], psd_pac_exc.freqs[peaks_exc]<=theta_band[1]))
 
@@ -246,13 +268,13 @@ print("Done.")
 # Save the figure
 print('[+] Saving the data (.npy objects)...')
 print('[*] Modulation Index E/I...')
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'MI_E_heatmap.npy'), MI_heatmap_E, allow_pickle=False, fix_imports=False)
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'MI_I_heatmap.npy'), MI_heatmap_I, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'MI_E_heatmap.npy'), MI_heatmap_E, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'MI_I_heatmap.npy'), MI_heatmap_I, allow_pickle=False, fix_imports=False)
 print('[*] Theta-Gamma heatmaps...')
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'theta_E_heatmap.npy'), theta_heatmap_E, allow_pickle=False, fix_imports=False)
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'theta_I_heatmap.npy'), theta_heatmap_I, allow_pickle=False, fix_imports=False)
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'gamma_E_heatmap.npy'), gamma_heatmap_E, allow_pickle=False, fix_imports=False)
-np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data', 'gamma_I_heatmap.npy'), gamma_heatmap_I, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'theta_E_heatmap.npy'), theta_heatmap_E, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'theta_I_heatmap.npy'), theta_heatmap_I, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'gamma_E_heatmap.npy'), gamma_heatmap_E, allow_pickle=False, fix_imports=False)
+np.save(os.path.join(parent_dir, 'figures', 'fig4', 'data_ext', 'gamma_I_heatmap.npy'), gamma_heatmap_I, allow_pickle=False, fix_imports=False)
 
 # Done with the iterations
 print("[V] Completed. Exiting...")
