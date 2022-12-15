@@ -26,16 +26,19 @@ parent_dir = Path(script_dir).parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
+from src.figure_plots_parameters import *
 
-fontprops = fm.FontProperties(size=12, family='monospace')
+# Set font to Arial -- is this working?
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
 
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
-mplb.rcParams['axes.titlesize'] = 11
-mplb.rcParams['axes.labelsize'] = 8
+mplb.rcParams['axes.titlesize'] = fsize_titles
+mplb.rcParams['axes.labelsize'] = fsize_xylabels
 
-def add_sizebar(ax, xlocs, ylocs, bcolor, text):
+def add_sizebar(ax, xlocs, ylocs, bcolor, text, fsize):
     """ Add a sizebar to the provided axis """
     ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)
 
@@ -102,8 +105,8 @@ if __name__ == "__main__":
     tv = np.arange(0., duration, dt)
     # t_stim = 2086.7*ms
     t_stim = 10801.9*ms
-    t_lims = [8200*ms, 11200*ms] # ms : x-axs limits
-    t_lims_adj = [4000*ms, 9000*ms] # ms : calculate mean FRs in a 5-sec window
+    t_lims = [9700*ms, 11400*ms] # ms : x-axs limits
+    t_lims_adj = [np.round(4000*ms,4), np.round(9000*ms,4)] # ms : calculate mean FRs in a 5-sec window
     duration_adj = t_lims_adj[1] - t_lims_adj[0]
     interp = 'nearest'
 
@@ -141,7 +144,7 @@ if __name__ == "__main__":
     newcmap_exc = ListedColormap(cvals_exc)
 
     # Raster downsampling
-    N_scaling = 200
+    N_scaling = 100
     N_gap = 10
 
     # Firing rates plotting gap
@@ -181,7 +184,7 @@ if __name__ == "__main__":
     """ Plot Figure 2 of the paper - TODO: Add DOI"""
     print('[+] Generating the figure...')
 
-    # Figure sizes
+    # Figure sizes (inches)
     fig_width = 7.5
     fig_height = 5.4
 
@@ -190,7 +193,7 @@ if __name__ == "__main__":
     # fig.subplots_adjust(left=0.095, right = 0.98, top=0.925, bottom=0.1)
 
     # Use gridspecs
-    G_outer = GridSpec(5, 2, left=0.075, right=0.925, bottom=0.075, top=0.925,
+    G_outer = GridSpec(5, 2, left=0.05, right=0.925, bottom=0.08, top=0.95,
                         wspace=0.05, hspace=0.5, height_ratios=(0.1, 0.1, 0.3, 0.2, 0.3), width_ratios=(0.99,0.01))
     G_rhythm = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[0,0])
     G_order_param = G_phase = GridSpecFromSubplotSpec(1, 1, hspace=0.1, subplot_spec=G_outer[1,0])
@@ -202,8 +205,7 @@ if __name__ == "__main__":
     G_specg = GridSpecFromSubplotSpec(2, 1, hspace=0.1, subplot_spec=G_outer[4,0])
     G_specg_cbars = GridSpecFromSubplotSpec(1, 1, hspace=0.3, subplot_spec=G_outer[4,1])
 
-    G_outer.tight_layout(fig)
-
+    # G_outer.tight_layout(fig)
 
     # Organize axes
     #------------------------
@@ -221,15 +223,15 @@ if __name__ == "__main__":
         axs.append([ax0, ax1, ax2, ax3])
 
         # set label as area name
-        ax0.set_title('CA1 Spiking Activity')
+        ax0.set_title('Spiking Activity', fontsize=fsize_titles)
         # ax0.set_title(area_labels[0])
         # ax1.set_title(area_labels[1])
         # ax2.set_title(area_labels[2])
         # ax3.set_title(area_labels[3])
-        ax0.set_ylabel(areas[0][0].split('_')[0], rotation=0, labelpad=15.)
-        ax1.set_ylabel(areas[1][0].split('_')[0], rotation=0, labelpad=15.)
-        ax2.set_ylabel(areas[2][0].split('_')[0], rotation=0, labelpad=15.)
-        ax3.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=15.)
+        ax0.set_ylabel(areas[0][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=15.)
+        ax1.set_ylabel(areas[1][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=15.)
+        ax2.set_ylabel(areas[2][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=15.)
+        ax3.set_ylabel(areas[3][0].split('_')[0], fontsize=fsize_xylabels, rotation=0, labelpad=15.)
 
         # set limits
         # ax0.set_xlim([575, (duration-450*ms)/winsize])
@@ -289,8 +291,8 @@ if __name__ == "__main__":
         axs.append([ax0])
 
         # set label as area name
-        ax0.set_title('Rasters')
-        ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=15.)
+        ax0.set_title('CA1 Spiking Activity', fontsize=fsize_titles)
+        # ax0.set_ylabel(areas[3][0].split('_')[0], rotation=0, labelpad=15.)
 
         # set limits
         ax0.set_xlim(xlims_raster)
@@ -324,7 +326,7 @@ if __name__ == "__main__":
     axs.append([ax_rates])
 
     # Set the title
-    ax_rates.set_title('CA1 Firing Rates')
+    ax_rates.set_title('CA1 Firing Rates', fontsize=fsize_titles)
 
     # Set the x-y limits
     ax_rates.set_ylim(ylims_rates)
@@ -367,7 +369,7 @@ if __name__ == "__main__":
     axs.append([ax_specg_exc, ax_specg_inh])
 
     # Set the title
-    ax_specg_inh.set_title('Spectrograms')
+    ax_specg_inh.set_title('Spectrograms', fontsize=fsize_titles)
 
     # # Set the x-y limits
     # ax_specg_inh.set_xlim(xlims_freq)
@@ -391,14 +393,14 @@ if __name__ == "__main__":
     ax_specg_exc.tick_params(axis='x', which='minor', width=1.0)
     ax_specg_exc.tick_params(axis='x', which='minor', length=5, labelcolor='0.25')
 
-    ax_specg_exc.tick_params(axis='both', which='both', labelsize=9)
-    ax_specg_inh.tick_params(axis='both', which='both', labelsize=9)
+    ax_specg_exc.tick_params(axis='both', which='both', labelsize=fsize_ticks)
+    ax_specg_inh.tick_params(axis='both', which='both', labelsize=fsize_ticks)
 
     # Hide x axis for inh
     ax_specg_inh.xaxis.set_visible(False)
 
     # Set xlabel
-    ax_specg_exc.set_xlabel('Time [s]', labelpad=-5.)
+    ax_specg_exc.set_xlabel('Time [s]', fontsize=fsize_xylabels, labelpad=0.)
 
     # Hide some spines
     ax_specg_exc.spines['top'].set_visible(False)
@@ -420,7 +422,7 @@ if __name__ == "__main__":
         ylims_common = ylims_rhythm
 
         # Set the title
-        ax_common.set_title('Order Parameter')
+        ax_common.set_title('Order Parameter', fontsize=fsize_titles)
 
     else:
         print('[>] Phase')
@@ -430,7 +432,7 @@ if __name__ == "__main__":
         ylims_common = [-0.1, 2*np.pi+0.1]
 
         # Set the title
-        ax_common.set_title('Phase')
+        ax_common.set_title('Phase', fontsize=fsize_titles)
 
     axs.append(ax_common)
 
@@ -461,7 +463,7 @@ if __name__ == "__main__":
     axs.append(ax_rhythm)
 
     # Set the title
-    ax_rhythm.set_title('Theta Rhythm')
+    ax_rhythm.set_title('Theta Rhythm', fontsize=fsize_titles)
 
     # Set the x-y limits
     ax_rhythm.set_xlim(xlims_rhythm)
@@ -565,13 +567,13 @@ if __name__ == "__main__":
 
         # inhibitory
         # ax_curr.plot(t_inh_sub, i_inh_sub, 'o', c=c_inh, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_inh_sub, i_inh_sub, s=1., linewidth=1., marker='.', c=c_inh, edgecolors='none', alpha=1., rasterized=True)
+        ax_curr.scatter(t_inh_sub, i_inh_sub, s=2., linewidth=1., marker='.', c=c_inh, edgecolors='none', alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
         # excitatory
         # ax_curr.plot(t_exc_sub, i_exc_sub, 'o', c=c_exc, markersize=.25, alpha=.75, zorder=1, rasterized=True)
-        ax_curr.scatter(t_exc_sub, i_exc_sub, s=1., linewidth=1., marker='.', c=c_exc, edgecolors='none', alpha=1., rasterized=True)
+        ax_curr.scatter(t_exc_sub, i_exc_sub, s=2., linewidth=1., marker='.', c=c_exc, edgecolors='none', alpha=1., rasterized=True)
         # ax_curr.set_rasterization_zorder(2)
         # ax_curr.set_rasterized(True)
 
@@ -581,8 +583,8 @@ if __name__ == "__main__":
         FR_exc_mean = (sum((t_exc>=t_lims_adj[0]) & (t_exc<t_lims_adj[1]))/duration_adj)/N_exc
 
         # add it as a text
-        ax_curr.text(x=xlims_rates[1]+100*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f} Hz'.format(FR_inh_mean), fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-        ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f} Hz'.format(FR_exc_mean), fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=1.5*N_scaling+N_gap, s=r'$\mu_I$: {0:.1f} Hz'.format(FR_inh_mean), fontsize=fsize_xylabels, ha='center', color=c_inh, clip_on=False)
+        ax_curr.text(x=xlims_rates[1]+100*ms, y=N_scaling//2, s=r'$\mu_E$: {0:.1f} Hz'.format(FR_exc_mean), fontsize=fsize_xylabels, ha='center', color=c_exc, clip_on=False)
 
         # Shade the areas
         # ax_curr.fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], cmap=newcmap_exc, alpha=0.1)
@@ -597,7 +599,7 @@ if __name__ == "__main__":
     # =====================
     print('[+] Plotting rhythm...')
 
-    rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3','data', 'order_param_mon_rhythm.txt'))
+    rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_rhythm.txt'))
     ax_rhythm.plot(tv, rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
@@ -610,8 +612,8 @@ if __name__ == "__main__":
     # calculate the frequency in the post-stim window
     fval0 = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
 
-    # find the oscullation frequency in the post-stim window using TensorPAC toolbox
-    idx_window = np.logical_and(tv>=t_lims_adj[0], tv<=t_lims_adj[1])
+    # find the oscillation frequency in the post-stim window using TensorPAC toolbox
+    idx_window = np.logical_and(np.round(tv,4)>t_lims_adj[0], np.round(tv,4)<=t_lims_adj[1])
     rhythm_window = rhythm[idx_window]
     rhythm_PSD = PSD(rhythm_window[np.newaxis,:], fs)
 
@@ -620,7 +622,7 @@ if __name__ == "__main__":
     fval1 = rhythm_PSD.freqs[idx_max_val_psd]
 
     # select which fval to show
-    fval_fin = fval0 # custom peak-based mean calculation
+    # fval_fin = fval0 # custom peak-based mean calculation
     fval_fin = fval1 # tensorpac PSD argmax calculation
 
     # for peak in pks:
@@ -640,10 +642,10 @@ if __name__ == "__main__":
     # ax_rhythm.annotate('Stimulation Pulse', xy=(t_stim, 1.2), xytext=(t_stim, 2.5), arrowprops=dict(facecolor='red', shrink=0.05))
 
     # text frequency label
-    ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval_fin), fontsize=fsize, ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=xlims_rhythm[0]+10*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval_fin), fontsize=fsize_misc, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
-    add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'])
+    add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'], fsize=fsize_misc)
 
 
     # ================================
@@ -651,26 +653,26 @@ if __name__ == "__main__":
     # ================================
     if args.order_parameter:
         print('[+] Plotting order parameter...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data','order_param_mon_coherence.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_coherence.txt'))
 
         # asymptote
         ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
 
         # add a sizebar for the y-axis
-        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt')
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 1.], 'black', '1.pt', fsize=fsize_misc)
 
     else:
         print('[+] Plotting phase...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data','order_param_mon_phase.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_phase.txt'))
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 
         # add a sizebar for the y-axis
-        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 2*np.pi], 'black', ['0', '$2\pi$'])
+        add_sizebar(ax_common, [xlims_common[1]+sizebar_off, xlims_common[1]+sizebar_off], [0, 2*np.pi], 'black', ['0', '$2\pi$'], fsize=fsize_misc)
 
         # text with stimulation phase [deg/rad]
         ax_common.scatter(x=t_stim, y=data[int(t_stim*fs)], s=12, marker='o', c='k')
-        ax_common.text(x=t_stim-75*ms, y=data[int(t_stim*fs)]+0.45, s=r"$\pi/2$", fontsize=fsize, ha='left', color='k', clip_on=False)
+        ax_common.text(x=t_stim-75*ms, y=data[int(t_stim*fs)]+0.45, s=r"$\pi/2$", fontsize=fsize_misc, ha='left', color='k', clip_on=False)
 
     # Data plotting
     ax_common.plot(np.arange(0.,duration,dt), data, ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
@@ -705,12 +707,12 @@ if __name__ == "__main__":
     # ax_rate_inh.text(x=-10*ms, y=ylims_rates[1]//2, s='Inhibitory', ha='center', color=c_inh, clip_on=False)
     # ax_rate_exc.text(x=-10*ms, y=ylims_rates[1]//2, s='Excitatory', ha='center', color=c_exc, clip_on=False)
     # ax_rates.text(x=xlims_rates[0]-10*ms, y=ylims_rates[1]-100, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-    ax_rates.text(x=xlims_rates[0]-50*ms, y=ylims_rates[0]+150+FR_exc_norm.max()+rates_gap, s='Inhibitory', fontsize=fsize, ha='center', color=c_inh, clip_on=False)
-    ax_rates.text(x=xlims_rates[0]-50*ms, y=ylims_rates[0]+75, s='Excitatory', fontsize=fsize, ha='center', color=c_exc, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-30*ms, y=ylims_rates[0]+150+FR_exc_norm.max()+rates_gap, s='Inhibitory', fontsize=fsize_legends, ha='center', color=c_inh, clip_on=False)
+    ax_rates.text(x=xlims_rates[0]-30*ms, y=ylims_rates[0]+75, s='Excitatory', fontsize=fsize_legends, ha='center', color=c_exc, clip_on=False)
 
     # add a sizebar for the y-axis
     # add_sizebar(ax_rate_exc, [duration+sizebar_off, duration+sizebar_off], [0, 50], 'black', '50Hz')
-    add_sizebar(ax_rates, [xlims_rates[1]+sizebar_off, xlims_rates[1]+sizebar_off], [0, 100], 'black', '100Hz')
+    add_sizebar(ax_rates, [xlims_rates[1]+sizebar_off, xlims_rates[1]+sizebar_off], [0, 100], 'black', '100 Hz', fsize=fsize_misc)
 
 
     # =====================
@@ -791,8 +793,8 @@ if __name__ == "__main__":
     # ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=fsize, transform=ax_specg_exc.transAxes, color=c_exc, verticalalignment='top', path_effects=[patheffects.withStroke(linewidth=1, foreground='white', capstyle="round")])
 
     # w/ white text
-    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=fsize, transform=ax_specg_inh.transAxes, color='white', verticalalignment='top')
-    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=fsize, transform=ax_specg_exc.transAxes, color='white', verticalalignment='top')
+    ax_specg_inh.text(0.02, 0.9, 'Inhibitory', fontsize=fsize_legends, transform=ax_specg_inh.transAxes, color='white', verticalalignment='top')
+    ax_specg_exc.text(0.02, 0.9, 'Excitatory', fontsize=fsize_legends, transform=ax_specg_exc.transAxes, color='white', verticalalignment='top')
 
 
     # data_inh, freqs_inh, bins_inh, im_inh = ax_specg_inh.specgram(FR_inh_norm, NFFT=window_width, pad_to=2048, Fs=fs_FR, noverlap=noverlap, scale='linear', window=sig.windows.hann(M=window_width, sym=False), cmap=newcmap_inh)
@@ -844,11 +846,17 @@ if __name__ == "__main__":
     cbe.solids.set_rasterized(True)
     cbe.dividers.set_color('none')
     cbe.dividers.set_linewidth(5)
-    cbe.ax.tick_params(labelsize=9)
+    cbe.ax.tick_params(labelsize=fsize_ticks)
 
     # sizebars
     # ax_specg_exc.plot([550*ms, 600*ms, None, 550*ms, 550*ms], [-60, -60, None, 0, 0], ls='-', c='r', linewidth=1., rasterized=True, clip_on=False)
     # ax_specg_exc.text(x=575*ms, y=-100, s='50ms', ha='center', fontproperties=fontprops, clip_on=False)
+
+    # Add panel label
+    print('[+]')
+
+    # Add text to the top-left to indicate panel A.
+    ax_rhythm.text(x=0.03, y=0.985, s='A.', fontsize=fsize_panels, weight='bold', ha='right', va='top', transform=fig.transFigure)
 
     # save the figure
     print('[+] Saving the figures...')
@@ -887,7 +895,9 @@ if __name__ == "__main__":
 
     print('[!] Done')
 
-    # fig.tight_layout()
+    # Set the tight layout
+    # G_outer.tight_layout(fig)
+
     plt.show()
 
     # Exit - no errors

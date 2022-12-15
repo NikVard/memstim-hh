@@ -354,7 +354,7 @@ def my_modulation_index(sig_phase: np.ndarray,
     return MI, dist_KL
 
 
-def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, **kwargs):
+def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, return_PSD=False, **kwargs):
     """
     Compute the average power of the signal x in a specific frequency band.
     Code adapted from: https://raphaelvallat.com/bandpower.html
@@ -417,5 +417,8 @@ def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, **kw
 
     if relative:
         bp /= simps(psd, dx=freq_res)
+
+    if return_PSD:
+        return bp, freqs, psd
 
     return bp

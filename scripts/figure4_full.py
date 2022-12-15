@@ -26,6 +26,16 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
+# Set font to Arial -- is this working?
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+
+# ILLUSTRATOR STUFF
+mplb.rcParams['pdf.fonttype'] = 42
+mplb.rcParams['ps.fonttype'] = 42
+mplb.rcParams['axes.titlesize'] = fsize_titles
+mplb.rcParams['axes.labelsize'] = fsize_xylabels
+
 # Sizebar func
 def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
     """ Add a sizebar to the provided axis """
@@ -56,7 +66,7 @@ root_precomp = os.path.join(parent_dir, 'figures', 'fig4', 'data')
 # Timing parameters
 second = 1
 ms = 1e-3
-duration = 4*second
+duration = 10*second
 stim_onset = 1800*ms
 dt = 0.1*ms
 fs = int(1*second/dt)
@@ -72,7 +82,7 @@ area_labels = ['EC', 'DG', 'CA3', 'CA1']
 N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
 
 # Raster downsampling
-N_scaling = 200
+N_scaling = 100
 N_gap = 10
 
 # Color selection
@@ -104,9 +114,9 @@ MI_heatmap_I = np.load(os.path.join(root_precomp, 'MI_I_heatmap.npy'))
 
 # Define points of interest % list of tuples: (label, [osc, stim] nA)
 points_of_interest = []
-points_of_interest.append((0.03, 7.0)) # A - no activity % post-stim
+points_of_interest.append((0.03, 8.0)) # A - no activity % post-stim
 points_of_interest.append((0.07, 8.0)) # B - transient activity
-points_of_interest.append((0.18, 8.0)) # D - restoration of physiological activity
+points_of_interest.append((0.18, 8.0)) # C - restoration of physiological activity
 points_of_interest_labels = ['A', 'B', 'C']
 
 # theta / gamma power matrices
@@ -275,15 +285,15 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
 
             # plot the rasters for E-I
             ax_rasters_curr = fig.add_subplot(gs_curr[0])
-            ax_rasters_curr.scatter(t_inh_sub, i_inh_sub, s=0.55, linewidth=1., marker='o', c=c_inh, edgecolors=None, alpha=1., rasterized=True)
-            ax_rasters_curr.scatter(t_exc_sub, i_exc_sub, s=0.55, linewidth=1., marker='o', c=c_exc, edgecolors=None, alpha=1., rasterized=True)
+            ax_rasters_curr.scatter(t_inh_sub, i_inh_sub, s=1.25, linewidth=1., marker='.', c=c_inh, edgecolors='none', alpha=1., rasterized=True)
+            ax_rasters_curr.scatter(t_exc_sub, i_exc_sub, s=1.25, linewidth=1., marker='.', c=c_exc, edgecolors='none', alpha=1., rasterized=True)
 
             # plot the FRs for E-I
             ax_FRs_curr = fig.add_subplot(gs_curr[1])
             # ax_FRs_curr.plot(tv_inh_FR, FR_inh_norm+200)
             # ax_FRs_curr.plot(tv_exc_FR, FR_exc_norm, c=)
-            ax_FRs_curr.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1.2, c=c_inh, label='inh', zorder=10, rasterized=False)
-            ax_FRs_curr.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1.2, c=c_exc, label='exc', zorder=10, rasterized=False)
+            ax_FRs_curr.plot(tv_inh_FR, FR_inh_norm+rates_gap, ls='-', linewidth=1., c=c_inh, label='inh', zorder=10, rasterized=False)
+            ax_FRs_curr.plot(tv_exc_FR, FR_exc_norm, ls='-', linewidth=1., c=c_exc, label='exc', zorder=10, rasterized=False)
 
             # add the axes to the lists
             axs_rasters.append(ax_rasters_curr)
@@ -305,7 +315,7 @@ for ax, label in zip(axs_rasters, points_of_interest_labels):
     # ax.text(x=-0.02, y=0.85, transform=ax.transAxes, weight='bold', s=label, fontsize=fsize_misc, ha='center', color='red', bbox=dict(boxstyle='square', edgecolor='red', facecolor='none'), clip_on=False)
 
     # Set xlims
-    ax.set_xlim([(t_stim-200)*ms, duration])
+    ax.set_xlim([(t_stim-500)*ms, (t_stim+2500)*ms])
     ax.set_ylim([0, cnt+1])
 
     # Set y-labels
@@ -331,7 +341,7 @@ for ax in axs_FRs:
     ax.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
 
     # Set xlims
-    ax.set_xlim([(t_stim-200)*ms, duration])
+    ax.set_xlim([(t_stim-500)*ms, (t_stim+2500)*ms])
     ax.set_ylim([-1, 600])
 
     # Set y-labels
@@ -352,10 +362,10 @@ for ax in axs_FRs:
 # axs_FRs[-1].set_xlabel('Time [s]', fontsize=fsize_xylabels)
 
 # Add sizebars for x-y axes
-xlims_sz = [t_stim*ms-0.25, t_stim*ms]
-ylims_sz = [-150, 0]
-add_sizebar(axs_FRs[-1], xlims_sz, [-150, -150], 'black', '250 ms', fsize=fsize_xylabels, rot=0, textx=np.mean(xlims_sz), texty=-220, ha='center', va='top')
-add_sizebar(axs_FRs[-1], [xlims_sz[0]]*2, ylims_sz, 'black', '150 Hz', fsize=fsize_xylabels, rot=90, textx=xlims_sz[0]-0.05, texty=np.mean(ylims_sz), ha='right', va='center')
+xlims_sz = [t_stim*ms-0.550, t_stim*ms-0.300]
+ylims_sz = [-75, 25]
+add_sizebar(axs_FRs[-1], xlims_sz, [ylims_sz[0]]*2, 'black', '250 ms', fsize=fsize_xylabels, rot=0, textx=np.mean(xlims_sz), texty=ylims_sz[0]-50, ha='center', va='top')
+add_sizebar(axs_FRs[-1], [xlims_sz[0]]*2, ylims_sz, 'black', '100 Hz', fsize=fsize_xylabels, rot=90, textx=xlims_sz[0]-0.05, texty=np.mean(ylims_sz), ha='right', va='center')
 
 # Stimulation lines + marker
 # First raster
@@ -409,7 +419,7 @@ im6 = axs_right[1].pcolormesh(X+X.min()/2, Y+Y.min()/2, gamma_heatmap_E.T, cmap=
 rect_list = []
 
 # Add text annotations
-text_c = [(points_of_interest[0][0]+0.0, points_of_interest[0][1]-1.0),
+text_c = [(points_of_interest[0][0]+0.0, points_of_interest[0][1]-2.0),
           (points_of_interest[1][0]+0.0, points_of_interest[1][1]-2.0),
           (points_of_interest[2][0]+0.0, points_of_interest[2][1]-2.0)
          ]
@@ -420,7 +430,7 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
     yn = ratio*y1 + (1-ratio)*y2
 
     # Point of interest
-    axs_right[0].plot([x1], [y1], marker='o', c='white', markersize=5)
+    axs_right[0].plot([x1], [y1], marker='o', mec='black', mfc='white',  markersize=5)
 
     # Annotation
     axs_right[0].annotate(label,
@@ -462,7 +472,7 @@ for ax in axs_right[1:]:
     for point in points_of_interest:
         # Point of interest
         x1,y1 = point
-        ax.plot([x1], [y1], marker='o', c='white', markersize=5)
+        ax.plot([x1], [y1], marker='o', mec='black', mfc='white',  markersize=5)
 
 # Set x-y ticks properly
 for ax in axs_right:
@@ -483,7 +493,7 @@ axs_right[2].set_xlabel('Osc. amp. [nA]', fontsize=fsize_xylabels)
 # Set titles
 axs_right[0].set_title('Theta band power', fontsize=fsize_titles)
 axs_right[1].set_title('Gamma band power', fontsize=fsize_titles)
-axs_right[2].set_title('Modulation Index', fontsize=fsize_titles)
+axs_right[2].set_title('Phase-Amplitude Coupling', fontsize=fsize_titles)
 
 # Add the colorbars
 # plt.colorbar(im2, label="Modulation Index", ax=axs_right[0])
@@ -513,10 +523,8 @@ axs_rasters[1].set_title('B.', loc='left', weight='bold', fontsize=fsize_panels)
 axs_rasters[2].set_title('C.', loc='left', weight='bold', fontsize=fsize_panels)
 axs_right[0].set_title('D.', loc='left', weight='bold', fontsize=fsize_panels)
 
-
 # Try the Gridspec tight_layout approach
 gs_outer.tight_layout(fig)
-
 
 # Save the figure
 print('[+] Saving the figure...')

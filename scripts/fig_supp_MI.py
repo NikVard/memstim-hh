@@ -37,7 +37,7 @@ overlap_FR = 0.9
 winstep_FR = winsize_FR*round(1-overlap_FR,4)
 fs_FR = int(1/winstep_FR)
 binnum = int(duration/winsize_FR)
-t_stim = 1800*ms
+t_stim = 2000*ms
 
 # Bands for PAC / PreferredPhase
 f_pha_PAC = (1, 12, 1, .2)
@@ -111,7 +111,8 @@ if __name__ == "__main__":
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_12Hz/10.0_nA/0.00_1800.0_ms/24-11-2022 17H29M25S/data'
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_8Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 09H58M40S/data'
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_8Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 12H02M48S/data'
-    dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_6Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 12H35M59S/data'
+    # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_6Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 12H35M59S/data'
+    dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/results/fig4_supp_MI/None/05-12-2022 15H43M04S/data'
 
     """ Loading the spikes from disk """
     print('[+] Loading the spikes for area', areas[3][0].split('_')[0])
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     FR_exc_norm = (FR_exc/winsize_FR)/N_tot[3][0]
 
     # get the post-stim indices
-    tlims_post = np.array([500, 5500])*ms + t_stim # avoid stim artifact
+    tlims_post = np.array([0, 5000])*ms + t_stim # avoid stim artifact
     tidx_post = np.logical_and(tv_exc_FR>=tlims_post[0], tv_exc_FR<=tlims_post[1])
 
     """ Add noise? """
