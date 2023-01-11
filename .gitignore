@@ -133,6 +133,11 @@ dmypy.json
 #*.png
 *.pdf
 
+# texts
+*.odt
+*.doc
+*.docx
+
 # backups
 *.backup
 
