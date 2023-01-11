@@ -26,6 +26,24 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
+# Arial font everywhere
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
+
 # Timing
 second = 1
 ms = 1e-3
@@ -63,11 +81,11 @@ rates_gap = 225 # Hz
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Generate Figure_2B from paper')
+    parser = argparse.ArgumentParser(description='Generate supplementary figure (MI) from paper')
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='fig2_A',
+                        default='fig_MI',
                         help='Name of the output figure [without extension].')
 
     parser.add_argument('--noise',
@@ -82,14 +100,14 @@ if __name__ == "__main__":
 
     # Make figure outline
     fig_width = 7.5
-    fig_height = 5.0
+    fig_height = 4.0
     fig = plt.figure(figsize=(fig_width, fig_height), tight_layout=False)
     fig.subplots_adjust(left=0.095, right = 0.98, top=0.925, bottom=0.1)
 
     # Add gridspecs
     gs_outer = fig.add_gridspec(2, 1, height_ratios=[0.4, 0.6]) # if you add wspace=<%> remove the tight_layout!!
     gs_top = GridSpecFromSubplotSpec(1, 1, subplot_spec=gs_outer[0])
-    gs_bottom = GridSpecFromSubplotSpec(1, 3, width_ratios=[0.25, 0.4, 0.35], wspace=0.5, subplot_spec=gs_outer[1])
+    gs_bottom = GridSpecFromSubplotSpec(1, 3, width_ratios=[0.25, 0.4, 0.35], wspace=0.25, subplot_spec=gs_outer[1])
 
     # Organize the axes
     axs_top = []
@@ -212,7 +230,7 @@ if __name__ == "__main__":
     ax_FRs.set_xlim([t_stim-200*ms, t_stim+1600*ms])
 
     # Set the title
-    ax_FRs.set_title('CA1 Firing Rates')
+    ax_FRs.set_title('CA1 Firing Rates', fontsize=fsize_titles)
 
     # Add text to indicate E-I
     ax_FRs.text(x=t_stim-250*ms, y=325, s='Inhibitory', fontsize=fsize_legends, ha='center', color=c_inh, clip_on=False)

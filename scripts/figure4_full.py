@@ -26,15 +26,25 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['axes.titlesize'] = fsize_titles
+plt.rcParams['axes.labelsize'] = fsize_xylabels
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+# Arial font everywhere
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
-
-# ILLUSTRATOR STUFF
-mplb.rcParams['pdf.fonttype'] = 42
-mplb.rcParams['ps.fonttype'] = 42
-mplb.rcParams['axes.titlesize'] = fsize_titles
-mplb.rcParams['axes.labelsize'] = fsize_xylabels
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 # Sizebar func
 def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
@@ -53,7 +63,7 @@ def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va
 
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4')
+root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext')
 # print(root_cluster)
 
 # get a list of the directories with oscillator amplitudes
@@ -61,7 +71,7 @@ osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
 # print(osc_amplitude_dirs)
 
 # set the directory with the precomputed results
-root_precomp = os.path.join(parent_dir, 'figures', 'fig4', 'data')
+root_precomp = os.path.join(parent_dir, 'figures', 'fig4', 'data_ext')
 
 # Timing parameters
 second = 1
@@ -103,6 +113,8 @@ osc_amps = np.array(osc_amps)
 # stim_amps = np.arange(1, 11, 1)
 stim_amps = []
 for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0])))[1]:
+    if val == 'None':
+        continue
     stim_amps.append(float(val.split('_')[0]))
 stim_amps.sort()
 stim_amps = np.array(stim_amps)
@@ -163,6 +175,9 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
     stim_amp_dirs = [dirname for dirname in sorted(os.listdir(curr_osc_dir)) if os.path.isdir(os.path.join(curr_osc_dir, dirname))]
 
     for stim_amp_dir in stim_amp_dirs:
+        if stim_amp_dir == 'None':
+            continue
+
         curr_stim_amp = float(stim_amp_dir.split('_')[0])
         idx_stim_amp = np.where(stim_amps == curr_stim_amp) # index for heatmap
 
@@ -201,7 +216,6 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
 
             # load the rhythm
             rhythm = np.loadtxt(os.path.join(curr_data_dir, 'order_param_mon_rhythm.txt'))
-
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning, append=1)
 
@@ -315,7 +329,7 @@ for ax, label in zip(axs_rasters, points_of_interest_labels):
     # ax.text(x=-0.02, y=0.85, transform=ax.transAxes, weight='bold', s=label, fontsize=fsize_misc, ha='center', color='red', bbox=dict(boxstyle='square', edgecolor='red', facecolor='none'), clip_on=False)
 
     # Set xlims
-    ax.set_xlim([(t_stim-500)*ms, (t_stim+2500)*ms])
+    ax.set_xlim([(t_stim-500)*ms, (t_stim+3000)*ms])
     ax.set_ylim([0, cnt+1])
 
     # Set y-labels
@@ -341,7 +355,7 @@ for ax in axs_FRs:
     ax.xaxis.set_major_locator(ticker.FixedLocator(ax_rate_majors))
 
     # Set xlims
-    ax.set_xlim([(t_stim-500)*ms, (t_stim+2500)*ms])
+    ax.set_xlim([(t_stim-500)*ms, (t_stim+3000)*ms])
     ax.set_ylim([-1, 600])
 
     # Set y-labels

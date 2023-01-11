@@ -118,9 +118,6 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         curr_stim_amp = float(stim_amp_dir.split('_')[0])
         idx_stim_amp = np.where(stim_amps == curr_stim_amp) # index for heatmap
 
-        # if curr_stim_amp < 7:
-        #     continue
-
         # one step in
         curr_stim_dir = os.path.join(curr_osc_dir, stim_amp_dir)
 

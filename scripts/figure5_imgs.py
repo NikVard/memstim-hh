@@ -24,9 +24,25 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['axes.titlesize'] = fsize_titles
+plt.rcParams['axes.labelsize'] = fsize_xylabels
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+# Arial font everywhere
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 # Error print!
 def eprint(*args, **kwargs):

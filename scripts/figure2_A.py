@@ -28,15 +28,25 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# Arial font everywhere
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
-# ILLUSTRATOR STUFF
-mplb.rcParams['pdf.fonttype'] = 42
-mplb.rcParams['ps.fonttype'] = 42
-mplb.rcParams['axes.titlesize'] = fsize_titles
-mplb.rcParams['axes.labelsize'] = fsize_xylabels
+
 
 def add_sizebar(ax, xlocs, ylocs, bcolor, text, fsize):
     """ Add a sizebar to the provided axis """
