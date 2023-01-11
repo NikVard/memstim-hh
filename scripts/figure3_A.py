@@ -29,6 +29,26 @@ mplb.rcParams['ps.fonttype'] = 42
 mplb.rcParams['axes.titlesize'] = 11
 mplb.rcParams['axes.labelsize'] = 9
 
+# Arial font everywhere
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
+
+
+
 def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
     """ Add a sizebar to the provided axis """
     ax.plot(xlocs, ylocs, ls='-', c=bcolor, linewidth=1., rasterized=False, clip_on=False)

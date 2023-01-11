@@ -23,9 +23,25 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['axes.titlesize'] = fsize_titles
+plt.rcParams['axes.labelsize'] = fsize_xylabels
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+# Arial font everywhere
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 # Error print!
 def eprint(*args, **kwargs):
@@ -78,12 +94,12 @@ if __name__ == "__main__":
     dt = 0.1*ms
     fs = int(1/dt)
 
-    # duration = 12.*second # change this if you change the dataset
-    duration = 5*second
+    duration = 8*second # change this if you change the dataset
+    # duration = 5*second
     tv = np.arange(0, duration, dt)
 
     # t_stim = 1800*ms # change this if you change the dataset
-    t_lims = [1250*ms, 4500*ms] # ms : x-axs limits
+    t_lims = [1250*ms, 5000*ms] # ms : x-axs limits
     # t_lims_adj = [t_stim + 500*ms, t_stim+5500*ms] # ms : calculate mean FRs in a 5-sec window
     # t_lims_adj = [1000*ms, 4000*ms] # ms : calculate mean FRs in a 5-sec window
     # duration_adj = t_lims_adj[1] - t_lims_adj[0]
@@ -175,7 +191,7 @@ if __name__ == "__main__":
 
 
     # Data for pulses - point B
-    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
+    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig_kN_point_B_trains', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
     results_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_in_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_dirs[0], 'data'),
@@ -183,7 +199,7 @@ if __name__ == "__main__":
     spikes_trains_in_phase_B_dir = [os.path.join(data_trains_in_phase_B_dirs[0], 'spikes'),
                              os.path.join(data_trains_in_phase_B_dirs[1], 'spikes')]
 
-    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
+    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig_kN_point_B_trains', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
     results_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_out_of_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_dirs[0], 'data'),
@@ -224,10 +240,10 @@ if __name__ == "__main__":
 
     # Organize the directories
     analysis_dirs = []
-    analysis_dirs.extend(results_in_phase_C_dirs)
-    analysis_dirs.extend(results_out_of_phase_C_dirs)
-    # analysis_dirs.extend(results_trains_in_phase_B_dirs)
-    # analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
+    # analysis_dirs.extend(results_in_phase_C_dirs)
+    # analysis_dirs.extend(results_out_of_phase_C_dirs)
+    analysis_dirs.extend(results_trains_in_phase_B_dirs)
+    analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
 
     # Theta power
     theta_band_power = []
@@ -248,7 +264,7 @@ if __name__ == "__main__":
         t_lims2 = [np.round(t_stim,4), np.round(t_stim+2000*ms,4)]
         duration_post = t_lims_post[1] - t_lims_post[0]
         duration_2 = t_lims2[1] - t_lims2[0]
-        # t_lims_post = t_lims2
+        t_lims_post = t_lims2
 
         # Use gridspecs
         G_outer = GridSpecFromSubplotSpec(2, 1, height_ratios=(0.25, 0.75), subplot_spec=G_curr, hspace=0.1)
@@ -686,6 +702,13 @@ if __name__ == "__main__":
         # Barplot
         bars_E = ax.bar(X*3, data_arr[3::4,0], color=c_exc)
         bars_I = ax.bar(X*3+1, data_arr[3::4,1], color=c_inh)
+
+        # # Add values on top of each bar
+        # for bars in ax.containers:
+        #     ax.bar_label(bars, np.round(bars.datavalues,2), fontsize=8, color='white', label_type='center', rotation=90)
+        #
+        # # Scientific notation for y-axis
+        # ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
         # Set x-ticks and x-labels
         ax.tick_params(axis='x', size=0, labelsize=fsize_ticks, labelrotation=45)

@@ -988,7 +988,7 @@ if not settings.fixed_input_enabled:
     print("[+] Saving Kuramoto monitor data")
     # np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
     np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
-    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm_rect.T/nA, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm.T/nA, fmt='%.8f')
     np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
 
 # CA1 firing rate
