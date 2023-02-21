@@ -216,7 +216,7 @@ if __name__ == "__main__":
     noverlap = int(overlap_PSD*winsize_samples)
 
     # Define delta lower and upper limits
-    theta_band = [3, 10]
+    theta_band = [3, 9]
     gamma_low_band = [40, 80]
     gamma_high_band = [80, 120]
 

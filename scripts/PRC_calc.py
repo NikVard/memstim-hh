@@ -7,13 +7,27 @@
 
 import os
 import sys
+from pathlib import Path
+
 import numpy as np
 import matplotlib as mplb
 import matplotlib.pyplot as plt
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = Path(script_dir).parent
+sys.path.insert(0, os.path.abspath(parent_dir))
+
+from src.figure_plots_parameters import *
+
+# Set font to Arial -- is this working?
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+
 # ILLUSTRATOR STUFF
 mplb.rcParams['pdf.fonttype'] = 42
 mplb.rcParams['ps.fonttype'] = 42
+mplb.rcParams['axes.titlesize'] = fsize_titles
+mplb.rcParams['axes.labelsize'] = fsize_xylabels
 
 dt = .1 # [msec]
 fs = 10e3
@@ -183,13 +197,16 @@ rhythm_cut = rhythm_cl[tmin_idx:tmax_idx]
 idxs = np.argsort(phase_cut)
 
 # Plot the actual theta rhythm w.r.t. phase
-axs2.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='k', alpha=0.4, zorder=0, label=r'Rhythm')
+# axs2.plot(phase_cut[idxs], rhythm_cut[idxs]/rhythm_cut.max(), c='k', alpha=0.4, zorder=0, label=r'Rhythm')
+rphase = np.linspace(-np.pi, np.pi, 101)
+rcos = (np.cos(rphase) + 1)/2
+axs2.plot(rphase, rcos, c='k', alpha=0.25, zorder=0, label=r'Rhythm')
 
 # Horizontal line @ y=0
-axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle=':', colors='k', linewidth=2., zorder=2)
+axs.hlines(y=0., xmin=-2*np.pi, xmax=2*np.pi, linestyle='-', colors='k', linewidth=1., zorder=-2)
 
 # Vertical line @ x=0
-axs.vlines(x=0., ymin=-4., ymax=4., linestyle=':', colors='k', linewidth=2., zorder=2)
+axs.vlines(x=0., ymin=-4., ymax=4., linestyle='-', colors='k', linewidth=1., zorder=-2)
 
 # Fill positive (y>0) and negative (y<0)
 # axs.fill_between(x=[-4,4], y1=[4., 4.], color='green', alpha=0.1)

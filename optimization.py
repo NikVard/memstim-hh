@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # ----------
     fnames = ["EC_pyCAN", "EC_inh", "DG_py", "DG_inh", "CA3_pyCAN", "CA3_inh", "CA1_pyCAN", "CA1_inh"]
     fs = 10e3
-    winsize_FR = 15/1e3
+    winsize_FR = 10/1e3
     overlap_FR = 0.9 # percentage
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
