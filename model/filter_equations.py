@@ -7,7 +7,7 @@ Date: 11/10/2021
 
 Implementation Notes
 --------------------------------------------------------------------------------
-    | 1: The simplest (dumbest) way to get the firing rate of a population of neurons is to low-pass filter the spikes it produces. This implementation is condoned by @adam here: https://brian.discourse.group/t/how-can-i-get-the-population-firing-rate-from-a-spiking-hh-network-during-simulation/496
+    | 1: The simplest (dumbest) way to get the firing rate of a population of neurons is to low-pass filter the spikes it produces. Thus, we will be using a neuron group as a real-time exponential filter to get the firing rate; this implementation is condoned by @adam and @mstimberg here: https://brian.discourse.group/t/how-can-i-get-the-population-firing-rate-from-a-spiking-hh-network-during-simulation/496
     | 2: A demo of this approach is shown in the jupyter notebook 'feedback.ipynb'
 """
 

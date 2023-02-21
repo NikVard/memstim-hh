@@ -493,12 +493,9 @@ for ax in axs_right:
 ax.set_xticks(osc_amps[1::4])
 
 # Set x-y labels
-axs_right[0].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
-axs_right[0].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
-axs_right[1].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
-axs_right[1].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
-axs_right[2].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
-axs_right[2].set_ylabel('Synchronization (kN)', fontsize=fsize_xylabels)
+axs_right[0].set_ylabel('Synchronization (k/N)', fontsize=fsize_xylabels)
+axs_right[1].set_ylabel('Synchronization (k/N)', fontsize=fsize_xylabels)
+axs_right[2].set_ylabel('Synchronization (k/N)', fontsize=fsize_xylabels)
 axs_right[2].set_xlabel('Osc. amp. [nA]', fontsize=fsize_xylabels)
 
 # Set titles

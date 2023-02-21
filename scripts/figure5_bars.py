@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
 
     # Data for pulses - point B
-    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig_kN_point_B_trains', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
+    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
     results_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_in_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_dirs[0], 'data'),
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     spikes_trains_in_phase_B_dir = [os.path.join(data_trains_in_phase_B_dirs[0], 'spikes'),
                              os.path.join(data_trains_in_phase_B_dirs[1], 'spikes')]
 
-    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig_kN_point_B_trains', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
+    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
     results_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_out_of_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_dirs[0], 'data'),
