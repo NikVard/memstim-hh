@@ -143,3 +143,9 @@ dmypy.json
 
 # Jupyter Notebooks
 jupyter/*
+
+# Unfinished GUI
+GUI/
+
+# Results
+results*

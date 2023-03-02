@@ -89,7 +89,7 @@ if __name__ == "__main__":
     fs = int(1/dt)
 
     # duration = 12.*second # change this if you change the dataset
-    duration = 10*second
+    duration = 8*second
     tv = np.arange(0, duration, dt)
 
     winsize_FR = 5*ms
@@ -97,10 +97,10 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    t_stim = 1800*ms # change this if you change the dataset
-    t_lims = [t_stim - 500*ms, t_stim+6500*ms] # ms : x-axs limits
-    t_lims_adj = [t_stim + 500*ms, t_stim+5500*ms] # ms : calculate mean FRs in a 5-sec window
-    t_lims_adj = [1000*ms, 4000*ms] # ms : calculate mean FRs in a 5-sec window
+    t_stim = 3500*ms # change this if you change the dataset
+    t_lims = [t_stim - 500*ms, t_stim+2500*ms] # ms : x-axs limits
+    t_lims_adj = [t_stim + 500*ms, t_stim+2500*ms] # ms : calculate mean FRs in a 5-sec window
+    # t_lims_adj = [250*ms, 2250*ms] # ms : calculate mean FRs in a 5-sec window
     duration_adj = t_lims_adj[1] - t_lims_adj[0]
 
     # For Fig2. supp.
@@ -149,8 +149,11 @@ if __name__ == "__main__":
     dpi = 300
 
     # Data
-    results_dir = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext', 'K_0.18', '8.0_nA', '0.00_1800.0_ms', '06-12-2022 15H42M51S') # change this for new dataset
-    results_dir = os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3') # change this for new dataset
+    # results_dir = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext', 'K_0.18', '8.0_nA', '0.00_1800.0_ms', '06-12-2022 15H42M51S') # change this for new dataset
+    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3') # change this for new dataset
+    results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'pos_pi')
+    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'pos_pi_2')
+    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'neg_pi_2')
     data_dir = os.path.join(results_dir, 'data')
     spikes_dir = os.path.join(data_dir, 'spikes')
 
@@ -505,26 +508,26 @@ if __name__ == "__main__":
     # ax_rhythm.vlines(x=t_stim, ymin=-0.1, ymax=1., color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=11, rasterized=False, clip_on=True)
 
     # stimulation lines
-    ax_rhythm.axvline(x=t_stim, ymin=-1.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    # ax_rhythm.axvline(x=t_stim, ymin=-1.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    ax_common.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    # ax_common.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    for ax in axs[2]:
-        ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    # for ax in axs[2]:
+    #     ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    for ax in axs[3]:
-        ln = ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    # for ax in axs[3]:
+    #     ln = ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    ln.set_clip_on(True)
+    # ln.set_clip_on(True)
 
-    # stimulation point
-    ax_rhythm.scatter(x=t_stim, y=1.8, s=75, marker='v', edgecolors='white', facecolors='gray', rasterized=False, clip_on=False)
+    # # stimulation point
+    # ax_rhythm.scatter(x=t_stim, y=1.8, s=75, marker='v', edgecolors='white', facecolors='gray', rasterized=False, clip_on=False)
 
 
     # Shade the areas
-    ax_rhythm.fill_betweenx(y=[0,1], x1=t_lims_adj[0], x2=t_lims_adj[1], color='k', alpha=0.25)
-    axs[2][0].fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_exc, alpha=0.25)
-    axs[2][0].fill_betweenx(y=[N_scaling+N_gap, ylims_rasters[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_inh, alpha=0.25)
+    # ax_rhythm.fill_betweenx(y=[0,1], x1=t_lims_adj[0], x2=t_lims_adj[1], color='k', alpha=0.25)
+    # axs[2][0].fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_exc, alpha=0.25)
+    # axs[2][0].fill_betweenx(y=[N_scaling+N_gap, ylims_rasters[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_inh, alpha=0.25)
 
     # Set tight_layout
     G_outer.tight_layout(fig)

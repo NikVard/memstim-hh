@@ -255,7 +255,7 @@
     "fixed_input": {
         "enabled": 0,
         "low": 0.0,
-        "high": 1.0,
+        "high": 0.15,
         "frequency": 6.0,
         "delay": 0.25
     },
@@ -264,8 +264,8 @@
         "f0": 6.0,
         "sigma": 0.5,
         "kN": 15,
-        "gain_reset": 4.0,
-        "gain_rhythm": 0.22,
+        "gain_reset": 2.0,
+        "gain_rhythm": 0.0,
         "offset": 0.0
     },
     "stimulation": {
@@ -276,9 +276,9 @@
             7.5
         ],
         "sigma": 0.33,
-        "duration": 3.0,
+        "duration": 2.0,
         "dt": 0.0001,
-        "onset": 1.333,
+        "onset": 1.577,
         "I": [
             10.0
         ],
@@ -296,8 +296,8 @@
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "08f74eab",
-    "timestamp": "Thu Mar  2 14:36:07 2023",
-    "git_branch": "master",
-    "git_hash": "08f74eabdb5ae41a8a4d09ab3d610652a824886a"
+    "timestamp": "Thu Sep 29 11:52:59 2022",
+    "git_branch": "PRC_new_set",
+    "git_hash": "300e42169b38ed6230e0db0ab47ce5af2074d85e",
+    "git_short_hash": "300e4216"
 }
