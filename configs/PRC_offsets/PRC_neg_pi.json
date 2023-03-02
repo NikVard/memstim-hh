@@ -266,7 +266,7 @@
         "kN": 15,
         "gain_reset": 4.0,
         "gain_rhythm": 0.22,
-        "offset": 0.0
+        "offset": -3.1416
     },
     "stimulation": {
         "target": "CA1",
@@ -276,11 +276,12 @@
             7.5
         ],
         "sigma": 0.33,
-        "duration": 3.0,
+        "duration": 8.0,
         "dt": 0.0001,
-        "onset": 1.333,
+        "onset": 2.8019,
+        "onset_old": 2.0867,
         "I": [
-            10.0
+            0.0
         ],
         "pulse_width": [
             0.001
@@ -292,12 +293,12 @@
         "ipi": 0.0001
     },
     "simulation": {
-        "duration": 3.0,
+        "duration": 8.0,
         "dt": 0.0001,
         "debugging": false
     },
-    "git_short_hash": "08f74eab",
-    "timestamp": "Thu Mar  2 14:36:07 2023",
-    "git_branch": "master",
-    "git_hash": "08f74eabdb5ae41a8a4d09ab3d610652a824886a"
+    "git_short_hash": "f3ccf2f3",
+    "timestamp": "Tue Sep 20 09:53:30 2022",
+    "git_branch": "fig2_panels",
+    "git_hash": "f3ccf2f368ebc3f27a02d54fcd334bc2d838f040"
 }

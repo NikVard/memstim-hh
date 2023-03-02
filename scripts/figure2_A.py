@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # Firing rates plotting gap
     rates_gap = 2 # Hz
 
-    # Firing Rate computation parameters
+    # Spectrogram computation parameters
     window_size = 100*ms
     window_width = int(fs_FR*window_size) # samples
     overlap = 0.99 # percentage
