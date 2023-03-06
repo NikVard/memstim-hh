@@ -4,10 +4,14 @@ To setup your environment, follow these steps:
 
 1. Make sure you have Anaconda (or miniconda) installed. The software has been tested on Ubuntu 21.10 using miniconda version 4.10.3
 
-2. Create a conda environment using the provided .yml file as follows (without the quotes): `conda env create --file=brianenv2.yml`
+2. Create a conda environment using the provided .yml file as follows (without the quotes): "conda env create --file=brianenv2.yml"
 
-3. Activate the environment in conda: `conda activate brianenv2`
+3. Activate the environment in conda: "conda activate brianenv2"
 
-4. You can run simulations using the following command, using the appropriate arguments: `python3 run_simulation.py -p [parameter_file.json] -sd [output folder]`
+4. You will also need to install `matplotlib-3d` (https://github.com/rougier/matplotlib-3d) as follows:
+    4a. Make sure you have installed git. Follow the instructions here (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) depending on your system
+    4b. Type the following command in your terminal, after making sure the conda environment is activated (step 3): "pip install git+https://github.com/rougier/matplotlib-3d"
+
+5. You can run simulations using the following command, using the appropriate arguments: "python3 run_simulation.py -p [parameter_file.json] -sd [output folder]""
 
 Note: for a full list of arguments, run: 'python3 run_simulation.py [-h|--help]
