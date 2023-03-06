@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 import os
 import time
+import sys
 from shutil import copyfile
 
 import argparse
@@ -61,14 +62,12 @@ parser = argparse.ArgumentParser(description='MemStim using HH neurons')
 
 parser.add_argument('-p', '--parameters',
                     nargs='?',
-                    metavar='-p',
                     type=str,
                     default=os.path.join('configs', 'default.json'),
                     help='Parameters file (json format)')
 
 parser.add_argument('-sd', '--save_dir',
                     nargs='?',
-                    metavar='-sd',
                     type=str,
                     default='results',
                     help='Destination directory to save the results')
@@ -1072,8 +1071,8 @@ for G in G_flat:
         continue
 
 
-# print("\n[85] Cleanup...")
+# print("\n[95] Cleanup...")
 # print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
 # clear_cache('cython')
 
-exit(0)
+sys.exit(0)
