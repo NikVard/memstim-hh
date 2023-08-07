@@ -32,13 +32,13 @@ noise_CA1_inh = 0. #
 
 # Default parameters
 a = b = c = d = 0. # connections
-a = 13. # 13
-b = 0.14 # 0.14
-c = 1.1 # 1.1
-d = 0.2 # 0.2
-I_in = 0.22 # 0.22 input gain Kuramoto
-stim_amplitude = [10.] # nA
-stim_onset = 1.8 # sec
+# a = 13. # 13
+# b = 0.14 # 0.14
+# c = 1.1 # 1.1
+# d = 0.2 # 0.2
+I_in = 0.00 # 0.22 input gain Kuramoto
+stim_amplitude = [0.] # nA
+stim_onset = 0.0 # sec
 
 # Default parameters
 _data = {
@@ -138,9 +138,9 @@ _data = {
     "fixed_input" : {
         "enabled"       : 0,                # [1=yes | 0=no]
         "low"           : 0.0,              # A0
-        "high"          : 0.15,             # A1
-        "frequency"     : 8.0,              # Hz
-        "delay"         : 0.25,             # seconds
+        "high"          : 0.0,              # A1
+        "frequency"     : 6.0,              # Hz
+        "delay"         : 0.0,              # seconds
     },
 
     # Kuramoto oscillator parameters
@@ -159,7 +159,7 @@ _data = {
         "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
-        "duration"      : 10.,              # [sec]
+        "duration"      : 4.,               # [sec]
         "dt"            : .1e-3,            # [sec]
         "onset"         : stim_onset,       # [sec]
         "I"             : stim_amplitude,   # stimulation amplitude [nA]
@@ -317,13 +317,13 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 10.0, 85.0
-    vals = np.arange(vmin, vmax, 5.0)
+    vmin,vmax,vstep = 0.01, 0.23, 0.01
+    vals = np.arange(vmin, vmax, vstep)
     # vals = np.linspace(vmin, vmax, 17)
     cnt = 0
     stim_t_off = 1.5
     for val in vals:
-        # _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
+        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
         # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 1)]*2
         # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 1)]*2
@@ -341,8 +341,8 @@ if __name__  == "__main__":
 
         # _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
         # _data["stimulation"]["I"] = [np.round(val,1)]
-        _data["stimulation"]["stim_freq"] = np.around(val, 1).astype(int).item()
-        _data["stimulation"]["nr_of_trains"] = np.rint(5*val).astype(int).item()
+        # _data["stimulation"]["stim_freq"] = np.around(val, 1).astype(int).item()
+        # _data["stimulation"]["nr_of_trains"] = np.rint(5*val).astype(int).item()
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))

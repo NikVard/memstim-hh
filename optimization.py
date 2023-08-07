@@ -57,7 +57,7 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
 
     settling_time = 2 # s
-    ending_time = 3 # s
+    ending_time = 4 # s
 
     # target for EC firing rate w/ noise
     # target_vals = [6., 60., 6., 60., 6., 60., 6., 60., 10., 6.]
@@ -152,14 +152,14 @@ if __name__ == "__main__":
                 b = params["connectivity"]["inter_custom"]["EC"]["E"][2][0]
                 c = params["connectivity"]["inter_custom"]["EC"]["E"][3][0]
                 d = params["connectivity"]["inter_custom"]["CA1"]["E"][0][0]
-                noise_EC_exc = params["areas"]["EC"]["E"]["noise"]
-                noise_EC_inh = params["areas"]["EC"]["I"]["noise"]
-                noise_DG_exc = params["areas"]["DG"]["E"]["noise"]
-                noise_DG_inh = params["areas"]["DG"]["I"]["noise"]
-                noise_CA3_exc = params["areas"]["CA3"]["E"]["noise"]
-                noise_CA3_inh = params["areas"]["CA3"]["I"]["noise"]
-                noise_CA1_exc = params["areas"]["CA1"]["E"]["noise"]
-                noise_CA1_inh = params["areas"]["CA1"]["I"]["noise"]
+                # noise_EC_exc = params["areas"]["EC"]["E"]["noise"]
+                # noise_EC_inh = params["areas"]["EC"]["I"]["noise"]
+                # noise_DG_exc = params["areas"]["DG"]["E"]["noise"]
+                # noise_DG_inh = params["areas"]["DG"]["I"]["noise"]
+                # noise_CA3_exc = params["areas"]["CA3"]["E"]["noise"]
+                # noise_CA3_inh = params["areas"]["CA3"]["I"]["noise"]
+                # noise_CA1_exc = params["areas"]["CA1"]["E"]["noise"]
+                # noise_CA1_inh = params["areas"]["CA1"]["I"]["noise"]
                 csv_data = [os.path.join(currdir, 'parameters_bak.json'), J, inp_val, a, b, c, d, noise_EC_exc, noise_EC_inh, noise_DG_exc, noise_DG_inh, noise_CA3_exc, noise_CA3_inh, noise_CA1_exc, noise_CA1_inh] + vec
 
                 print(csv_data)
