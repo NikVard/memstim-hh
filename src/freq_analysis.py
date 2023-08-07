@@ -73,6 +73,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, sos=False):
 
     return y
 
+
 # Functions examples from https://www.programcreek.com/python/example/100546/scipy.signal.spectrogram
 def power_spectrum(signal: np.ndarray,
                    fs: int,
@@ -110,7 +111,6 @@ def power_spectrum(signal: np.ndarray,
                             mode="magnitude")
 
     return f, t, (1.0 / window_width) * (sxx ** 2)
-
 
 
 def power_to_db(spectrum: np.ndarray,
@@ -178,7 +178,7 @@ def my_FR(spikes: np.ndarray,
 
     # Calculate new sampling times
     win_step = window_size * round(1. - overlap, 4)
-    # fs_n = int(1/win_step)
+    fs_n = int(1/win_step)
 
     # First center is at the middle of the first window
     c0 = window_size/2
@@ -195,8 +195,11 @@ def my_FR(spikes: np.ndarray,
         spike_cnt = np.count_nonzero(np.where((spikes >= cl) & (spikes < ch)))
         counts.append(spike_cnt)
 
-    # return centers and spike counts per window
-    return centers, np.array(counts)
+    # Normalize according to window size
+    FR = (np.array(counts)/window_size)
+
+    # return centers, spike counts, and adjusted sampling rates per window
+    return centers, np.array(counts), fs_n
 
 
 def my_specgram(signal: np.ndarray,
@@ -380,7 +383,7 @@ def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, retu
         Absolute or relative band power.
     """
     from scipy.signal import welch
-    from scipy.integrate import simps
+    from scipy.integrate import simpson
     band = np.asarray(band)
     low, high = band
 
@@ -413,10 +416,10 @@ def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, retu
     # Integral approximation of the spectrum using Simpson's rule.
     if psd.size > 1:
         psd = psd.squeeze()
-    bp = simps(psd[idx_band], dx=freq_res)
+    bp = simpson(psd[idx_band], freqs)
 
     if relative:
-        bp /= simps(psd, dx=freq_res)
+        bp /= simpson(psd, freqs)
 
     if return_PSD:
         return bp, freqs, psd
