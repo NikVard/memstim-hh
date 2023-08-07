@@ -14,7 +14,7 @@ Implementation Notes
 
 # Kuramoto oscillators
 kuramoto_eqs_stim = '''
-    dTheta/dt = ((omega + (kN * PIF) - G_in*X*sin(Theta + offset)) * second**-1) : 1
+    dTheta/dt = ((omega + (kN * PIF) - G_in*(X+stim_MS(t))*sin(Theta + offset)) * second**-1) : 1
     PIF = .5 * (sin(ThetaPreInput - Theta)) : 1
 
     ThetaPreInput : 1

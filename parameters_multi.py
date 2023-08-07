@@ -36,7 +36,7 @@ a = 13. # 13
 b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
-I_in = 0.0 # 0.22 input gain Kuramoto
+I_in = 0.22 # 0.22 input gain Kuramoto
 stim_amplitude = [10.] # nA
 stim_onset = 1.8 # sec
 
@@ -159,7 +159,7 @@ _data = {
         "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
-        "duration"      : 2.,               # [sec]
+        "duration"      : 10.,              # [sec]
         "dt"            : .1e-3,            # [sec]
         "onset"         : stim_onset,       # [sec]
         "I"             : stim_amplitude,   # stimulation amplitude [nA]
@@ -317,8 +317,8 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax = 0.0, 11.0
-    vals = np.arange(vmin, vmax, 1.0)
+    vmin,vmax = 10.0, 85.0
+    vals = np.arange(vmin, vmax, 5.0)
     # vals = np.linspace(vmin, vmax, 17)
     cnt = 0
     stim_t_off = 1.5
@@ -340,7 +340,9 @@ if __name__  == "__main__":
         # _data["areas"]["CA1"]["I"]["noise"] = np.around(val, 6)
 
         # _data["stimulation"]["onset"] = np.round(stim_t_off+val,3)
-        _data["stimulation"]["I"] = [np.round(val,1)]
+        # _data["stimulation"]["I"] = [np.round(val,1)]
+        _data["stimulation"]["stim_freq"] = np.around(val, 1).astype(int).item()
+        _data["stimulation"]["nr_of_trains"] = np.rint(5*val).astype(int).item()
 
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
