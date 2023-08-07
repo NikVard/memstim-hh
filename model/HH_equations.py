@@ -19,7 +19,7 @@ Implementation Notes
 """ ------------------------------------------------------------------------ """
 # Pyramidal CAN
 py_CAN_inp_eqs = '''
-    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + I_exc + rin*I_tonic + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_CAN = ((gCAN) * (size)) * mCAN**2 * (v + 20.*mV) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
             mCANInf = alpha2 / (alpha2 + (0.0002*ms**-1)) : 1
@@ -60,7 +60,7 @@ py_CAN_inp_eqs = '''
     I_SynHipp = + ge_hipp * (v - 0.*mV) : amp
         dge_hipp/dt = (- ge_hipp + he_hipp) * (1. / (0.3*ms)) : siemens
         dhe_hipp/dt = - he_hipp / (5.*ms) : siemens
-    I_SynI = + gi * (v - 0.*mV) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
+    I_SynI = + gi * (v - (-50.*mV)) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
         dgi/dt = (- gi + hi) * (1. / (1.*ms)) : siemens
         dhi/dt = - hi / (10.*ms) : siemens
 
@@ -77,13 +77,15 @@ py_CAN_inp_eqs = '''
     G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1 # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked) # this is the input theta rhythm from the MS
     # I_exc = inp_theta(t)*int(z_soma<15*mm)*int(z_soma>0*mm) : amp
+    rin : 1
+    I_tonic = inputs_tonic(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
 '''
 
 py_CAN_eqs = '''
-    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = (- I_CAN - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + rin*I_tonic + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_CAN = ((gCAN) * (size)) * mCAN**2 * (v + 20.*mV) : amp
         dmCAN/dt = (mCANInf - mCAN) / mCANTau : 1
             mCANInf = alpha2 / (alpha2 + (0.0002*ms**-1)) : 1
@@ -124,7 +126,7 @@ py_CAN_eqs = '''
     I_SynHipp = + ge_hipp * (v - 0.*mV) : amp
         dge_hipp/dt = (- ge_hipp + he_hipp) * (1. / (0.3*ms)) : siemens
         dhe_hipp/dt = - he_hipp / (5.*ms) : siemens
-    I_SynI = + gi * (v - 0.*mV) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
+    I_SynI = + gi * (v - (-50.*mV)) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
         dgi/dt = (- gi + hi) * (1. / (1.*ms)) : siemens
         dhi/dt = - hi / (10.*ms) : siemens
 
@@ -139,6 +141,8 @@ py_CAN_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
+    rin : 1
+    I_tonic = inputs_tonic(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -146,7 +150,7 @@ py_CAN_eqs = '''
 
 #Pyramidal non CAN :
 py_eqs = '''
-    dv/dt = ( - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = ( - I_M - I_leak - I_K - I_Na - I_Ca - I_SynE - I_SynExt - I_SynI - I_SynHipp + rin*I_tonic + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_M = ((gM) * (size)) * p * (v - Ek) : amp
         dp/dt = (pInf - p) / pTau : 1
             pInf = 1. / (1. + exp(- (v + (35.*mV)) / (10.*mV))) : 1
@@ -182,7 +186,7 @@ py_eqs = '''
     I_SynHipp = + ge_hipp * (v - 0.*mV) : amp
         dge_hipp/dt = (- ge_hipp + he_hipp) * (1. / (0.3*ms)) : siemens
         dhe_hipp/dt = - he_hipp / (5.*ms) : siemens
-    I_SynI = + gi * (v - 0.*mV) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
+    I_SynI = + gi * (v - (-50.*mV)) * int(Cl>0.5) + gi * (v - (-80.*mV)) * int(Cl<=0.5): amp
         dgi/dt = (- gi + hi) * (1. / (1.*ms)) : siemens
         dhi/dt = - hi / (10.*ms) : siemens
 
@@ -197,6 +201,8 @@ py_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
+    rin : 1
+    I_tonic = inputs_tonic(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -206,7 +212,7 @@ py_eqs = '''
 """ Inhibitory Neuron Types """
 """ ------------------------------------------------------------------------ """
 inh_inp_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + I_exc + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + I_exc + rin*I_tonic + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_leak = ((0.1e-3*siemens*cm**-2) * (size)) * (v - (-65.*mV)) : amp
     I_K = ((9e-3*siemens*cm**-2) * (size)) * (n**4) * (v - (-90.*mV)) : amp
         dn/dt = (alphan * (1 - n) - betan * n) / 0.2: 1
@@ -242,6 +248,8 @@ inh_inp_eqs = '''
     G_sin = 1.*int(z_soma<15*mm)*int(z_soma>0*mm) : 1  # this is the mask/scaling for which neurons get the sinusoidal input
     I_exc : amp (linked)    # same as in the pyCAN group, excitatory input from MS
     # I_exc = inp_theta(t)*int(z_soma<15*mm)*int(z_soma>0*mm) : amp
+    rin : 1
+    I_tonic = inputs_tonic(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)
@@ -250,7 +258,7 @@ inh_inp_eqs = '''
 
 
 inh_eqs = '''
-    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
+    dv/dt = ( - I_leak - I_K - I_Na - I_SynE - I_SynExt - I_SynHipp - I_SynI + rin*I_tonic + r*I_stim) / ((1.*ufarad*cm**-2) * (size)) + noise : volt
     I_leak = ((0.1e-3*siemens*cm**-2) * (size)) * (v - (-65.*mV)) : amp
     I_K = ((9e-3*siemens*cm**-2) * (size)) * (n**4) * (v - (-90.*mV)) : amp
         dn/dt = (alphan * (1 - n) - betan * n) / 0.2 : 1
@@ -272,7 +280,7 @@ inh_eqs = '''
     I_SynHipp = + ge_hipp * (v - 0.*mV) : amp
         dge_hipp/dt = (- ge_hipp + he_hipp) * (1. / (0.3*ms)) : siemens
         dhe_hipp/dt = - he_hipp / (5.*ms) : siemens
-    I_SynI = + gi * (v + 80.*mV) : amp
+    I_SynI = + gi * (v - (-80.*mV)) : amp
         dgi/dt = (- gi + hi) * (1. / (1.*ms)) : siemens
         dhi/dt = - hi / (10.*ms) : siemens
 
@@ -283,6 +291,8 @@ inh_eqs = '''
     x_soma : metre
     y_soma : metre
     z_soma : metre
+    rin : 1
+    I_tonic = inputs_tonic(t) : amp
     r : 1
     I_stim = inputs_stim(t) : amp
     size : metre**2 (shared)

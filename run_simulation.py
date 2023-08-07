@@ -20,6 +20,7 @@ from model.kuramoto_equations import *
 from model.filter_equations import *
 from model.fixed_input_equations import *
 from model.Vm_avg_eqs import *
+from model.I_SynE_I_sum_eqs import *
 from model import settings
 from model import setup
 
@@ -450,7 +451,10 @@ for ngroup in G_flat:
     ngroup.v = '-60.*mvolt-rand()*10*mvolt' # str -> individual init. val. per neuron, randn is Gaussian
 
     # CA1 populations get stimulated
-    if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or ngroup.name=='{group}_py'.format(group=settings.stim_target)) or ngroup.name=='{group}_inh'.format(group=settings.stim_target):
+    if (ngroup.name=='{group}_pyCAN'.format(group=settings.stim_target) or \
+        ngroup.name=='{group}_py'.format(group=settings.stim_target)) or \
+        ngroup.name=='{group}_inh'.format(group=settings.stim_target):
+
         print("[!] Stimulation applied @", ngroup.name)
         ngroup.r = 1 # 1 means on
 
@@ -465,6 +469,20 @@ for ngroup in G_flat:
     else:
         ngroup.r = 0 # int -> same init. val. for all neurons
 
+
+
+    # Tonic input -- Added on 19/06/2023
+    # Default zero
+    ngroup.rin = 0
+    
+    # CA1-E
+    if ngroup.name=='CA1_pyCAN':
+        ngroup.rin = 0
+    
+    # CA1-I
+    if ngroup.name=='CA1_inh':
+        ngroup.rin = 0
+    
     # neuron_pos = column_stack((ngroup.x_soma/mm, ngroup.y_soma/mm, ngroup.z_soma/mm))
     # elec_pos = array(settings.stim_coordinates)[np.newaxis,...]
     # d0 = dst.cdist(elec_pos, neuron_pos)
@@ -546,28 +564,7 @@ syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, 
 
 
 
-# Add the monitors (spikes/rates)
-# -------------------------------------------------------------#
-print('\n[13] Adding monitors...')
-state_mon_all = []
-spike_mon_all = []
-rate_mon_all = []
-
-state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
-state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
-print('[\u2022]\tState monitors [v]: done')
-
-spike_mon_E_all = [[SpikeMonitor(G_py, name=G_py.name+'_spikemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
-spike_mon_I_all = [[SpikeMonitor(G_inh, name=G_inh.name+'_spikemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
-print('[\u2022]\tSpike monitors: done')
-
-rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
-rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
-print('[\u2022]\tRate monitors: done')
-
-
-
-# Add groups for monitoring the avg Vm
+# Add groups for monitoring the avg Vm and I_SynE / I
 # -------------------------------------------------------------#
 # Average Vm per group per area
 print('\n[20] Vm average groups...')
@@ -575,7 +572,6 @@ print('-'*32)
 
 G_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
 syn_Vm_avg_all = [[[] for pops in range(2)] for areas in range(4)]
-state_mon_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
 
 for area_idx in range(4):
     print('[+] {0}:'.format(areas[area_idx]))
@@ -594,11 +590,31 @@ for area_idx in range(4):
     syn_Vm_avg_all[area_idx][1].append(Syn_I)
     print('[\u2022]\tSynapses: done')
 
-    SM_Vm_avg_E = StateMonitor(G_E, ['sum_v'], record=True, name='Vm_avg_mon_{0}_E'.format(areas[area_idx]))
-    SM_Vm_avg_I = StateMonitor(G_I, ['sum_v'], record=True, name='Vm_avg_mon_{0}_I'.format(areas[area_idx]))
-    state_mon_Vm_avg[area_idx][0].append(SM_Vm_avg_E)
-    state_mon_Vm_avg[area_idx][1].append(SM_Vm_avg_I)
-    print('[\u2022]\tMonitors: done')
+
+# Summed I_SynE/I per group per area
+print('\n[21] I_SynE/I summed groups...')
+print('-'*32)
+
+G_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
+syn_ISynI_sum_all = [[[] for pops in range(2)] for areas in range(4)]
+
+for area_idx in range(4):
+    print('[+] {0}:'.format(areas[area_idx]))
+
+    # One unit records both I_SynE and I_SynI
+    G_E = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_E'.format(areas[area_idx]))
+    G_I = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_I'.format(areas[area_idx]))
+    G_ISyn_sum[area_idx][0].append(G_E)
+    G_ISyn_sum[area_idx][1].append(G_I)
+    print('[\u2022]\tNeuronGroups: done')
+
+    Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_LFP_synapses)
+    Syn_E.connect()
+    Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_LFP_synapses)
+    Syn_I.connect()
+    syn_ISynI_sum_all[area_idx][0].append(Syn_E)
+    syn_ISynI_sum_all[area_idx][1].append(Syn_I)
+    print('[\u2022]\tSynapses: done')
 
 
 
@@ -629,11 +645,6 @@ if G_CA1_E:
     syn_CA1_2_rates = Synapses(G_CA1_E, G_S2R, on_pre='Y_post += (1/tauFR)/N_incoming', namespace=filter_params)
     syn_CA1_2_rates.connect()
 print('[\u2022]\tConnecting CA1-to-S2R: done')
-
-# spikes2rates monitor (vout)
-print('\n[32] Adding monitors...')
-state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
-print('[\u2022]\tState monitor [drive]: done')
 
 
 
@@ -763,6 +774,10 @@ print('[\u2022]\tInputs: done')
 print('\n[50] Stimulation...')
 print('-'*32)
 
+# generate empty stim signal
+xstim_zero = zeros(tv.shape)
+tv_stim_zero = tv
+
 # generate stimulation signal
 if settings.I_stim[0]:
     print(bcolors.GREEN + '[+]' + bcolors.ENDC + ' Stimulation ON')
@@ -778,10 +793,53 @@ if settings.I_stim[0]:
                                       ipi=settings.stim_ipi)
 else:
     print(bcolors.RED + '[-]' + bcolors.ENDC + ' No stimulation defined; using empty TimedArray')
-    xstim = zeros(tv.shape)
-    tv_stim = tv
+    xstim = xstim_zero
+    tv_stim = tv_stim_zero
 
 inputs_stim = TimedArray(values=xstim*nA, dt=settings.stim_dt*second, name='Input_stim')
+
+
+# Tonic inputs -- Added on 19/06/2023
+val = 0.0;
+inputs_tonic = TimedArray(np.array([0] + [val]*5 + [0])*nA, dt=1*second)
+# inputs_tonic = TimedArray([0]*nA, dt=1*second)
+
+"""
+# Hard-coded scrambling stim:
+f_vals = [7, 4]
+t_pause = 2 # seconds
+t_on = 2 # seconds
+
+# Start with a zero-stim array
+xstim_total = zeros(tv_stim.shape)
+
+# Create the aggregated stimulation waveform
+cnt = 0
+for fval in f_vals:
+    xstimp, tv_stim = stimulation.generate_stim(duration=settings.stim_duration,
+                                  dt=settings.stim_dt,
+                                  I_stim=settings.I_stim,
+                                  stim_on=settings.stim_onset + cnt*(t_pause+t_on),
+                                  nr_of_trains=t_on*fval,
+                                  nr_of_pulses=settings.nr_of_pulses,
+                                  stim_freq=fval,
+                                  pulse_width=settings.pulse_width,
+                                  pulse_freq=settings.pulse_freq,
+                                  ipi=settings.stim_ipi)
+    xstim_total += xstimp
+    cnt += 1
+"""
+
+fig_stim = figure()
+plt.plot(tv_stim, xstim)
+fig_stim.savefig(os.path.join(dirs['figures'], 'stimulation.png'))
+
+# fig_stim_total = figure()
+# plt.plot(tv_stim, xstim_total)
+# fig_stim_total.savefig(os.path.join(dirs['figures'], 'stimulation_total.png'))
+
+stim_MS_gain = 0
+stim_MS = TimedArray(values=stim_MS_gain*xstim_zero, dt=settings.stim_dt*second, name='MS_stim')
 
 
 
@@ -799,8 +857,8 @@ print('\n[60] Adding extra monitors...')
 # state_mon_noise_all = [StateMonitor(G, ['noise'], record=True) for G in G_flat]
 # print('[\u2022]\tNoise monitors: done')
 
-# state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))))
-# state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
+# state_mon_Vm_EC_exc = StateMonitor(G_all[0][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000, 9010))), name='statemon_EC_E_Vm')
+# state_mon_Vm_EC_inh = StateMonitor(G_all[0][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))), name='statemon_EC_I_Vm')
 # state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
 # state_mon_Vm_CA1_inh = StateMonitor(G_all[3][1][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
 # print('[\u2022]\tVm monitors: done')
@@ -820,6 +878,7 @@ net.add(G_all) # add groups
 net.add(G_S2R) # was missing
 net.add(G_inputs)
 net.add(G_Vm_avg)
+net.add(G_ISyn_sum)
 print('[\u2022]\tNetwork groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
@@ -834,22 +893,38 @@ for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
     if syn_Vm_avg !=0:
         net.add(syn_Vm_avg)
 
+for syn_ISynI in make_flat(syn_ISynI_sum_all): # add synapses ISyn avg
+    if syn_ISynI !=0:
+        net.add(syn_ISynI)
+
 net.add(syn_CA1_2_rates)
-net.add(syn_inputs) # synapses avout inputs
+net.add(syn_inputs) # synapses about inputs
 print('[\u2022]\tNetwork connections: done')
 
-net.add(state_mon_E_all) # monitors
-net.add(state_mon_I_all)
-net.add(spike_mon_E_all)
-net.add(spike_mon_I_all)
-net.add(rate_mon_E_all)
-net.add(rate_mon_I_all)
-net.add(state_mon_s2r)
+
+# Add fixed monitors for the inputs
 net.add(state_mon_inputs)
-# net.add(state_mon_CA1_E_curr)
-net.add(state_mon_Vm_avg)
-# net.add(state_mon_EC_E_curr, state_mon_CA1_E_curr)
-print('[\u2022]\tNetwork monitors: done')
+
+print('\n Creating fixed monitors...')
+spike_mon_E_all = [[SpikeMonitor(G_py, name=G_py.name+'_spikemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
+spike_mon_I_all = [[SpikeMonitor(G_inh, name=G_inh.name+'_spikemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+print('[\u2022]\tSpike monitors: done')
+
+rate_mon_E_all = [[PopulationRateMonitor(G_py) for G_py in G_all[i][0] if G_py] for i in range(4)]
+rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+print('[\u2022]\tRate monitors: done')
+
+# spikes2rates monitor (vout)
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
+print('[\u2022]\tState monitor [drive]: done')
+
+# Adding them to the network
+net.add(spike_mon_E_all, spike_mon_I_all)
+net.add(rate_mon_E_all, rate_mon_I_all)
+net.add(state_mon_s2r)
+
+state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
+net.add(state_mon_Vm_CA1_exc)
 
 
 
@@ -858,43 +933,129 @@ print('[\u2022]\tNetwork monitors: done')
 defaultclock.dt = settings.dt
 tstep = defaultclock.dt
 
+# Preparation for simulations
+t_step = 1*second
+t_run = settings.duration
+run_sim = True
+
 print('\n[80] Starting simulation...')
 print('-'*32)
 
 start = time.time()
-t_elapsed = 0*ms
-net.run(settings.duration, report='text', report_period=10*second, profile=True)
+while run_sim:
+    # Create all the monitors
+    # (spikes/rates)
 
-# # Theta OFF
-# print("[+] Theta off; nothing happening")
-# G_K.kN = 0
-# G_pop_avg.G_out = 0.
-# t_run = 200*ms
-# net.run(t_run, report='text', report_period=10*second, profile=True)
-# t_elapsed += t_run
-#
-# # Theta ON + stim
-# print("[+] Theta on + stim.")
-# G_K.kN = settings.kN_frac
-# G_pop_avg.G_out = settings.r_gain
-# t_run = settings.duration - (500*ms + t_elapsed)
-# net.run(t_run, report='text', report_period=10*second, profile=True)
-# t_elapsed += t_runinp_theta
-#
-# # Theta OFF
-# print("[+] Theta off | relaxation")
-# G_pop_avg.G_out = 0.
-# t_run = settings.duration - t_elapsed
-# net.run(t_run, report='text', report_period=10*second, profile=True)
-# t_elapsed += t_run
+    print('\n Creating monitors...')
+    # state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
+    # state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+    # print('[\u2022]\tState monitors [v]: done')
+
+    # Avg. Vm monitors + Summed I_SynE/I monitors
+    state_mon_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
+    state_mon_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
+
+    for area_idx in range(4):
+        G_E = G_Vm_avg[area_idx][0][0]
+        G_I = G_Vm_avg[area_idx][1][0]
+
+        SM_Vm_avg_E = StateMonitor(G_E, ['sum_v'], record=True, name='Vm_avg_mon_{0}_E'.format(areas[area_idx]))
+        SM_Vm_avg_I = StateMonitor(G_I, ['sum_v'], record=True, name='Vm_avg_mon_{0}_I'.format(areas[area_idx]))
+        state_mon_Vm_avg[area_idx][0].append(SM_Vm_avg_E)
+        state_mon_Vm_avg[area_idx][1].append(SM_Vm_avg_I)
+        print('[\u2022]\tVm Monitors: done')
+
+        G_E = G_ISyn_sum[area_idx][0][0]
+        G_I = G_ISyn_sum[area_idx][1][0]
+
+        SM_ISyn_sum_E = StateMonitor(G_E, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_E'.format(areas[area_idx]))
+        SM_ISyn_sum_I = StateMonitor(G_I, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_I'.format(areas[area_idx]))
+        state_mon_ISyn_sum[area_idx][0].append(SM_ISyn_sum_E)
+        state_mon_ISyn_sum[area_idx][1].append(SM_ISyn_sum_I)
+        print('[\u2022]\tI_SynE/I summed Monitors: done')
+
+    # LFP proxy v2 -- Added on 30/06/2023
+    # Add StateMonitors for the synaptic currents per neuron
+    # state_mon_ISynE_all = [[StateMonitor(G_py, ['I_SynE'], record=True, dt=0.1*ms, name=G_py.name + '_I_synE_statemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
+    # state_mon_ISynI_all = [[StateMonitor(G_inh, ['I_SynI'], record=True, dt=0.1*ms, name=G_inh.name + '_I_synI_statemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
+    # print('[\u2022]\tSynaptic (E/I) current monitors: done')
+
+    # Add monitors to network
+    # net.add(state_mon_E_all, state_mon_I_all)
+    net.add(state_mon_Vm_avg)
+    net.add(state_mon_ISyn_sum)
+    # net.add(state_mon_ISynE_all, state_mon_ISynI_all)
+    print('[\u2022]\tNetwork monitors: done')
+
+    # Run the simulaton
+    if t_run >= t_step:
+        net.run(t_step, report='text', report_period=5*second, profile=True)
+        t_run -= t_step
+    else:
+        net.run(t_run, report='text', report_period=5*second, profile=True)
+        run_sim = False
+
+    # Write data to disk
+    # Vm avgs
+    print("[+] Saving Vm avgs")
+    for StM in make_flat(state_mon_Vm_avg):
+        print("[\u2022]\tStateMon: ", StM.name)
+        f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
+        np.savetxt(f, StM.sum_v/mV, fmt='%.8f')
+        f.write('\n')
+        f.close()
+
+    # I_SynE sum
+    print("[+] Saving I_SynE sums")
+    for StM in make_flat(state_mon_ISyn_sum):
+        print("[\u2022]\tStateMon: ", StM.name)
+        f = open(os.path.join(dirs['data'], StM.name+'_E.txt'),'a')
+        np.savetxt(f, StM.sum_I_SynE/nA, fmt='%.8f')
+        f.write('\n')
+        f.close()
+
+    # I_SynI sum
+    print("[+] Saving I_SynI sums")
+    for StM in make_flat(state_mon_ISyn_sum):
+        print("[\u2022]\tStateMon: ", StM.name)
+        f = open(os.path.join(dirs['data'], StM.name+'_I.txt'),'a')
+        np.savetxt(f, StM.sum_I_SynI/nA, fmt='%.8f')
+        f.write('\n')
+        f.close()
+
+    # # I_SynE
+    # print("[+] Saving I_SynE")
+    # for StM in make_flat(state_mon_ISynE_all):
+    #     print("[\u2022]\tStateMon: ", StM.name)
+    #     f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
+    #     np.savetxt(f, StM.I_SynE/nA, fmt='%.8f')
+    #     f.write('\n')
+    #     f.close()
+        
+    # # I_SynI
+    # print("[+] Saving I_SynI")
+    # for StM in make_flat(state_mon_ISynI_all):
+    #     print("[\u2022]\tStateMon: ", StM.name)
+    #     f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
+    #     np.savetxt(f, StM.I_SynI/nA, fmt='%.8f')
+    #     f.write('\n')
+    #     f.close()
+
+    # Remove the monitors
+    net.remove(state_mon_Vm_avg)
+    net.remove(state_mon_ISyn_sum)
+    # net.remove(state_mon_ISynE_all, state_mon_ISynI_all)
+
+    # Free up memory
+    del state_mon_Vm_avg
+    del state_mon_ISyn_sum
+    # del state_mon_ISynE_all, state_mon_ISynI_all
+
 
 end = time.time()
-print('-'*32)
-print(bcolors.GREEN + '[+]' + ' Simulation ended' + bcolors.ENDC)
+print(bcolors.GREEN + '[+]' + ' All simulations ended' + bcolors.ENDC)
 print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Simulation ran for '+str((end-start)/60)+' minutes')
-print()
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
-
 
 print('\n[81] Mean firing rates...')
 print('-'*32)
@@ -965,12 +1126,11 @@ fig2.savefig(os.path.join(dirs['figures'], fig_name))
 # plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
 # print("[+] Saving figure 'figures/%s'" %fig_name)
 # fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
-#
-# # newer version
-# fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
-# plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
-# print("[+] Saving figure 'figures/%s'" %fig_name)
-# fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
+# newer version
+fig_extra, extra_axs, fig_name = plot_network_output2(spike_mon_E_all[-1][0], spike_mon_I_all[-1][0], state_mon_s2r, state_mon_order_param, tv_stim, xstim)
+plot_watermark(fig_extra, os.path.basename(__file__), filename, settings.git_branch, settings.git_short_hash)
+print("[+] Saving figure 'figures/%s'" %fig_name)
+fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 
 # tight_layout()
 # show()
@@ -998,12 +1158,6 @@ np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), state_mon_s2r.drive_
 # External stimulus
 print("[+] Saving external stimulus")
 np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
-
-# Vm avgs
-print("[+] Saving Vm avgs")
-for StM in make_flat(state_mon_Vm_avg):
-    print("[\u2022]\tStateMon: ", StM.name)
-    np.savetxt(os.path.join(dirs['data'], StM.name+'.txt'), StM.sum_v/mV, fmt='%.8f')
 
 # Current monitors
 # print("[+] Saving EC-E currents")
@@ -1033,6 +1187,9 @@ for StM in make_flat(state_mon_Vm_avg):
 # np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp/nA, fmt='%.8f')
 # np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_stim.txt'), state_mon_CA1_E_curr.I_stim/nA, fmt='%.8f')
 
+# print("[+] Saving EC-E/I Vm values")
+# np.savetxt(os.path.join(dirs['data'], state_mon_Vm_EC_exc.name+'.txt'), state_mon_Vm_EC_exc.v/mV, fmt='%.8f')
+# np.savetxt(os.path.join(dirs['data'], state_mon_Vm_EC_inh.name+'.txt'), state_mon_Vm_EC_inh.v/mV, fmt='%.8f')
 
 
 # Save the spikes and their times
