@@ -34,11 +34,11 @@ py_CAN_inp_eqs = '''
         dn/dt = alphan * (1. - n) - betan * n : 1
             alphan = 0.032 * (mV**-1) * (5.*mV) / exprel(-(v + 40.*mV) / (5.*mV)) / ms : Hz
             betan = 0.5 * exp(- (v + 45.*mV) / (40.*mV)) / ms : Hz
-    I_Na = ((50*msiemens*cm**-2) * (size)) * (m**3) * h * (v - 50.*mV) : amp
-        dm/dt = alpham * (1 - m) - betam * m : 1
+    I_Na = ((50.*msiemens*cm**-2) * (size)) * (m**3) * h * (v - (50.*mV) : amp
+        dm/dt = alpham * (1. - m) - betam * m : 1
             alpham = 0.32 * (mV**-1) * (4.*mV) / exprel(-(v + 42.*mV) / (4.*mV)) / ms : Hz
             betam = 0.28 * (mV**-1) * (5.*mV) / exprel( (v + 15.*mV) / (5.*mV)) / ms : Hz
-        dh/dt = alphah * (1 - h) - betah * h : 1
+        dh/dt = alphah * (1. - h) - betah * h : 1
             alphah = 0.128 * exp(- (v + 38.*mV) / (18.*mV)) / ms : Hz
             betah = 4. / (1. + exp(- (v + 15.*mV) / (5.*mV))) / ms : Hz
     I_Ca = ((1e-4 * siemens*cm**-2) * (size)) * (mCaL**2) * hCaL * (v - 120.*mV) : amp
@@ -49,7 +49,7 @@ py_CAN_inp_eqs = '''
             alphahCaL = 0.000457 * exp(-(v + 13.*mV) / (50.*mV)) / ms : Hz
             betahCaL = 0.0065 / (exp(-(v + 15.*mV) / (28.*mV)) + 1.) / ms : Hz
         dCa_i/dt = driveChannel + ((2.4e-4*mole*metre**-3) - Ca_i) / (200.*ms) : mole*meter**-3
-            driveChannel = (-(1e4) * I_Ca / (cm**2)) / (2. * (96489*coulomb*mole**-1) * (1*umetre)) : mole*meter**-3*Hz
+            driveChannel = (-(1e4) * I_Ca / (cm**2)) / (2. * (96489*coulomb*mole**-1) * (1.*umetre)) : mole*meter**-3*Hz
 
     I_SynE = + ge * (v - 0.*mV) : amp
         dge/dt = (-ge + he) * (1. / (0.3*ms)) : siemens
@@ -135,7 +135,7 @@ py_CAN_eqs = '''
     dglu/dt = (1. - glu) / (3.*second) : 1
 
 
-    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
+    noise = sigma_noise_exc * (2. * (0.1e-3*siemens) / (1.*ufarad))**.5 * randn() / sqrt(tstep) : volt/second (constant over dt)
 
 
     x_soma : metre
