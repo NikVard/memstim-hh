@@ -4,16 +4,17 @@ import scipy.signal as sig
 import matplotlib.pyplot as plt
 
 # Parameters
-T = 3
+T = 10
 ms = 1e-3
 dt = 0.1*ms
 fs = int(1/dt)
 tv = np.arange(0, T, dt)
 
 # file path
-dir = 'results_PRC_new/None/22-06-2022 12H35M46S/data'
+datadir = 'results_PRC_new/None/22-06-2022 12H35M46S/data'
+datadir = '/home/nikos/Documents/projects/Python/memstim-hh/results/new_test/10.0_nA/0.00_8333.0_ms/14-08-2023 16H27M36S/data'
 fname = 'order_param_mon_phase.txt'
-full_path = os.path.join(dir, fname)
+full_path = os.path.join(datadir, fname)
 
 # target phases
 rdec = 6
@@ -26,8 +27,8 @@ phase_target = np.round(phase_target, rdec)
 phase = np.loadtxt(full_path)
 
 # isolate a phase cycle
-t_low = 1500*ms
-t_high = 2000*ms
+t_low = 3800*ms
+t_high = 4300*ms
 t_low_s = t_low*fs
 t_high_s = t_high*fs
 
@@ -49,11 +50,13 @@ print("[+] Plotting...")
 plt.plot(tv, phase)
 for val in t_stims:
     plt.plot(val, phase[int(val*fs)], color='r', marker='o')
+
+plt.xlim([t_low-100*ms, t_high+100*ms])
 plt.show()
 
 # save the times
 print("[+] Saving stimulus timings...")
-np.savetxt('stim_times.txt', t_stims, fmt='%.6f')
+np.savetxt('stim_times.txt', t_stims, fmt='%.4f')
 
 
 # generate the simulation config files

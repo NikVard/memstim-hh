@@ -3,25 +3,48 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="/beegfs/nvardala/results_fig4_ext/K_0.19"
-RESDIRTOT="$RESBASE"_"$CURRDATE"
+RESDATA="/beegfs/nvardala/results_opt_new/data/$1"
+RESLOGS="/beegfs/nvardala/results_opt_new/logs/$1_$CURRDATE"
+# RESDIRTOT="$RESBASE"_"$CURRDATE"
 
+# if [ -d $RESDIRTOT ]; then
+#     echo "Directory $RESDIRTOT exists. Cleaning..."
+#     rm $RESDIRTOT/*.txt
+# else
+#     echo "Directory $RESDIRTOT does not exist. Creating..."
+#     mkdir $RESDIRTOT
+# fi
 
 ### Check and make directory for saving ALL the results
-if [ -d $RESDIRTOT ]; then
-	echo "Directory $RESDIRTOT exists. Cleaning..."
-	rm $RESDIRTOT/*.txt
-else
-	echo "Directory $RESDIRTOT does not exist. Creating..."
-	mkdir $RESDIRTOT
-fi
+while : ; do
+    if [ -d $RESDATA ]; then
+        echo "Directory $RESDATA exists. Will add the results in here..."
+        # sleep 5
+        # continue
+    else
+        echo "Directory $RESDATA does not exist. Creating..."
+        mkdir $RESDATA
+        break
+    fi
+done
 
+while : ; do
+    if [ -d $RESLOGS ]; then
+        echo "Directory $RESLOGS exists. Will add the results in here..."
+        # sleep 5
+        # continue
+    else
+        echo "Directory $RESLOGS does not exist. Creating..."
+        mkdir $RESLOGS
+        break
+    fi
+done
 
 ### Get all config directories
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/fig4_ext_K_0.19"
+CONF_DIRS="configs/opt_new/$1"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
@@ -31,16 +54,16 @@ for DIR in $CONF_DIRS;
         echo "In $PNAME"
 
         ### 1. Make a subdirectory to store the used configuration files for this parameter set i.e. results_{date}/10nA/...
-        CURRRES="$RESDIRTOT/$PNAME"
+        CURRRES="$RESLOGS/$PNAME"
         if ! [ -d $CURRRES ]; then
-        	echo "Directory $CURRRES does not exist. Creating..."
-        	mkdir $CURRRES
+            echo "Directory $CURRRES does not exist. Creating..."
+            mkdir $CURRRES
         fi
 
         BACKCONF="$CURRRES/configs"
         if ! [ -d $BACKCONF ]; then
-        	echo "Directory $BACKCONF does not exist. Creating..."
-        	mkdir $BACKCONF
+            echo "Directory $BACKCONF does not exist. Creating..."
+            mkdir $BACKCONF
         fi
 
 
@@ -59,10 +82,10 @@ for DIR in $CONF_DIRS;
 
                 ### Queue the simulation
                 let DELAY="CNT*60"
-        		echo "Delayed: $DELAY seconds"
-			DELAY_TOT=$(($DELAY+$1))
-			echo "Delay TOTAL: $DELAY_TOT seconds"
-                sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY_TOT --time=120 --cpus-per-task=1 --mem-per-cpu=24G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT,OUTDIR=$RESBASE run_sim.sh
+            echo "Delayed: $DELAY seconds"
+            DELAY_TOT=$(($DELAY+$2))
+            echo "Delay TOTAL: $DELAY_TOT seconds"
+                sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY_TOT --time=120 --cpus-per-task=1 --mem-per-cpu=24G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT,OUTDIR=$RESDATA run_sim.sh
 
                 let "CNT+=1"
 

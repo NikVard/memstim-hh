@@ -72,8 +72,15 @@ def myround(x, base=100):
 # main program
 if __name__ == "__main__":
     import argparse
+    import parameters
 
     parser = argparse.ArgumentParser(description='Generate figure 2A from paper')
+
+    parser.add_argument('-id', '--input-dir',
+                        type=str,
+                        default=os.path.join('results', 'analysis', 'default'),
+                        help='Input directory (relative to base directory)'
+                        )
 
     parser.add_argument('-ra', '--rasters-all',
                         action='store_true',
@@ -97,6 +104,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Normalize the path for later
+    args.input_dir = os.path.normpath(args.input_dir)
+
+    """ Load the configuration file for this simulation """
+    print('[+] Loading parameters file...')
+    filename = 'parameters_bak.json'
+    try:
+        params = parameters.load(os.path.join(args.input_dir, filename))
+    except Exception as e:
+        print('[!]' + "Error code " + str(e.errno) + ": " + e.strerror)
+        sys.exit(-1)
 
     """ Parameters initialization """
     print('[+] Setting up parameters...')
@@ -104,8 +122,9 @@ if __name__ == "__main__":
     # Timing
     second = 1.
     ms = 1e-3
-    duration = 12.*second
-    dt = 0.1*ms
+    duration = params["simulation"]["duration"]
+    dt = params["simulation"]["dt"]
+    t_stim = params["stimulation"]["onset"]
     fs = int(1/dt)
     winsize_FR = 5*ms
     overlap_FR = 0.9
@@ -113,17 +132,18 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
     binnum = int(duration/winsize_FR)
     tv = np.arange(0., duration, dt)
-    # t_stim = 2086.7*ms
-    t_stim = 10801.9*ms
-    t_lims = [9700*ms, 11400*ms] # ms : x-axs limits
-    t_lims_adj = [np.round(4000*ms,4), np.round(9000*ms,4)] # ms : calculate mean FRs in a 5-sec window
+    t_lims = [t_stim-1000*ms, t_stim+1500*ms] # ms : x-axs limits
+    t_lims_adj = [np.round(4000*ms,4), np.round(6000*ms,4)] # ms : calculate mean FRs in a 4-sec window
     duration_adj = t_lims_adj[1] - t_lims_adj[0]
     interp = 'nearest'
 
     # Area names and sizes
     areas = [['EC_pyCAN', 'EC_inh'], ['DG_py', 'DG_inh'], ['CA3_pyCAN', 'CA3_inh'], ['CA1_pyCAN', 'CA1_inh']]
     area_labels = ['EC', 'DG', 'CA3', 'CA1']
-    N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
+    N_tot = [[params["areas"][area_labels[0]]["E"]["N"], params["areas"][area_labels[0]]["I"]["N"]],
+             [params["areas"][area_labels[1]]["E"]["N"], params["areas"][area_labels[1]]["I"]["N"]],
+             [params["areas"][area_labels[2]]["E"]["N"], params["areas"][area_labels[2]]["I"]["N"]],
+             [params["areas"][area_labels[3]]["E"]["N"], params["areas"][area_labels[3]]["I"]["N"]]]
 
     # Color selection
     c_inh = '#bf616a'
@@ -510,10 +530,10 @@ if __name__ == "__main__":
 
         # load t-i arrays for this area
         print('[+] Loading the spikes for area', areas[area_idx][0].split('_')[0])
-        i_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0])))
-        t_exc = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0])))
-        i_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1])))
-        t_inh = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1])))
+        i_exc = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][0])))
+        t_exc = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][0])))
+        i_inh = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'spikes/{0}_spikemon_i.txt'.format(areas[area_idx][1])))
+        t_inh = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'spikes/{0}_spikemon_t.txt'.format(areas[area_idx][1])))
 
         i_exc = i_exc.astype(int)
         t_exc = t_exc*ms
@@ -609,7 +629,7 @@ if __name__ == "__main__":
     # =====================
     print('[+] Plotting rhythm...')
 
-    rhythm = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_rhythm.txt'))
+    rhythm = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'order_param_mon_rhythm.txt'))
     ax_rhythm.plot(tv, rhythm/(np.max(rhythm)), ls='-', c='k', linewidth=1.2, rasterized=False, zorder=1)
 
     # vertical lines at x-points
@@ -623,7 +643,7 @@ if __name__ == "__main__":
     fval0 = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
 
     # find the oscillation frequency in the post-stim window using TensorPAC toolbox
-    idx_window = np.logical_and(np.round(tv,4)>t_lims_adj[0], np.round(tv,4)<=t_lims_adj[1])
+    idx_window = np.logical_and(np.around(tv,4)>=t_lims_adj[0], np.around(tv,4)<t_lims_adj[1])
     rhythm_window = rhythm[idx_window]
     rhythm_PSD = PSD(rhythm_window[np.newaxis,:], fs)
 
@@ -663,7 +683,7 @@ if __name__ == "__main__":
     # ================================
     if args.order_parameter:
         print('[+] Plotting order parameter...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_coherence.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'order_param_mon_coherence.txt'))
 
         # asymptote
         ax_common.hlines(y=1., xmin=0., xmax=duration, color='k', ls='--', linewidth=0.5, zorder=11)
@@ -673,7 +693,7 @@ if __name__ == "__main__":
 
     else:
         print('[+] Plotting phase...')
-        data = np.loadtxt(os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3', 'data', 'order_param_mon_phase.txt'))
+        data = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'data', 'order_param_mon_phase.txt'))
         # data = (data + np.pi) % (2 * np.pi)
         data += (1.*(data<0)*2*np.pi)
 
@@ -691,14 +711,16 @@ if __name__ == "__main__":
     # ============
     # Plot CA1 FRs
     # ============
-    tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # SAVE THE NON-NORMALIZED FR SIGNALS
-    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'FR_inh.txt'), FR_inh, fmt='%.8f')
-    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'tv_inh.txt'), tv_inh_FR, fmt='%.8f')
-    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'FR_exc.txt'), FR_exc, fmt='%.8f')
-    np.savetxt(os.path.join(parent_dir, 'test_FRs', 'tv_exc.txt'), tv_exc_FR, fmt='%.8f')
+    if not os.path.exists(os.path.join(parent_dir, args.input_dir, 'test_FRs')):
+        os.makedirs(os.path.join(parent_dir, args.input_dir, 'test_FRs'))
+    np.savetxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'FR_inh.txt'), FR_inh, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'tv_inh.txt'), tv_inh_FR, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'FR_exc.txt'), FR_exc, fmt='%.8f')
+    np.savetxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'tv_exc.txt'), tv_exc_FR, fmt='%.8f')
 
     # Normalize the FRs
     FR_inh_norm = (FR_inh/winsize_FR)/N_inh
@@ -863,7 +885,7 @@ if __name__ == "__main__":
     # ax_specg_exc.text(x=575*ms, y=-100, s='50ms', ha='center', fontproperties=fontprops, clip_on=False)
 
     # Add panel label
-    print('[+]')
+    # print('[+]')
 
     # Add text to the top-left to indicate panel A.
     ax_rhythm.text(x=0.03, y=0.985, s='A.', fontsize=fsize_panels, weight='bold', ha='right', va='top', transform=fig.transFigure)

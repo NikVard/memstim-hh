@@ -32,13 +32,17 @@ noise_CA1_inh = 0. #
 
 # Default parameters
 a = b = c = d = 0. # connections
-# a = 13. # 13
-# b = 0.14 # 0.14
+a = 13. # 13
+b = 0.14 # 0.14
+c = 1.1 # 1.1
+d = 0.2 # 0.2 // 0.43 new val
+# a = 240. # 13
+# b = 0.09 # 0.14
 # c = 1.1 # 1.1
-# d = 0.2 # 0.2
-I_in = 0.00 # 0.22 input gain Kuramoto
-stim_amplitude = [0.] # nA
-stim_onset = 0.0 # sec
+# d = 0.21 # 0.2 // 0.43 new val
+I_in = 0.20 # 0.22 input gain Kuramoto
+stim_amplitude = [9.] # nA
+stim_onset = 1.8 # sec
 
 # Default parameters
 _data = {
@@ -159,7 +163,7 @@ _data = {
         "target"        : "CA1",            # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
-        "duration"      : 4.,               # [sec]
+        "duration"      : 5.,               # [sec]
         "dt"            : .1e-3,            # [sec]
         "onset"         : stim_onset,       # [sec]
         "I"             : stim_amplitude,   # stimulation amplitude [nA]
@@ -317,17 +321,21 @@ if __name__  == "__main__":
     #         _data["areas"][area]["E"]["noise"] = 0.
     #         _data["areas"][area]["I"]["noise"] = 0.
 
-    vmin,vmax,vstep = 0.01, 0.23, 0.01
+    vmin,vmax,vstep = 0., 55., 5.
     vals = np.arange(vmin, vmax, vstep)
     # vals = np.linspace(vmin, vmax, 17)
+    # stim_times = [5.6050, 5.6153,5.6257, 5.6360, 5.6464, 5.6567, 5.6671, 5.6775, 5.6879, 5.7557, 5.7734, 5.7856, 5.7966, 5.8072, 5.8176, 5.8280, 5.8383]
+    # stim_times = np.loadtxt('stim_times.txt')
+    # stim_amplitude = 20.
     cnt = 0
     stim_t_off = 1.5
     for val in vals:
-        _data["Kuramoto"]["gain_rhythm"] = np.around(val, 2)
-        # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 1)]*2
-        # _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 1)]*2
-        # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 1)]*2
-        # _data["connectivity"]["inter_custom"]["CA3"]["E"][3] = [np.around(val, 1)]*2
+        _data["Kuramoto"]["kN"] = np.around(val, 2)
+        # _data["fixed_input"]["high"] = np.around(val,2)
+        # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = [np.around(val, 2)]*2
+        # _data["connectivity"]["inter_custom"]["DG"]["E"][2] = [np.around(val, 2)]*2
+        # _data["connectivity"]["inter_custom"]["EC"]["E"][3] = [np.around(val, 2)]*2
+        # _data["connectivity"]["inter_custom"]["CA3"]["E"][3] = [np.around(val, 2)]*2
         # _data["connectivity"]["inter_custom"]["CA1"]["E"][0] = [np.around(val, 2)]*2
 
         # _data["areas"]["EC"]["E"]["noise"] = np.around(val, 6)
@@ -344,12 +352,15 @@ if __name__  == "__main__":
         # _data["stimulation"]["stim_freq"] = np.around(val, 1).astype(int).item()
         # _data["stimulation"]["nr_of_trains"] = np.rint(5*val).astype(int).item()
 
+        # Used for PRC calc
+        # _data["stimulation"]["I"] = [np.round(stim_amplitude,1)]
+        # _data["stimulation"]["onset"] = np.round(val,4)
+
         # Define the filename
         filename = os.path.join(basedir, (args.filename+'{0:02d}.json').format(cnt))
         print('Saving file "{0}"'.format(filename))
         save(filename, _data)
         cnt += 1
-
 
     # _data["connectivity"]["inter_custom"]["EC"]["E"][1] = np.around([a, a], decimals=1).tolist()
     # _data["connectivity"]["inter_custom"]["EC"]["E"][2] = np.around([b, b], decimals=1).tolist()

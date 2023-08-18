@@ -63,7 +63,7 @@ def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va
 
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext')
+root_cluster = os.path.join(parent_dir, 'results', 'fig4')
 # print(root_cluster)
 
 # get a list of the directories with oscillator amplitudes
@@ -112,7 +112,7 @@ osc_amps = np.array(osc_amps)
 
 # stim_amps = np.arange(1, 11, 1)
 stim_amps = []
-for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0])))[1]:
+for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0], 'data')))[1]:
     if val == 'None':
         continue
     stim_amps.append(float(val.split('_')[0]))
@@ -126,9 +126,9 @@ MI_heatmap_I = np.load(os.path.join(root_precomp, 'MI_I_heatmap.npy'))
 
 # Define points of interest % list of tuples: (label, [osc, stim] nA)
 points_of_interest = []
-points_of_interest.append((0.03, 8.0)) # A - no activity % post-stim
-points_of_interest.append((0.07, 8.0)) # B - transient activity
-points_of_interest.append((0.18, 8.0)) # C - restoration of physiological activity
+points_of_interest.append((0.05, 7.0)) # A - no activity % post-stim
+points_of_interest.append((0.10, 7.0)) # B - transient activity
+points_of_interest.append((0.13, 7.0)) # C - restoration of physiological activity
 points_of_interest_labels = ['A', 'B', 'C']
 
 # theta / gamma power matrices
@@ -172,7 +172,7 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
     # print('osc: ', osc_amp_dir)
 
     # iterate over stimulation amplitudes
-    stim_amp_dirs = [dirname for dirname in sorted(os.listdir(curr_osc_dir)) if os.path.isdir(os.path.join(curr_osc_dir, dirname))]
+    stim_amp_dirs = [dirname for dirname in sorted(os.listdir(os.path.join(curr_osc_dir, 'data'))) if os.path.isdir(os.path.join(curr_osc_dir, 'data', dirname))]
 
     for stim_amp_dir in stim_amp_dirs:
         if stim_amp_dir == 'None':
@@ -191,7 +191,7 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
             # print("[>] Found label ", points_of_interest_labels[label_idx])
 
             # one step in
-            curr_stim_dir = os.path.join(curr_osc_dir, stim_amp_dir)
+            curr_stim_dir = os.path.join(curr_osc_dir, 'data', stim_amp_dir)
             # print('|')
             # print('-> stim: ', stim_amp_dir)
 
@@ -281,8 +281,8 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
             i_inh_sub = i_inh_sub_new
 
             # get the firing rate (spikes-to-rates)
-            tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-            tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
             # Normalize the FRs
             FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]
@@ -412,30 +412,33 @@ norm_theta = mplb.colors.Normalize(vmin=vmin_theta, vmax=vmax_theta)
 norm_gamma = mplb.colors.Normalize(vmin=vmin_gamma, vmax=vmax_gamma)
 
 # Plot the heatmaps
-# im1 = axs_right[0].contourf(X+X.min()/2, Y+Y.min()/2, MI_heatmap_I.T, levels=5, norm=norm_MI)
-# im2 = axs_right[0].contourf(X+X.min()/2, Y+Y.min()/2, MI_heatmap_E.T, levels=5, norm=norm_MI)
-im2 = axs_right[2].pcolormesh(X+X.min()/2, Y+Y.min()/2, MI_heatmap_E.T, shading='auto', rasterized=True)
-# cs2 = axs_right[2].contour(X+X.min()/2, Y+Y.min()/2, MI_heatmap_E.T, levels=[0.15*MI_heatmap_E.max()], colors='white', origin='lower')
+X_adj, Y_adj = X-(osc_amps[1]-osc_amps[0])/2, Y-(stim_amps[1]-stim_amps[0])/2
 
 # Theta power
 # im3 = axs_theta[0].contourf(X+X.min()/2, Y+Y.min()/2, theta_heatmap_I.T, levels=5, norm=norm_theta)
 # im4 = axs_right[1].contourf(X+X.min()/2, Y+Y.min()/2, theta_heatmap_E.T, levels=5, norm=norm_theta)
-im4 = axs_right[0].pcolormesh(X+X.min()/2, Y+Y.min()/2, theta_heatmap_E.T, cmap='inferno', shading='auto', rasterized=True)
+im4 = axs_right[0].pcolormesh(X_adj+0.005, Y_adj+0.5, theta_heatmap_E.T, cmap='inferno', shading='auto', rasterized=True)
 # cs4 = axs_right[0].contour(X+X.min()/2, Y+Y.min()/2, theta_heatmap_E.T, levels=[0.15*theta_heatmap_E.max()], colors='white', origin='lower')
 
 # Gamma power
 # im5 = axs_right[2].contourf(X+X.min()/2, Y+Y.min()/2, gamma_heatmap_I.T, levels=5, norm=norm_gamma)
 # im6 = axs_right[2].contourf(X+X.min()/2, Y+Y.min()/2, gamma_heatmap_E.T, levels=5, norm=norm_gamma)
-im6 = axs_right[1].pcolormesh(X+X.min()/2, Y+Y.min()/2, gamma_heatmap_E.T, cmap='inferno', shading='auto', rasterized=True)
+im6 = axs_right[1].pcolormesh(X_adj+0.005, Y_adj+0.5, gamma_heatmap_E.T, cmap='inferno', shading='auto', rasterized=True)
 # cs6 = axs_right[1].contour(X+X.min()/2, Y+Y.min()/2, gamma_heatmap_E.T, levels=[0.15*gamma_heatmap_E.max()], colors='white')
+
+# im1 = axs_right[0].contourf(X+X.min()/2, Y+Y.min()/2, MI_heatmap_I.T, levels=5, norm=norm_MI)
+# im2 = axs_right[0].contourf(X+X.min()/2, Y+Y.min()/2, MI_heatmap_E.T, levels=5, norm=norm_MI)
+im2 = axs_right[2].pcolormesh(X_adj+0.005, Y_adj+0.5, MI_heatmap_E.T, shading='auto', rasterized=True)
+# cs2 = axs_right[2].contour(X+X.min()/2, Y+Y.min()/2, MI_heatmap_E.T, levels=[0.15*MI_heatmap_E.max()], colors='white', origin='lower')
+
 
 # Mark points of interest using rectangles
 rect_list = []
 
 # Add text annotations
-text_c = [(points_of_interest[0][0]+0.0, points_of_interest[0][1]-2.0),
-          (points_of_interest[1][0]+0.0, points_of_interest[1][1]-2.0),
-          (points_of_interest[2][0]+0.0, points_of_interest[2][1]-2.0)
+text_c = [(points_of_interest[0][0]+0.0, points_of_interest[0][1]-2.5),
+          (points_of_interest[1][0]+0.0, points_of_interest[1][1]-2.5),
+          (points_of_interest[2][0]+0.0, points_of_interest[2][1]-2.5)
          ]
 for point, label, text_coords in zip(points_of_interest, points_of_interest_labels, text_c):
     # Add annotations
@@ -480,6 +483,9 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
 #                         color='red', weight='bold', fontsize=fsize_legends,
 #                         ha='center', va='center')
 
+# Set xlims of images
+for ax in axs_right[1:]:
+    ax.set_xlim((0., 0.17))
 
 # Add points, mark other axes
 for ax in axs_right[1:]:
@@ -492,8 +498,12 @@ for ax in axs_right[1:]:
 for ax in axs_right:
     ax.set_xticks([])
     ax.set_yticks(stim_amps[1::2])
+    # ax.set_yticklabels(['{0:d}'.format(amp,) for amp in stim_amps[1::2])
     ax.tick_params(axis='both', which='both', labelsize=fsize_ticks)
-ax.set_xticks(osc_amps[1::4])
+# ax.set_xticks(osc_amps[::2])
+ax.xaxis.set_major_locator(ticker.FixedLocator([0.01, 0.05, 0.1, 0.15, 0.2]))
+# ax.set_xticks(osc_amps + osc_amps[0]/2)
+# ax.set_yticks(stim_amps + stim_amps[0]/2)
 
 # Set x-y labels
 axs_right[0].set_ylabel('Stim. amp. [nA]', fontsize=fsize_xylabels)
@@ -542,8 +552,8 @@ gs_outer.tight_layout(fig)
 
 # Save the figure
 print('[+] Saving the figure...')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full_noise_7nA.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full_noise_7nA.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
 # Show the images
 plt.show()

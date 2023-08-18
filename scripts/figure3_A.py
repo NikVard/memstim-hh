@@ -645,10 +645,10 @@ if __name__ == "__main__":
 
     # Calculate the FRs
     print('[+] Calculating CA1 FRs...')
-    tv_inh_ICAN_FR, FR_inh_ICAN = my_FR(spikes=t_inh_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_exc_ICAN_FR, FR_exc_ICAN = my_FR(spikes=t_exc_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_inh_noICAN_FR, FR_inh_noICAN = my_FR(spikes=t_inh_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_exc_noICAN_FR, FR_exc_noICAN = my_FR(spikes=t_exc_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_inh_ICAN_FR, FR_inh_ICAN, _ = my_FR(spikes=t_inh_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_exc_ICAN_FR, FR_exc_ICAN , _ = my_FR(spikes=t_exc_ICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_inh_noICAN_FR, FR_inh_noICAN , _ = my_FR(spikes=t_inh_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_exc_noICAN_FR, FR_exc_noICAN , _ = my_FR(spikes=t_exc_noICAN, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # Normalize the FRs
     print('[+] Normalizing CA1 FRs...')

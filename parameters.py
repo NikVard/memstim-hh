@@ -13,8 +13,8 @@ import numpy as np
 from numpy import pi
 
 # Constants
-noise_exc = 10. # uV
-noise_inh = 1. # uV
+# noise_exc = 10. # uV
+# noise_inh = 1. # uV
 noise_exc = 0. # uV
 noise_inh = 0. # uV
 noise_EC = noise_DG = noise_CA3 = noise_CA1 = 0.
@@ -36,10 +36,10 @@ a = 13. # 13
 b = 0.14 # 0.14
 c = 1.1 # 1.1
 d = 0.2 # 0.2
-I_in = 0.22 # 0.22 input
+I_in = 0.18 # 0.22 input / 0.18nA for 0.1/1.mV noise
 stim_target = "CA1"
 stim_amplitude = [10.] # nA
-stim_onset = 1.333 # sec
+stim_onset = 1.8 # sec
 
 # Default parameters
 _data = {
@@ -160,7 +160,7 @@ _data = {
         "target"        : stim_target,      # target area [EC | DG | CA3 | CA1]
         "coordinates"   : (5.0, -8., 7.5),  # point electrode coordinates (x,y,z) [mm]
         "sigma"         : 0.33,             # conductivity of homogeneous conductive medium [S/m]
-        "duration"      : 3.,               # [sec]
+        "duration"      : 10.,              # [sec]
         "dt"            : .1e-3,            # [sec]
         "onset"         : stim_onset,       # [sec]
         "I"             : stim_amplitude,   # stimulation amplitude [nA]
@@ -174,7 +174,7 @@ _data = {
 
     # simulation parameters
     "simulation" : {
-        "duration"      : 3.0,              # second
+        "duration"      : 10.0,             # second
         "dt"            : .1e-3,            # second
         "debugging"     : False
     },

@@ -156,25 +156,50 @@ def check_MI_noisy(tv, fs, FR, noise, idxs, RND=False):
 # main program
 if __name__ == "__main__":
     import argparse
+    import parameters
 
     parser = argparse.ArgumentParser(description='Generate Figure_2B from paper')
 
+    parser.add_argument('-id', '--input-dir',
+                        type=str,
+                        default=os.path.join('results', 'analysis', 'default'),
+                        help='Input directory (relative to base directory)'
+                        )
+
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='fig2_A',
+                        default='fig2_B',
                         help='Name of the output figure [without extension].')
 
     args = parser.parse_args()
 
+    # Normalize the path for later
+    args.input_dir = os.path.normpath(args.input_dir)
 
-    """ Loading the FRs from disk """
-    print('[+] Loading FRs from disk...')
+    """ Load the configuration file for this simulation """
+    print('[+] Loading parameters file...')
+    filename = 'parameters_bak.json'
+    try:
+        params = parameters.load(os.path.join(args.input_dir, filename))
+    except Exception as e:
+        print('[!]' + "Error code " + str(e.errno) + ": " + e.strerror)
+        sys.exit(-1)
+
+    """ Parameters initialization """
+    print('[+] Setting up parameters...')
 
     # Load the non-normalized FRs
-    FR_inh = np.loadtxt(os.path.join(parent_dir, 'test_FRs', 'FR_inh.txt'))
-    tv_FR_inh = np.loadtxt(os.path.join(parent_dir, 'test_FRs', 'tv_inh.txt'))
-    FR_exc = np.loadtxt(os.path.join(parent_dir, 'test_FRs', 'FR_exc.txt'))
-    tv_FR_exc = np.loadtxt(os.path.join(parent_dir, 'test_FRs', 'tv_exc.txt'))
+    if os.path.exists(os.path.join(parent_dir, args.input_dir, 'test_FRs')):
+        """ Loading the FRs from disk """
+        print('[+] Loading FRs from disk...')
+        FR_inh = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'FR_inh.txt'))
+        tv_FR_inh = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'tv_inh.txt'))
+        FR_exc = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'FR_exc.txt'))
+        tv_FR_exc = np.loadtxt(os.path.join(parent_dir, args.input_dir, 'test_FRs', 'tv_exc.txt'))
+    else:
+        """ Error, did not run previous script """
+        print('[!] Could not find saved FRs. Did you run the script to generate 2A?')
+        sys.exit(-1)
 
     """ Parameters initialization """
     print('[+] Setting up parameters...')
@@ -189,12 +214,13 @@ if __name__ == "__main__":
     # Timing
     second = 1
     ms = 1e-3
-    duration = 8*second
-    dt = 0.1*ms
+    duration = params["simulation"]["duration"]
+    dt = params["simulation"]["dt"]
+    t_stim = params["stimulation"]["onset"]
     fs = int(1/dt)
-    t_lims = [950*ms, 2700*ms] # ms
-    t_lims_adj = [1000*ms, 2000*ms]
-    tidx = np.logical_and(tv_FR_inh>=t_lims_adj[0], tv_FR_inh<=t_lims_adj[1])
+    t_lims = [t_stim-1000*ms, t_stim+1500*ms] # ms : x-axs limits
+    t_lims_adj = [t_stim, t_stim+1000*ms]
+    tidx = np.logical_and(tv_FR_inh>=t_lims_adj[0], tv_FR_inh<t_lims_adj[1])
 
     # Color selection
     c_inh = '#bf616a'
@@ -319,7 +345,7 @@ if __name__ == "__main__":
 
     # Labels
     # ax_PSD.set_ylabel('PSD [$\\frac{V^2}{Hz}$]', labelpad=-25.)
-    ax_PSD.set_ylabel('PSD', labelpad=-15.)
+    ax_PSD.set_ylabel('PSD', labelpad=-1.)
     ax_PSD.set_xlabel('Frequency [Hz]')
 
     # Tick fontsizes
@@ -355,7 +381,7 @@ if __name__ == "__main__":
     # Setting xlims
     ax_PSD.set_xlim([0, 120])
     axin_PSD.set_xlim(37, 81)
-    axin_PSD.set_ylim(0, 60)
+    axin_PSD.set_ylim(0, 70)
 
     # gridlines
     axin_PSD.grid(which='major', alpha=0.5, linestyle='dotted', linewidth=1)
@@ -564,29 +590,29 @@ if __name__ == "__main__":
     print('[+] Saving PSDs...')
     plt.figure('PSD')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_B_PSD.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_B_PSD.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_A_PSD.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_A_PSD.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Select the PAC figure
     print('[+] Saving PACs...')
     plt.figure('PAC')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_X_PAC.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_X_PAC.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_B_PAC.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_B_PAC.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Select the binned PAC figure
     print('[+] Saving bins...')
     plt.figure('bins')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_X_bins.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_X_bins.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_X_bins.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_X_bins.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Select the preferred phase polar figure
     print('[+] Saving preferred phase polar plot...')
     plt.figure('pref_phase')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_C_prefp.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', 'fig2_C_prefp.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_C_prefp.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_C_prefp.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Close some figures
     print('[-] Closing figure [binned phases]...')

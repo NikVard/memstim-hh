@@ -27,8 +27,9 @@ cell_size_inh = 14.e3*umetre**2
 scale = round(1000/818,6)*umetre
 scale_aussel = 150*umetre
 
-sigma_noise_inh = 200.*uvolt
-sigma_noise_exc = 2000.*uvolt
+# Controls the level of noise globally
+sigma_noise_inh = 100.*uvolt
+sigma_noise_exc = 1000.*uvolt
 
 tstep = defaultclock.dt
 integ_method = 'exponential_euler'  # integration method

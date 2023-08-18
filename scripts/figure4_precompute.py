@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# OS stuff
 import os
 import sys
 import warnings
 from pathlib import Path
 from tqdm import tqdm
+
+import json
 
 # Computational stuff
 import numpy as np
@@ -23,9 +25,28 @@ parent_dir = Path(script_dir).parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
+from src.figure_plots_parameters import *
+
+# Arial font everywhere
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext')
+root_cluster = os.path.join(parent_dir, 'results', 'fig4')
 
 # get a list of the directories with oscillator amplitudes
 osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
@@ -33,11 +54,15 @@ osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
 # Timing parameters
 second = 1
 ms = 1e-3
+
 duration = 10*second
 stim_onset = 1800*ms
+
 dt = 0.1*ms
 fs = int(1*second/dt)
+
 tv = np.linspace(0, duration, fs*duration)/ms
+
 winsize_FR = 5*ms
 overlap_FR = 0.9
 winstep_FR = winsize_FR*round(1-overlap_FR,4)
@@ -52,13 +77,14 @@ N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
 # osc_amps = np.arange(0.01, 0.23, 0.01)
 osc_amps = []
 for val in osc_amplitude_dirs:
-    osc_amps.append(float(val.split('_')[1]))
+    osc_amp = float(val.split('_')[1])
+    osc_amps.append(osc_amp)
 osc_amps.sort()
 osc_amps = np.array(osc_amps)
 
 # stim_amps = np.arange(1, 11, 1)
 stim_amps = []
-for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0])))[1]:
+for val in next(os.walk(os.path.join(root_cluster, osc_amplitude_dirs[0], 'data')))[1]:
     if val == 'None':
         continue
     else:
@@ -109,7 +135,7 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
     print('osc: ', osc_amp_dir)
 
     # iterate over stimulation amplitudes
-    stim_amp_dirs = [dirname for dirname in sorted(os.listdir(curr_osc_dir)) if os.path.isdir(os.path.join(curr_osc_dir, dirname))]
+    stim_amp_dirs = [dirname for dirname in sorted(os.listdir(os.path.join(curr_osc_dir, 'data'))) if os.path.isdir(os.path.join(curr_osc_dir, 'data', dirname))]
 
     for stim_amp_dir in stim_amp_dirs:
         if stim_amp_dir == 'None':
@@ -119,7 +145,7 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         idx_stim_amp = np.where(stim_amps == curr_stim_amp) # index for heatmap
 
         # one step in
-        curr_stim_dir = os.path.join(curr_osc_dir, stim_amp_dir)
+        curr_stim_dir = os.path.join(curr_osc_dir, 'data', stim_amp_dir)
 
         # go through the stimulation directory
         stim_time_dir = next(os.walk(curr_stim_dir))[1][0]
@@ -152,8 +178,8 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         t_inh = t_inh*ms
 
         # get the firing rate (spikes-to-rates)
-        tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-        tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+        tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+        tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
         # Normalize the FRs
         FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]
@@ -168,8 +194,8 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Computing the modulation index
         tidx_post = np.logical_and(np.round(tv_exc_FR/ms,4)>tlims_post[0], np.round(tv_exc_FR/ms,4)<=tlims_post[1])
 
         # Use the TensorPAC module to calculate the PSDs
-        psd_pac_inh = PSD(FR_inh_norm[np.newaxis,tidx_post], fs_FR)
-        psd_pac_exc = PSD(FR_exc_norm[np.newaxis,tidx_post], fs_FR)
+        psd_pac_inh = PSD(FR_inh_norm_noise[np.newaxis,tidx_post], fs_FR)
+        psd_pac_exc = PSD(FR_exc_norm_noise[np.newaxis,tidx_post], fs_FR)
 
         # Theta band indices
         f_theta_idxs = np.logical_and(psd_pac_inh.freqs>=theta_band[0], psd_pac_inh.freqs<=theta_band[1])

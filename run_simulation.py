@@ -578,6 +578,8 @@ for area_idx in range(4):
 
     G_E = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_E'.format(areas[area_idx]))
     G_I = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_I'.format(areas[area_idx]))
+    G_E.sum_v = np.mean(G_all[area_idx][0][0].v[:])
+    G_I.sum_v = np.mean(G_all[area_idx][1][0].v[:])
     G_Vm_avg[area_idx][0].append(G_E)
     G_Vm_avg[area_idx][1].append(G_I)
     print('[\u2022]\tNeuronGroups: done')
