@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # OS stuff
@@ -44,44 +45,18 @@ plt.rcParams['mathtext.rm'] = 'Arial'
 plt.rcParams['mathtext.it'] = 'Arial:italic'
 plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
-# Timing
-second = 1
-ms = 1e-3
-duration = 10*second
-dt = 0.1*ms
-fs = int(1/dt)
-winsize_FR = 5*ms
-overlap_FR = 0.9
-winstep_FR = winsize_FR*round(1-overlap_FR,4)
-fs_FR = int(1/winstep_FR)
-binnum = int(duration/winsize_FR)
-t_stim = 2000*ms
-
-# Bands for PAC / PreferredPhase
-f_pha_PAC = (1, 12, 1, .2)
-f_amp_PAC = (30, 100, 10, 1)
-f_pha_PP = [3, 9]
-f_amp_PP = (20, 100, 10, 1)
-f_pha_MI = [3, 9]
-f_amp_MI = [40, 80]
-
-# Area names and sizes
-areas = [['EC_pyCAN', 'EC_inh'], ['DG_py', 'DG_inh'], ['CA3_pyCAN', 'CA3_inh'], ['CA1_pyCAN', 'CA1_inh']]
-area_labels = ['EC', 'DG', 'CA3', 'CA1']
-N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
-
-# Color selection
-c_inh = '#bf616a'
-c_exc = '#5e81ac'
-
-# Firing rates plotting gap
-rates_gap = 225 # Hz
-
 # main program
 if __name__ == "__main__":
     import argparse
+    import parameters
 
     parser = argparse.ArgumentParser(description='Generate supplementary figure (MI) from paper')
+
+    parser.add_argument('-id', '--input-dir',
+                        type=str,
+                        default=os.path.join('results', 'analysis', 'default'),
+                        help='Input directory (relative to base directory)'
+                        )
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
@@ -95,6 +70,56 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Normalize the path for later
+    args.input_dir = os.path.normpath(args.input_dir)
+
+    """ Load the configuration file for this simulation """
+    print('[+] Loading parameters file...')
+    filename = 'parameters_bak.json'
+    try:
+        params = parameters.load(os.path.join(args.input_dir, filename))
+    except Exception as e:
+        print('[!]' + "Error code " + str(e.errno) + ": " + e.strerror)
+        sys.exit(-1)
+
+    """ Parameters initialization """
+    print('[+] Setting up parameters...')
+    
+    # Timing
+    second = 1.
+    ms = 1e-3
+    duration = params["simulation"]["duration"]
+    dt = params["simulation"]["dt"]
+    t_stim = params["stimulation"]["onset"]
+    fs = int(1/dt)
+    winsize_FR = 5*ms
+    overlap_FR = 0.9
+    winstep_FR = winsize_FR*round(1-overlap_FR,4)
+    fs_FR = int(1/winstep_FR)
+    binnum = int(duration/winsize_FR)
+    tv = np.arange(0., duration, dt)
+
+    # Bands for PAC / PreferredPhase
+    f_pha_PAC = (1, 12, 1, .2)
+    f_amp_PAC = (30, 100, 10, 1)
+    f_pha_PP = [3, 9]
+    f_amp_PP = (20, 100, 10, 1)
+    f_pha_MI = [3, 9]
+    f_amp_MI = [40, 80]
+
+    # Area names and sizes
+    areas = [['EC_pyCAN', 'EC_inh'], ['DG_py', 'DG_inh'], ['CA3_pyCAN', 'CA3_inh'], ['CA1_pyCAN', 'CA1_inh']]
+    area_labels = ['EC', 'DG', 'CA3', 'CA1']
+    N_tot = [[10000, 1000], [10000, 100], [1000, 100], [10000, 1000]]
+
+    # Color selection
+    c_inh = '#bf616a'
+    c_exc = '#5e81ac'
+
+    # Firing rates plotting gap
+    rates_gap = 225 # Hz
+
+
     """ Figure preparation """
     print('[+] Preparing figure outline...')
 
@@ -107,7 +132,7 @@ if __name__ == "__main__":
     # Add gridspecs
     gs_outer = fig.add_gridspec(2, 1, height_ratios=[0.4, 0.6]) # if you add wspace=<%> remove the tight_layout!!
     gs_top = GridSpecFromSubplotSpec(1, 1, subplot_spec=gs_outer[0])
-    gs_bottom = GridSpecFromSubplotSpec(1, 3, width_ratios=[0.25, 0.4, 0.35], wspace=0.25, subplot_spec=gs_outer[1])
+    gs_bottom = GridSpecFromSubplotSpec(1, 3, width_ratios=[0.25, 0.4, 0.35], wspace=0.5, subplot_spec=gs_outer[1])
 
     # Organize the axes
     axs_top = []
@@ -130,7 +155,8 @@ if __name__ == "__main__":
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_8Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 09H58M40S/data'
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_8Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 12H02M48S/data'
     # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/test_6Hz/10.0_nA/0.00_1800.0_ms/25-11-2022 12H35M59S/data'
-    dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/results/fig4_supp_MI/None/05-12-2022 15H43M04S/data'
+    # dir_data = '/home/nikos/Documents/projects/Python/memstim-hh/results/fig4_supp_MI/None/05-12-2022 15H43M04S/data'
+    dir_data = os.path.join(args.input_dir, 'data')
 
     """ Loading the spikes from disk """
     print('[+] Loading the spikes for area', areas[3][0].split('_')[0])
@@ -151,16 +177,19 @@ if __name__ == "__main__":
     print('[+] Calculating FRs...')
 
     # get the firing rate (spikes-to-rates)
-    tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # Normalize the FRs
     FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]
     FR_exc_norm = (FR_exc/winsize_FR)/N_tot[3][0]
 
     # get the post-stim indices
-    tlims_post = np.array([0, 5000])*ms + t_stim # avoid stim artifact
+    tlims_post = np.array([50, 2050])*ms + t_stim # avoid stim artifact
     tidx_post = np.logical_and(tv_exc_FR>=tlims_post[0], tv_exc_FR<=tlims_post[1])
+    tlims_pre = np.array([-5050, -50])*ms + t_stim # avoid stim artifact
+    tidx_pre = np.logical_and(tv_exc_FR>=tlims_pre[0], tv_exc_FR<=tlims_pre[1])
+    tidx_post = tidx_pre
 
     """ Add noise? """
     noise = np.zeros(int((duration-winsize_FR)*fs_FR)+2)
@@ -251,7 +280,7 @@ if __name__ == "__main__":
     # Setting xlims
     ax_PSD.set_xlim([0, 120])
     axin_PSD.set_xlim(37, 81)
-    axin_PSD.set_ylim(0, 500)
+    axin_PSD.set_ylim(0, 300)
 
     # Hide some spines
     ax_PSD.spines['top'].set_visible(False)
@@ -309,10 +338,6 @@ if __name__ == "__main__":
     ax_prefp = prefp_obj.polar(ampbin_exc.squeeze().T, polarvec_exc, prefp_obj.yvec, title='Phase-Amplitude Coupling', colorbar=False, **kw_plt)
     axs_bottom[1].yaxis.grid(linewidth=0.5, alpha=0.9)
 
-    # Add MI as text overlay
-    mi_text = r'  MI: {0:.4f}'.format(xpac_exc.squeeze())
-    ax_prefp.text(x=np.deg2rad(-90), y=70, s=mi_text, fontsize=fsize_misc, ha='center', va='bottom', color='white', clip_on=True)
-
     # Fix the label positions
     ax_prefp.set_rlabel_position(135)
     for label in ax_prefp.get_ymajorticklabels():
@@ -361,8 +386,20 @@ if __name__ == "__main__":
 
     # Set current axes
     plt.sca(ax_PAC)
-    pac_obj.comodulogram(pac_exc.mean(-1), xlabel='Frequency for phase (Hz)', ylabel='Frequency for amplitude (Hz)', title='PAC Excitatory [-1, 0]s', colorbar=False, **kw)
+    pac_obj.comodulogram(pac_exc.mean(-1), xlabel='Frequency for phase (Hz)', ylabel='Frequency for amplitude (Hz)', title='PAC Comodulogram', colorbar=False, **kw)
 
+    # Add a red box around the area
+
+
+    # Add MI as text overlay
+    mi_text = r'  MI: {0:.2f}'.format(xpac_exc.squeeze())
+    ax_PAC.text(x=5.5, y=45, s=mi_text, fontsize=fsize_misc, ha='left', va='top', color='white', clip_on=True)
+
+    # Create a Rectangle patch
+    rect = mplb.patches.Rectangle((3, 40), 6, 40, linewidth=2, edgecolor='r', facecolor='none')
+
+    # Add the patch to the Axes
+    ax_PAC.add_patch(rect)
 
     # Set tight_layout
     # gs_outer.tight_layout(fig)

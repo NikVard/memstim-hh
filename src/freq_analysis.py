@@ -196,7 +196,7 @@ def my_FR(spikes: np.ndarray,
         counts.append(spike_cnt)
 
     # Normalize according to window size
-    FR = (np.array(counts)/window_size)
+    # FR = (np.array(counts)/window_size)
 
     # return centers, spike counts, and adjusted sampling rates per window
     return centers, np.array(counts), fs_n
@@ -416,7 +416,7 @@ def bandpower(data, fs, band, window_sec=None, overlap=0.9, relative=False, retu
     # Integral approximation of the spectrum using Simpson's rule.
     if psd.size > 1:
         psd = psd.squeeze()
-    bp = simpson(psd[idx_band], freqs)
+    bp = simpson(psd[idx_band], freqs[idx_band])
 
     if relative:
         bp /= simpson(psd, freqs)

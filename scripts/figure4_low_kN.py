@@ -273,8 +273,8 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
             i_inh_sub = i_inh_sub_new
 
             # get the firing rate (spikes-to-rates)
-            tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-            tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
             # Normalize the FRs
             FR_inh_norm = (FR_inh/winsize_FR)/N_tot[3][1]

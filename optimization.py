@@ -35,7 +35,7 @@ if __name__ == "__main__":
                         nargs='?',
                         metavar='-o',
                         type=str,
-                        default='optimization_test.csv',
+                        default='optimization_new.csv',
                         help='Output file name')
     args = parser.parse_args()
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    settling_time = 2 # s
+    settling_time = 3 # s
     ending_time = 4 # s
 
     # target for EC firing rate w/ noise
@@ -137,6 +137,9 @@ if __name__ == "__main__":
                 duration = len(data["rhythm"])/fs
                 duration0 = (ending_time-settling_time)
 
+
+                # exit()
+
                 # Run the cost function
                 params_FR = {"winsize":winsize_FR, "overlap":overlap_FR}
                 J, vec = cost_func(data, target_vals, duration, fs, params_FR=params_FR)
@@ -160,7 +163,8 @@ if __name__ == "__main__":
                 # noise_CA3_inh = params["areas"]["CA3"]["I"]["noise"]
                 # noise_CA1_exc = params["areas"]["CA1"]["E"]["noise"]
                 # noise_CA1_inh = params["areas"]["CA1"]["I"]["noise"]
-                csv_data = [os.path.join(currdir, 'parameters_bak.json'), J, inp_val, a, b, c, d, noise_EC_exc, noise_EC_inh, noise_DG_exc, noise_DG_inh, noise_CA3_exc, noise_CA3_inh, noise_CA1_exc, noise_CA1_inh] + vec
+                # csv_data = [os.path.join(currdir, 'parameters_bak.json'), J, inp_val, a, b, c, d, noise_EC_exc, noise_EC_inh, noise_DG_exc, noise_DG_inh, noise_CA3_exc, noise_CA3_inh, noise_CA1_exc, noise_CA1_inh] + vec
+                csv_data = [os.path.join(currdir, 'parameters_bak.json'), J, inp_val, a, b, c, d,] + vec
 
                 print(csv_data)
 

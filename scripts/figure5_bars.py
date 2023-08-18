@@ -99,7 +99,7 @@ if __name__ == "__main__":
     tv = np.arange(0, duration, dt)
 
     # t_stim = 1800*ms # change this if you change the dataset
-    t_lims = [1250*ms, 5000*ms] # ms : x-axs limits
+    t_lims = [2500*ms, 6000*ms] # ms : x-axs limits
     # t_lims_adj = [t_stim + 500*ms, t_stim+5500*ms] # ms : calculate mean FRs in a 5-sec window
     # t_lims_adj = [1000*ms, 4000*ms] # ms : calculate mean FRs in a 5-sec window
     # duration_adj = t_lims_adj[1] - t_lims_adj[0]
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
 
     # Data - point C
-    results_in_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_single', 'point_C', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
+    results_in_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_data', 'single_pulse', 'point_C', '7.0_nA', '0.00_3027.5_ms') # change this for new dataset
     results_in_phase_C_dirs = [os.path.join(results_in_phase_C_base_dir, 'w_phase_reset'),
                                os.path.join(results_in_phase_C_base_dir, 'wo_phase_reset')]
     data_in_phase_C_dirs = [os.path.join(results_in_phase_C_dirs[0], 'data'),
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     spikes_in_phase_C_dir = [os.path.join(data_in_phase_C_dirs[0], 'spikes'),
                              os.path.join(data_in_phase_C_dirs[1], 'spikes')]
 
-    results_out_of_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_single', 'point_C', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
+    results_out_of_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_data', 'single_pulse', 'point_C', '7.0_nA', '0.00_3111.5_ms') # change this for new dataset
     results_out_of_phase_C_dirs = [os.path.join(results_out_of_phase_C_base_dir, 'w_phase_reset'),
                                os.path.join(results_out_of_phase_C_base_dir, 'wo_phase_reset')]
     data_out_of_phase_C_dirs = [os.path.join(results_out_of_phase_C_dirs[0], 'data'),
@@ -240,10 +240,10 @@ if __name__ == "__main__":
 
     # Organize the directories
     analysis_dirs = []
-    # analysis_dirs.extend(results_in_phase_C_dirs)
-    # analysis_dirs.extend(results_out_of_phase_C_dirs)
-    analysis_dirs.extend(results_trains_in_phase_B_dirs)
-    analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
+    analysis_dirs.extend(results_in_phase_C_dirs)
+    analysis_dirs.extend(results_out_of_phase_C_dirs)
+    # analysis_dirs.extend(results_trains_in_phase_B_dirs)
+    # analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
 
     # Theta power
     theta_band_power = []
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     pac_obj = Pac(idpac=(2,0,0), f_pha=theta_band, f_amp=gamma_band)
     PAC_metric = []
 
-    for G_curr, panel_label, results_dir_curr, t_stim in zip(G_outer_figure_nb, ['A.', 'B.', 'C.', 'D.'], analysis_dirs, [1850.3*ms, 1850.3*ms, 1934.4*ms, 1934.4*ms]):
+    for G_curr, panel_label, results_dir_curr, t_stim in zip(G_outer_figure_nb, ['A.', 'B.', 'C.', 'D.'], analysis_dirs, [3027.5*ms, 3027.5*ms, 3111.5*ms, 3111.5*ms]):
         print('[*] Panel', panel_label)
 
         # Adjust limits
@@ -580,8 +580,8 @@ if __name__ == "__main__":
 
             # calculate firing rates
             print('[>] Computing firing rates...')
-            tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-            tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
             # # SAVE THE NON-NORMALIZED FR SIGNALS
             # np.savetxt(os.path.join(results_dir_curr, 'data', 'FR_inh.txt'), FR_inh, fmt='%.8f')
@@ -622,7 +622,6 @@ if __name__ == "__main__":
             theta_band_power.append([theta_band_pow_exc, theta_band_pow_inh])
             gamma_band_power.append([gamma_band_pow_exc, gamma_band_pow_inh])
             PAC_metric.append([MI_E, MI_I])
-
 
 
         # axs[3][0].text(x=xlims_rates[1]+50*ms, y=ylims_rates[0]+150+FR_exc_norm.max()+rates_gap, s='Inhibitory', fontsize=fsize_legends, ha='left', color=c_inh, clip_on=False)

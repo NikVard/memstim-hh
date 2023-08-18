@@ -19,15 +19,26 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# Arial font everywhere
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['axes.titlesize'] = fsize_titles
+plt.rcParams['axes.labelsize'] = fsize_xylabels
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+# Arial font everywhere
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
-
-# ILLUSTRATOR STUFF
-mplb.rcParams['pdf.fonttype'] = 42
-mplb.rcParams['ps.fonttype'] = 42
-mplb.rcParams['axes.titlesize'] = fsize_titles
-mplb.rcParams['axes.labelsize'] = fsize_xylabels
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 dt = .1 # [msec]
 fs = 10e3
@@ -50,7 +61,7 @@ fsize = [9, 11] # axes, titles
 # phase_ol = np.loadtxt(os.path.join(dir_ol, 'data', 'order_param_mon_phase.txt'))
 
 # Closed-loop results directory | no stim
-dir_cl = os.path.join('results_PRC_new', 'None')
+dir_cl = os.path.join('results', 'PRC_new', 'analysis', 'None')
 dir_cl = os.path.join(dir_cl, os.listdir(dir_cl)[0])
 phase_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_phase.txt'))
 
@@ -59,12 +70,12 @@ rhythm_cl = np.loadtxt(os.path.join(dir_cl, 'data', 'order_param_mon_rhythm.txt'
 
 # Results directories
 dirs = []
-dirs.append(os.path.join('results_PRC_new', '2_nA'))
-dirs.append(os.path.join('results_PRC_new', '5_nA'))
-dirs.append(os.path.join('results_PRC_new', '10_nA'))
-dirs.append(os.path.join('results_PRC_new', '20_nA'))
-dirs.append(os.path.join('results_PRC_new', '40_nA'))
-# dirs.append(os.path.join('results_PRC_new', '10_nA'))
+dirs.append(os.path.join('results', 'PRC_new', 'analysis', '2.0_nA'))
+dirs.append(os.path.join('results', 'PRC_new', 'analysis', '5.0_nA'))
+dirs.append(os.path.join('results', 'PRC_new', 'analysis', '10.0_nA'))
+dirs.append(os.path.join('results', 'PRC_new', 'analysis', '20.0_nA'))
+dirs.append(os.path.join('results', 'PRC_new', 'analysis', '40.0_nA'))
+# dirs.append(os.path.join('results', 'PRC_new', '10nA'))
 
 # set default phase to compare against
 phase_def = phase_cl

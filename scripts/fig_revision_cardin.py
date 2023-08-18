@@ -181,11 +181,16 @@ if __name__ == "__main__":
         # Relative power
         axs[idx_data].plot(fstims_all[1:], vals_E, color=c_exc, linestyle='-', marker='o', markersize=5, label='Excitatory')
         axs[idx_data].plot(fstims_all[1:], vals_I, color=c_inh, linestyle='-', marker='s', markersize=5, label='Inhibitory')
-        axs[idx_data].set_title(f'Stim. E {bool(stim_E)} | I {bool(stim_I)})', fontsize=fsize_titles)
+        # axs[idx_data].set_title(f'Stim. E {bool(stim_E)} | I {bool(stim_I)})', fontsize=fsize_titles)
         axs[idx_data].set_ylabel('Relative power', fontsize=fsize_xylabels)
         axs[idx_data].set_xlim([8, 202])
         axs[idx_data].set_ylim([-0.005, 0.36])
         axs[idx_data].xaxis.set_major_locator(ticker.FixedLocator(fstims_all))
+
+    # Set the titles
+    axs[0].set_title(f'Stimulation of excitatory cells', fontsize=fsize_titles)
+    axs[1].set_title(f'Stimulation of inhibitory cells', fontsize=fsize_titles)
+    axs[2].set_title(f'Stimulation of excitatory and inhibitory cells', fontsize=fsize_titles)
 
     # Last idx
     axs[idx_data].set_xlabel('Stim. frequency [Hz]')
@@ -194,6 +199,14 @@ if __name__ == "__main__":
     # Remove xticks
     axs[0].xaxis.set_ticklabels([])
     axs[1].xaxis.set_ticklabels([])
+
+    # Remove the box borders
+    axs[0].spines['top'].set_visible(False)
+    axs[0].spines['right'].set_visible(False)
+    axs[1].spines['top'].set_visible(False)
+    axs[1].spines['right'].set_visible(False)
+    axs[2].spines['top'].set_visible(False)
+    axs[2].spines['right'].set_visible(False)
 
     # Fixed locator for y-ticks
     for ax in axs:

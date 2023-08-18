@@ -26,9 +26,23 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
+# Arial font everywhere
 # ILLUSTRATOR STUFF
-mplb.rcParams['pdf.fonttype'] = 42
-mplb.rcParams['ps.fonttype'] = 42
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 
 def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va):
@@ -95,7 +109,7 @@ if __name__ == "__main__":
     # Timing
     second = 1
     ms = 1e-3
-    duration = 3*second
+    duration = 10*second
     dt = 0.1*ms
     fs = int(1*second/dt)
     tv = np.linspace(0, duration, fs*duration)/ms
@@ -105,7 +119,7 @@ if __name__ == "__main__":
     fs_FR = int(1/winstep_FR)
 
     # Stim onset
-    t_stim = 1.8*second/ms
+    t_stim = 7.664*second/ms
 
     # Pre/Post stim PAC
     tlims_pre = np.array([-1100, -100]) + t_stim
@@ -113,6 +127,7 @@ if __name__ == "__main__":
 
     # Directories
     fig4_dir = os.path.join(parent_dir, 'res_test_fig4', '10.0_nA', '0.00_1800.0_ms', '11-10-2022 15H02M22S')
+    fig4_dir = '/home/nikos/Documents/projects/Python/memstim-hh/results/new_test/10.0_nA/0.00_7664.0_ms/14-08-2023 17H05M04S'
     fig4_data = os.path.join(fig4_dir, 'data')
     fig4_currents = os.path.join(fig4_data, 'currents')
     fig4_spikes = os.path.join(fig4_data, 'spikes')
@@ -436,8 +451,8 @@ if __name__ == "__main__":
 
     # Calculate the CA1 (last spikes loaded) FRs
     print('[+] Calculating CA1 FRs...')
-    tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-    tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+    tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
     # Normalize the FRs
     print('[+] Normalizing CA1 FRs...')
