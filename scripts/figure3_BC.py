@@ -158,7 +158,7 @@ if __name__ == "__main__":
     import argparse
     import parameters
 
-    parser = argparse.ArgumentParser(description='Generate Figure_2B from paper')
+    parser = argparse.ArgumentParser(description='Generate Figure_3B from paper')
 
     parser.add_argument('-id', '--input-dir',
                         type=str,
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='fig2_B',
+                        default='fig3_B',
                         help='Name of the output figure [without extension].')
 
     args = parser.parse_args()
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     # Calculate the sampling frequency of the FRs
     fs_FR = int(1/(tv_FR_exc[2] - tv_FR_exc[1]))
 
-    # From fig2_A:
+    # From fig3_A:
     winsize_FR = 5*ms
 
     # PSDs
@@ -590,29 +590,29 @@ if __name__ == "__main__":
     print('[+] Saving PSDs...')
     plt.figure('PSD')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_A_PSD.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_A_PSD.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
-
-    # Select the PAC figure
-    print('[+] Saving PACs...')
-    plt.figure('PAC')
-    # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_B_PAC.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_B_PAC.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
-
-    # Select the binned PAC figure
-    print('[+] Saving bins...')
-    plt.figure('bins')
-    # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_X_bins.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_X_bins.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_B_PSD.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_B_PSD.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Select the preferred phase polar figure
     print('[+] Saving preferred phase polar plot...')
     plt.figure('pref_phase')
     # plt.tight_layout()
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_C_prefp.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-    plt.savefig(os.path.join(parent_dir, 'figures', 'fig2', args.figure_name + '_C_prefp.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_C_prefp.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_C_prefp.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+
+    # Select the PAC figure
+    print('[+] Saving PACs...')
+    plt.figure('PAC')
+    # plt.tight_layout()
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_X_PAC.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_X_PAC.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+
+    # Select the binned PAC figure
+    print('[+] Saving bins...')
+    plt.figure('bins')
+    # plt.tight_layout()
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_X_bins.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+    plt.savefig(os.path.join(parent_dir, 'figures', 'fig3', args.figure_name + '_X_bins.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
     # Close some figures
     print('[-] Closing figure [binned phases]...')

@@ -40,8 +40,8 @@ d = 0.2 # 0.2 // 0.43 new val
 # b = 0.09 # 0.14
 # c = 1.1 # 1.1
 # d = 0.21 # 0.2 // 0.43 new val
-I_in = 0.20 # 0.22 input gain Kuramoto
-stim_amplitude = [9.] # nA
+I_in = 0.22 # 0.22 input gain Kuramoto
+stim_amplitude = [7.] # nA
 stim_onset = 1.8 # sec
 
 # Default parameters

@@ -23,9 +23,25 @@ sys.path.insert(0, os.path.abspath(parent_dir))
 from src.freq_analysis import *
 from src.figure_plots_parameters import *
 
-# Set font to Arial -- is this working?
+# ILLUSTRATOR STUFF
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['axes.titlesize'] = fsize_titles
+plt.rcParams['axes.labelsize'] = fsize_xylabels
+
+plt.rcParams.update({
+    "text.usetex": False,
+    "font.family": "sans-serif",
+    "font.sans-serif": "Arial",
+})
+
+# Arial font everywhere
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = 'Arial'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.rm'] = 'Arial'
+plt.rcParams['mathtext.it'] = 'Arial:italic'
+plt.rcParams['mathtext.bf'] = 'Arial:bold'
 
 # Error print!
 def eprint(*args, **kwargs):
@@ -78,12 +94,12 @@ if __name__ == "__main__":
     dt = 0.1*ms
     fs = int(1/dt)
 
-    # duration = 12.*second # change this if you change the dataset
-    duration = 5*second
+    duration = 8*second # change this if you change the dataset
+    # duration = 5*second
     tv = np.arange(0, duration, dt)
 
     # t_stim = 1800*ms # change this if you change the dataset
-    t_lims = [1500*ms, 4500*ms] # ms : x-axs limits
+    t_lims = [2600*ms, 7000*ms] # ms : x-axs limits
     # t_lims_adj = [t_stim + 500*ms, t_stim+5500*ms] # ms : calculate mean FRs in a 5-sec window
     # t_lims_adj = [1000*ms, 4000*ms] # ms : calculate mean FRs in a 5-sec window
     # duration_adj = t_lims_adj[1] - t_lims_adj[0]
@@ -157,7 +173,7 @@ if __name__ == "__main__":
 
 
     # Data - point C
-    results_in_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_single', 'point_C', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
+    results_in_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_data', 'single_pulse', 'point_C', '7.0_nA', '0.00_3027.5_ms') # change this for new dataset
     results_in_phase_C_dirs = [os.path.join(results_in_phase_C_base_dir, 'w_phase_reset'),
                                os.path.join(results_in_phase_C_base_dir, 'wo_phase_reset')]
     data_in_phase_C_dirs = [os.path.join(results_in_phase_C_dirs[0], 'data'),
@@ -165,7 +181,7 @@ if __name__ == "__main__":
     spikes_in_phase_C_dir = [os.path.join(data_in_phase_C_dirs[0], 'spikes'),
                              os.path.join(data_in_phase_C_dirs[1], 'spikes')]
 
-    results_out_of_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_single', 'point_C', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
+    results_out_of_phase_C_base_dir = os.path.join(parent_dir, 'results', 'fig5_data', 'single_pulse', 'point_C', '7.0_nA', '0.00_3111.5_ms') # change this for new dataset
     results_out_of_phase_C_dirs = [os.path.join(results_out_of_phase_C_base_dir, 'w_phase_reset'),
                                os.path.join(results_out_of_phase_C_base_dir, 'wo_phase_reset')]
     data_out_of_phase_C_dirs = [os.path.join(results_out_of_phase_C_dirs[0], 'data'),
@@ -175,7 +191,7 @@ if __name__ == "__main__":
 
 
     # Data for pulses - point B
-    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1850.3_ms') # change this for new dataset
+    results_trains_in_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig6_data4', '7.0_nA', '0.00_3027.5_ms') # change this for new dataset
     results_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_in_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_in_phase_B_dirs = [os.path.join(results_trains_in_phase_B_dirs[0], 'data'),
@@ -183,7 +199,7 @@ if __name__ == "__main__":
     spikes_trains_in_phase_B_dir = [os.path.join(data_trains_in_phase_B_dirs[0], 'spikes'),
                              os.path.join(data_trains_in_phase_B_dirs[1], 'spikes')]
 
-    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig5_test_trains', '8.0_nA', '0.00_1934.4_ms') # change this for new dataset
+    results_trains_out_of_phase_B_base_dir = os.path.join(parent_dir, 'results', 'fig6_data4', '7.0_nA', '0.00_3111.6_ms') # change this for new dataset
     results_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_base_dir, 'w_phase_reset'),
                                os.path.join(results_trains_out_of_phase_B_base_dir, 'wo_phase_reset')]
     data_trains_out_of_phase_B_dirs = [os.path.join(results_trains_out_of_phase_B_dirs[0], 'data'),
@@ -199,16 +215,16 @@ if __name__ == "__main__":
     fig = plt.figure(figsize=(fig_width,fig_height))
 
     # Use gridspecs
-    G_outer_figure = fig.add_gridspec(4, 3, left=0.005, right=0.925, bottom=0.1, top=0.995,
-                                            height_ratios=(0.05, 0.425, 0.425, 0.1),
-                                            width_ratios=(0.05, 0.475, 0.475),
+    G_outer_figure = fig.add_gridspec(4, 3, left=0.01, right=0.95, bottom=0.1, top=0.995,
+                                            height_ratios=(0.01, 0.405, 0.405, 0.18),
+                                            width_ratios=(0.01, 0.495, 0.495),
                                             wspace=0.2, hspace=0.3)
 
     # Separate the bar graphs from the rest of the figure elements
     G_top_titles = G_outer_figure[0,1:].subgridspec(1,2)
     G_side_titles = G_outer_figure[1:3,0].subgridspec(2,1)
     G_outer_figure_nb = G_outer_figure[1:3,1:].subgridspec(2,2)
-    G_barplots = G_outer_figure[3,1:].subgridspec(1,3)
+    G_barplots = G_outer_figure[3,1:].subgridspec(1,3, wspace=0.4)
 
     # Fix tight layout
     G_outer_figure.tight_layout(fig)
@@ -224,10 +240,10 @@ if __name__ == "__main__":
 
     # Organize the directories
     analysis_dirs = []
-    analysis_dirs.extend(results_in_phase_C_dirs)
-    analysis_dirs.extend(results_out_of_phase_C_dirs)
-    # analysis_dirs.extend(results_trains_in_phase_B_dirs)
-    # analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
+    # analysis_dirs.extend(results_in_phase_C_dirs)
+    # analysis_dirs.extend(results_out_of_phase_C_dirs)
+    analysis_dirs.extend(results_trains_in_phase_B_dirs)
+    analysis_dirs.extend(results_trains_out_of_phase_B_dirs)
 
     # Theta power
     theta_band_power = []
@@ -239,7 +255,7 @@ if __name__ == "__main__":
     pac_obj = Pac(idpac=(2,0,0), f_pha=theta_band, f_amp=gamma_band)
     PAC_metric = []
 
-    for G_curr, panel_label, results_dir_curr, t_stim in zip(G_outer_figure_nb, ['A.', 'B.', 'C.', 'D.'], analysis_dirs, [1850.3*ms, 1850.3*ms, 1934.4*ms, 1934.4*ms]):
+    for G_curr, panel_label, results_dir_curr, t_stim in zip(G_outer_figure_nb, ['A.', 'B.', 'C.', 'D.'], analysis_dirs, [3027.5*ms, 3027.5*ms, 3111.5*ms, 3111.5*ms]):
         print('[*] Panel', panel_label)
 
         # Adjust limits
@@ -248,6 +264,7 @@ if __name__ == "__main__":
         t_lims2 = [np.round(t_stim,4), np.round(t_stim+2000*ms,4)]
         duration_post = t_lims_post[1] - t_lims_post[0]
         duration_2 = t_lims2[1] - t_lims2[0]
+        t_lims_post = t_lims2
 
         # Use gridspecs
         G_outer = GridSpecFromSubplotSpec(2, 1, height_ratios=(0.25, 0.75), subplot_spec=G_curr, hspace=0.1)
@@ -563,8 +580,8 @@ if __name__ == "__main__":
 
             # calculate firing rates
             print('[>] Computing firing rates...')
-            tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-            tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+            tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
             # # SAVE THE NON-NORMALIZED FR SIGNALS
             # np.savetxt(os.path.join(results_dir_curr, 'data', 'FR_inh.txt'), FR_inh, fmt='%.8f')
@@ -605,7 +622,6 @@ if __name__ == "__main__":
             theta_band_power.append([theta_band_pow_exc, theta_band_pow_inh])
             gamma_band_power.append([gamma_band_pow_exc, gamma_band_pow_inh])
             PAC_metric.append([MI_E, MI_I])
-
 
 
         # axs[3][0].text(x=xlims_rates[1]+50*ms, y=ylims_rates[0]+150+FR_exc_norm.max()+rates_gap, s='Inhibitory', fontsize=fsize_legends, ha='left', color=c_inh, clip_on=False)
@@ -686,22 +702,32 @@ if __name__ == "__main__":
         bars_E = ax.bar(X*3, data_arr[3::4,0], color=c_exc)
         bars_I = ax.bar(X*3+1, data_arr[3::4,1], color=c_inh)
 
+        # # Add values on top of each bar
+        # for bars in ax.containers:
+        #     ax.bar_label(bars, np.round(bars.datavalues,2), fontsize=8, color='white', label_type='center', rotation=90)
+        #
+        # # Scientific notation for y-axis
+        # ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
         # Set x-ticks and x-labels
         ax.tick_params(axis='x', size=0, labelsize=fsize_ticks, labelrotation=45)
         ax.set_xticks(X*3+0.5)
         ax.set_xticklabels(["A. Peak Stim.\nPhase Reset", "B. Peak Stim.\nNo Phase Reset", "C. Trough Stim.\nPhase Reset", "D. Trough Stim.\nNo Phase Reset"])
-        ax.set_title(label)
+        ax.set_title(label, fontsize=fsize_titles)
+
+        # Add text for units
+        ax.text(x=-0.08, y=-0.2, s='(a.u.)', fontsize=fsize_xylabels, ha='center', va='center', transform=ax.transAxes)
 
         # remove y-ticks
-        ax.set_yticks([])
+        # ax.set_yticks([])
 
         # Hide some spines
         ax.spines['top'].set_visible(False)
         # ax.spines['bottom'].set_visible(False)
-        ax.spines['left'].set_visible(False)
+        # ax.spines['left'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
-    bar_axs[0].text(x=-0.07, y=1.6, s='E.', fontsize=fsize_panels, weight='bold', ha='left', va='top', transform=bar_axs[0].transAxes)
+    bar_axs[0].text(x=-0.07, y=1.3, s='E.', fontsize=fsize_panels, weight='bold', ha='left', va='top', transform=bar_axs[0].transAxes)
 
 
     # Add top titles
@@ -743,11 +769,10 @@ if __name__ == "__main__":
     ax_side_titles_bottom.yaxis.set_visible(False)
 
     # Add the text
-    ax_top_titles_left.text(x=0.5, y=0.5, rotation=0, s='Phase Reset Enabled', fontsize=fsize_panels, va='center', ha='center', transform=ax_top_titles_left.transAxes)
-    ax_top_titles_right.text(x=0.5, y=0.5, rotation=0, s='Phase Reset Disabled', fontsize=fsize_panels, va='center', ha='center', transform=ax_top_titles_right.transAxes)
-    ax_side_titles_top.text(x=0.5, y=0.5, rotation=90, s='Peak Stimulation', fontsize=fsize_panels, va='center', ha='center', transform=ax_side_titles_top.transAxes)
-    ax_side_titles_bottom.text(x=0.5, y=0.5, rotation=90, s='Trough Stimulation', fontsize=fsize_panels, va='center', ha='center', transform=ax_side_titles_bottom.transAxes)
-
+    ax_top_titles_left.text(x=0.5, y=0.5, rotation=0, s='Phase Reset Enabled', fontsize=fsize_panels, va='top', ha='center', transform=ax_top_titles_left.transAxes)
+    ax_top_titles_right.text(x=0.5, y=0.5, rotation=0, s='Phase Reset Disabled', fontsize=fsize_panels, va='top', ha='center', transform=ax_top_titles_right.transAxes)
+    ax_side_titles_top.text(x=0.5, y=0.5, rotation=90, s='Peak Stimulation', fontsize=fsize_panels, va='center', ha='left', transform=ax_side_titles_top.transAxes)
+    ax_side_titles_bottom.text(x=0.5, y=0.5, rotation=90, s='Trough Stimulation', fontsize=fsize_panels, va='center', ha='left', transform=ax_side_titles_bottom.transAxes)
 
     # Set tight_layout
     # G_outer_figure.tight_layout(fig)
@@ -756,8 +781,8 @@ if __name__ == "__main__":
 
     """ Saving the figure """
     print('[+] Saving the figure...')
-    fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', args.figure_name + '.png'), transparent=True, dpi=300, format='png')
-    fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', args.figure_name + '.pdf'), transparent=True, dpi=300, format='pdf')
+    fig.savefig(os.path.join(parent_dir, 'figures', 'fig6', args.figure_name + '.png'), transparent=True, dpi=300, format='png')
+    fig.savefig(os.path.join(parent_dir, 'figures', 'fig6', args.figure_name + '.pdf'), transparent=True, dpi=300, format='pdf')
 
     print('[!] Done')
 

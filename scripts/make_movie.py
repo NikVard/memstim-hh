@@ -351,10 +351,10 @@ print(">> Movie finished.")
 # Save the animation as an mp4 file. Requires ffmpeg encoder.
 # The extra arguments given ensure the x264 coden is used (html5 compatibility)
 print(">> Exporting as mp4 video file...")
-# movie.save(dirs['results'] + 'activation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-# print(">> Exporting as gif...")
-# movie.save('activation.gif', fps=30)
-# print(">> File saved.")
+movie.save(dirs['results'] + 'activation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+print(">> Exporting as gif...")
+movie.save('activation.gif', fps=30)
+print(">> Files saved.")
 
 # draw the plot
 plt.show()

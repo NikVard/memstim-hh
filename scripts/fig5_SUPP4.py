@@ -13,6 +13,7 @@ import matplotlib as mplb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpecFromSubplotSpec
 from matplotlib import ticker
+import matplotlib.patheffects as patheffects
 
 # TensorPAC
 from tensorpac import Pac
@@ -64,7 +65,7 @@ def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va
 
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results_cluster', 'results_fig4_low_kN')
+root_cluster = os.path.join(parent_dir, 'results', 'fig4_kN2')
 # print(root_cluster)
 
 # get a list of the directories with oscillator amplitudes
@@ -72,7 +73,7 @@ osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
 # print(osc_amplitude_dirs)
 
 # set the directory with the precomputed results
-root_precomp = os.path.join(parent_dir, 'figures', 'fig4_low_kN', 'data')
+root_precomp = os.path.join(parent_dir, 'figures', 'fig4_kN2', 'data')
 
 # Timing parameters
 second = 1
@@ -122,9 +123,9 @@ MI_heatmap_I = np.load(os.path.join(root_precomp, 'MI_I_heatmap.npy'))
 # Define points of interest % list of tuples: (label, [osc, stim] nA)
 points_of_interest = []
 points_of_interest.append((0.20, 5.0)) # A - no activity % post-stim
-points_of_interest.append((0.20, 15.0)) # B - transient activity
+# points_of_interest.append((0.20, 15.0)) # B - transient activity
 points_of_interest.append((0.20, 35.0)) # C - restoration of physiological activity
-points_of_interest_labels = ['A', 'B', 'C']
+points_of_interest_labels = ['A', 'B']
 
 # theta / gamma power matrices
 theta_heatmap_E = np.load(os.path.join(root_precomp, 'theta_E_heatmap.npy'))
@@ -159,7 +160,7 @@ for elem in gs_right:
 # Parameters (backup) filename
 fname = 'parameters_bak.json'
 # t_stim = data['stimulation']['onset']*1000
-t_stim = 2000.0 # ms
+t_stim = 1800.0 # ms
 
 # iterate over oscillator amplitudes
 axs_idxs = []
@@ -171,11 +172,11 @@ for osc_amp_dir in tqdm(osc_amplitude_dirs, desc='Plotting [A] w/ points of inte
     curr_osc_dir = os.path.join(root_cluster, osc_amp_dir)
     print('osc: ', osc_amp_dir)
 
-    # two steps in - stim 8.0nA @ 2000ms
-    for kN_dir in next(os.walk(os.path.join(curr_osc_dir, '8.0_nA', '0.00_2000.0_ms')))[1]:
+    # two steps in - stim 7.0nA @ 1800ms
+    for kN_dir in next(os.walk(os.path.join(curr_osc_dir, 'data', '7.0_nA', '0.00_1800.0_ms')))[1]:
 
         # one more step in - kN
-        curr_kN_dir = os.path.join(curr_osc_dir, '8.0_nA', '0.00_2000.0_ms', kN_dir)
+        curr_kN_dir = os.path.join(curr_osc_dir, 'data', '7.0_nA', '0.00_1800.0_ms', kN_dir)
 
         # load parameters backup data
         try:
@@ -340,6 +341,10 @@ for ax, label in zip(axs_rasters, [points_of_interest_labels[idx] for idx in axs
     ax.yaxis.set_major_locator(ticker.NullLocator())
     ax.yaxis.set_minor_locator(ticker.NullLocator())
 
+    # Add the title
+    ax.set_title(label+'.', loc='left', weight='bold', fontsize=fsize_panels)
+
+
 ax_rate_majors = np.arange(0., duration, .5) #[0.5, 1.0, 1.5...]
 for ax in axs_FRs:
     # Hide some spines
@@ -375,23 +380,31 @@ for ax in axs_FRs:
 # Add sizebars for x-y axes
 xlims_sz = [t_stim*ms-0.550, t_stim*ms-0.300]
 ylims_sz = [-75, 25]
-add_sizebar(axs_FRs[axs_idxs[-1]], xlims_sz, [ylims_sz[0]]*2, 'black', '250 ms', fsize=fsize_xylabels, rot=0, textx=np.mean(xlims_sz), texty=ylims_sz[0]-50, ha='center', va='top')
-add_sizebar(axs_FRs[axs_idxs[-1]], [xlims_sz[0]]*2, ylims_sz, 'black', '100 Hz', fsize=fsize_xylabels, rot=90, textx=xlims_sz[0]-0.05, texty=np.mean(ylims_sz), ha='right', va='center')
+add_sizebar(axs_FRs[np.argmax(axs_idxs)], xlims_sz, [ylims_sz[0]]*2, 'black', '250 ms', fsize=fsize_xylabels, rot=0, textx=np.mean(xlims_sz), texty=ylims_sz[0]-50, ha='center', va='top')
+add_sizebar(axs_FRs[np.argmax(axs_idxs)], [xlims_sz[0]]*2, ylims_sz, 'black', '100 Hz', fsize=fsize_xylabels, rot=90, textx=xlims_sz[0]-0.05, texty=np.mean(ylims_sz), ha='right', va='center')
+
+# Sort the axes from top to bottom
+axs_idxs_sorted_I = np.argsort(axs_idxs)
+axs_rasters_sorted = np.array(axs_rasters)[axs_idxs_sorted_I]
+axs_FRs_sorted = np.array(axs_FRs)[axs_idxs_sorted_I]
 
 # Stimulation lines + marker
 # First raster
-axs_rasters[0].axvline(x=t_stim*ms, ymin=-0.5, ymax=1.0, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=True)
+axs_rasters_sorted[0].axvline(x=t_stim*ms, ymin=-0.1, ymax=1.0, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=True)
 
 # Rasters + FRs
-for ax in [axs_rasters[idx] for idx in axs_idxs][1:] + [axs_FRs[idx] for idx in axs_idxs][:-1]:
-    ax.axvline(x=t_stim*ms, ymin=-0.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+for ax in axs_rasters_sorted:
+    ax.axvline(x=t_stim*ms, ymin=-0.1, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+
+for ax in axs_FRs_sorted:
+    ax.axvline(x=t_stim*ms, ymin=-0.1, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
 # Last FR
-axs_FRs[axs_idxs[-1]].axvline(x=t_stim*ms, ymin=0, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=True)
+axs_FRs_sorted[-1].axvline(x=t_stim*ms, ymin=0, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=True)
 
 # Don't forget to mark the stimulation onset!
 # add marker for stimulation onset
-axs_rasters[axs_idxs[0]].scatter(x=t_stim*ms, y=cnt+30, s=15, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
+axs_rasters[np.argmin(axs_idxs)].scatter(x=t_stim*ms, y=cnt+30, s=15, linewidth=1., marker='v', c='gray', edgecolors=None, alpha=1, rasterized=False, clip_on=False)
 
 # set vmin/vmax for plotting
 # vmin = 1e-12
@@ -432,7 +445,7 @@ rect_list = []
 # Add text annotations
 text_c = [(points_of_interest[0][0]-0.05, points_of_interest[0][1]-0.0),
           (points_of_interest[1][0]-0.05, points_of_interest[1][1]-0.0),
-          (points_of_interest[2][0]-0.05, points_of_interest[2][1]-0.0)
+          # (points_of_interest[2][0]-0.05, points_of_interest[2][1]-0.0)
          ]
 for point, label, text_coords in zip(points_of_interest, points_of_interest_labels, text_c):
     # Add annotations
@@ -444,15 +457,21 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
     axs_right[0].plot([x1], [y1], marker='o', mec='black', mfc='white',  markersize=5)
 
     # Annotation
-    axs_right[0].annotate(label,
+    PE = [patheffects.withStroke(linewidth=2, foreground='black', capstyle="round")]
+    anno = axs_right[0].annotate(label,
                           xy=(xn, yn),
                           xytext=text_coords,
-                          arrowprops=dict(arrowstyle='-', edgecolor='white'),
+                          arrowprops=dict(arrowstyle='-', path_effects=PE, edgecolor='white', linewidth=2),
+                          path_effects=PE,
                           # bbox=dict(boxstyle='square', edgecolor='white', facecolor='none'),
-                          weight='bold', fontsize=fsize_misc, color='white',
+                          weight='bold', fontsize=fsize_titles, color='white',
                           horizontalalignment='center',
                           verticalalignment='center')
-#
+    # Line adjustment
+    anno.arrow_patch.set_path_effects([
+        patheffects.Stroke(linewidth=3, foreground="k"),
+        patheffects.Normal()])
+
 # axs_right[0].annotate(label,
 #                       xy=text_coords,
 #                       xytext=text_coords,
@@ -477,6 +496,9 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
 #                         color='red', weight='bold', fontsize=fsize_legends,
 #                         ha='center', va='center')
 
+# Set xlims of images
+for ax in axs_right[0:]:
+    ax.set_xlim((0., 0.21))
 
 # Add points, mark other axes
 for ax in axs_right[1:]:
@@ -526,18 +548,18 @@ cbar_theta.ax.tick_params(labelsize=fsize_ticks)
 cbar_gamma.ax.tick_params(labelsize=fsize_ticks)
 
 # Set the panel labels
-axs_rasters[axs_idxs[0]].set_title('A.', loc='left', weight='bold', fontsize=fsize_panels)
-axs_rasters[axs_idxs[1]].set_title('B.', loc='left', weight='bold', fontsize=fsize_panels)
-axs_rasters[axs_idxs[2]].set_title('C.', loc='left', weight='bold', fontsize=fsize_panels)
-axs_right[axs_idxs[0]].set_title('D.', loc='left', weight='bold', fontsize=fsize_panels)
+# axs_rasters[0].set_title('A.', loc='left', weight='bold', fontsize=fsize_panels)
+# axs_rasters[1].set_title('B.', loc='left', weight='bold', fontsize=fsize_panels)
+# axs_rasters[2].set_title('C.', loc='left', weight='bold', fontsize=fsize_panels)
+axs_right[0].set_title('C.', loc='left', weight='bold', fontsize=fsize_panels)
 
 # Try the Gridspec tight_layout approach
 gs_outer.tight_layout(fig)
 
 # Save the figure
 print('[+] Saving the figure...')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4_low_kN', 'fig4_low_kN_full.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4_low_kN', 'fig4_low_kN_full.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', 'fig5_Supp4_kN_full.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', 'fig5_Supp4_kN_full.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
 # Show the images
 plt.show()
