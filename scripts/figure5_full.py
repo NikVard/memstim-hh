@@ -13,6 +13,7 @@ import matplotlib as mplb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpecFromSubplotSpec
 from matplotlib import ticker
+import matplotlib.patheffects as patheffects
 
 # TensorPAC
 from tensorpac import Pac
@@ -63,7 +64,7 @@ def add_sizebar(ax, xlocs, ylocs, bcolor, text, textx, texty, fsize, rot, ha, va
 
 
 # get the root directory for the simulations
-root_cluster = os.path.join(parent_dir, 'results', 'fig4')
+root_cluster = os.path.join(parent_dir, 'results', 'fig5')
 # print(root_cluster)
 
 # get a list of the directories with oscillator amplitudes
@@ -71,7 +72,7 @@ osc_amplitude_dirs = sorted(next(os.walk(root_cluster))[1])
 # print(osc_amplitude_dirs)
 
 # set the directory with the precomputed results
-root_precomp = os.path.join(parent_dir, 'figures', 'fig4', 'data_ext')
+root_precomp = os.path.join(parent_dir, 'figures', 'fig5', 'data_ext_new')
 
 # Timing parameters
 second = 1
@@ -127,8 +128,8 @@ MI_heatmap_I = np.load(os.path.join(root_precomp, 'MI_I_heatmap.npy'))
 # Define points of interest % list of tuples: (label, [osc, stim] nA)
 points_of_interest = []
 points_of_interest.append((0.05, 7.0)) # A - no activity % post-stim
-points_of_interest.append((0.10, 7.0)) # B - transient activity
-points_of_interest.append((0.13, 7.0)) # C - restoration of physiological activity
+points_of_interest.append((0.13, 7.0)) # B - restoration of physiological activity
+points_of_interest.append((0.20, 7.0)) # C - activity by default
 points_of_interest_labels = ['A', 'B', 'C']
 
 # theta / gamma power matrices
@@ -450,15 +451,21 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
     axs_right[0].plot([x1], [y1], marker='o', mec='black', mfc='white',  markersize=5)
 
     # Annotation
-    axs_right[0].annotate(label,
+    PE = [patheffects.withStroke(linewidth=2, foreground='black', capstyle="round")]
+    anno = axs_right[0].annotate(label,
                           xy=(xn, yn),
                           xytext=text_coords,
-                          arrowprops=dict(arrowstyle='-', edgecolor='white'),
+                          arrowprops=dict(arrowstyle='-', path_effects=PE, edgecolor='white', linewidth=2),
+                          path_effects=PE,
                           # bbox=dict(boxstyle='square', edgecolor='white', facecolor='none'),
-                          weight='bold', fontsize=fsize_misc, color='white',
+                          weight='bold', fontsize=fsize_titles, color='white',
                           horizontalalignment='center',
                           verticalalignment='top')
-#
+    # Line adjustment
+    anno.arrow_patch.set_path_effects([
+        patheffects.Stroke(linewidth=3, foreground="k"),
+        patheffects.Normal()])
+
 # axs_right[0].annotate(label,
 #                       xy=text_coords,
 #                       xytext=text_coords,
@@ -484,8 +491,8 @@ for point, label, text_coords in zip(points_of_interest, points_of_interest_labe
 #                         ha='center', va='center')
 
 # Set xlims of images
-for ax in axs_right[1:]:
-    ax.set_xlim((0., 0.17))
+for ax in axs_right[0:]:
+    ax.set_xlim((0., 0.21))
 
 # Add points, mark other axes
 for ax in axs_right[1:]:
@@ -552,8 +559,8 @@ gs_outer.tight_layout(fig)
 
 # Save the figure
 print('[+] Saving the figure...')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full_noise_7nA.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
-fig.savefig(os.path.join(parent_dir, 'figures', 'fig4', 'fig4_full_noise_7nA.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', 'fig5_full.png'), transparent=True, dpi=300, format='png', bbox_inches='tight')
+fig.savefig(os.path.join(parent_dir, 'figures', 'fig5', 'fig5_full.pdf'), transparent=True, dpi=300, format='pdf', bbox_inches='tight')
 
 # Show the images
 plt.show()

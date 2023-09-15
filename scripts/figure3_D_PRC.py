@@ -127,6 +127,12 @@ for root in dirs:
     xvals = [xvals[i] for i in idxs]
     PRC = [PRC[i] for i in idxs]
 
+    # Last point becomes first
+    xvals.insert(0, -xvals[-1])
+    del xvals[-1]
+    PRC.insert(0, PRC[-1])
+    del PRC[-1]
+
     # add to list
     PRC_all.append(PRC)
     xvals_all.append(xvals)
@@ -337,8 +343,8 @@ lines2, labels2 = axs2.get_legend_handles_labels()
 fig.subplots_adjust(left=0.16, bottom=0.17, right=0.89, top=0.9)
 
 # Save the figures
-fig.savefig('figures/fig2/fig2_D_PRC.png', transparent=True, dpi=300, format='png', pad_inches=0)
-fig.savefig('figures/fig2/fig2_D_PRC.pdf', transparent=True, dpi=300, format='pdf', pad_inches=0)
+fig.savefig('figures/fig3/fig3_D_PRC.png', transparent=True, dpi=300, format='png', pad_inches=0)
+fig.savefig('figures/fig3/fig3_D_PRC.pdf', transparent=True, dpi=300, format='pdf', pad_inches=0)
 
 # Show the figure
 plt.show()

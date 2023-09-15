@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-ra', '--rasters-all',
                         action='store_true',
-                        default=False,
+                        default=True,
                         help='Set to plot all rasters instead of only for CA1.')
 
     parser.add_argument('-op', '--order-parameter',
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     fs = int(1/dt)
 
     # duration = 12.*second # change this if you change the dataset
-    duration = 8*second
+    duration = 10*second
     tv = np.arange(0, duration, dt)
 
     winsize_FR = 5*ms
@@ -97,9 +97,9 @@ if __name__ == "__main__":
     winstep_FR = winsize_FR*round(1-overlap_FR,4)
     fs_FR = int(1/winstep_FR)
 
-    t_stim = 3500*ms # change this if you change the dataset
-    t_lims = [t_stim - 500*ms, t_stim+2500*ms] # ms : x-axs limits
-    t_lims_adj = [t_stim + 500*ms, t_stim+2500*ms] # ms : calculate mean FRs in a 5-sec window
+    t_stim = 1800*ms # change this if you change the dataset
+    t_lims = [t_stim - 500*ms, t_stim+3500*ms] # ms : x-axs limits
+    t_lims_adj = [t_stim + 200*ms, t_stim+2200*ms] # ms : calculate mean FRs in a 5-sec window
     # t_lims_adj = [250*ms, 2250*ms] # ms : calculate mean FRs in a 5-sec window
     duration_adj = t_lims_adj[1] - t_lims_adj[0]
 
@@ -149,11 +149,10 @@ if __name__ == "__main__":
     dpi = 300
 
     # Data
-    # results_dir = os.path.join(parent_dir, 'results_cluster', 'results_fig4_ext', 'K_0.18', '8.0_nA', '0.00_1800.0_ms', '06-12-2022 15H42M51S') # change this for new dataset
-    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'current', 'desc3') # change this for new dataset
-    results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'pos_pi')
-    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'pos_pi_2')
-    # results_dir = os.path.join(parent_dir, 'results', 'analysis', 'PRC_offsets', 'neg_pi_2')
+    results_dir_A = os.path.join(parent_dir, 'results', 'fig4', 'K_0.05', 'data', '7.0_nA', '0.00_1800.0_ms', '15-08-2023 00H47M43S')
+    results_dir_B = os.path.join(parent_dir, 'results', 'fig4', 'K_0.13', 'data', '7.0_nA', '0.00_1800.0_ms', '15-08-2023 12H34M03S')
+    results_dir_C = os.path.join(parent_dir, 'results', 'fig4', 'K_0.20', 'data', '7.0_nA', '0.00_1800.0_ms', '15-08-2023 15H43M41S')
+    results_dir = results_dir_A
     data_dir = os.path.join(results_dir, 'data')
     spikes_dir = os.path.join(data_dir, 'spikes')
 
@@ -346,7 +345,7 @@ if __name__ == "__main__":
     fval0 = 1/(np.mean(pks_new[1:] - pks_new[0:-1])/fs) if len(pks_new)>1 else 1/(pks_new[0]/fs)
 
     # find the oscillation frequency in the post-stim window using TensorPAC toolbox
-    idx_window = np.logical_and(tv>t_lims_adj[0], tv<=t_lims_adj[1])
+    idx_window = np.logical_and(tv>=t_lims_adj[0], tv<t_lims_adj[1])
     rhythm_window = rhythm[idx_window]
     rhythm_PSD = PSD(rhythm_window[np.newaxis,:], fs)
 
@@ -359,7 +358,7 @@ if __name__ == "__main__":
     fval_fin = fval1 # tensorpac PSD argmax calculation
 
     # text frequency label
-    ax_rhythm.text(x=xlims_rhythm[0]+150*ms, y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval_fin), fontsize=fsize_misc, ha='left', color='k', clip_on=False)
+    ax_rhythm.text(x=t_lims_adj[0], y=1.2, s=r"$f_\theta={0:.1f}$ Hz".format(fval_fin), fontsize=fsize_misc, ha='left', color='k', clip_on=False)
 
     # add a sizebar for the y-axis
     add_sizebar(ax_rhythm, [xlims_rhythm[1]+sizebar_off, xlims_rhythm[1]+sizebar_off], [0, 1.], 'black', ['0', '1'], fsize=fsize_misc, rot=[0, 0], textx=[xlims_rhythm[1]+sizebar_off+20*ms]*2, texty=[0, 1], ha='left', va='center')
@@ -477,8 +476,8 @@ if __name__ == "__main__":
 
         # plot rates
         print('[>] Plotting rates...')
-        tv_inh_FR, FR_inh = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
-        tv_exc_FR, FR_exc = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+        tv_inh_FR, FR_inh, fs_FR2 = my_FR(spikes=t_inh, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
+        tv_exc_FR, FR_exc, _ = my_FR(spikes=t_exc, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
         # SAVE THE NON-NORMALIZED FR SIGNALS
         np.savetxt(os.path.join(data_dir, 'FR_inh.txt'), FR_inh, fmt='%.8f')
@@ -508,26 +507,26 @@ if __name__ == "__main__":
     # ax_rhythm.vlines(x=t_stim, ymin=-0.1, ymax=1., color='gray', alpha=0.75, ls='--', linewidth=1.5, zorder=11, rasterized=False, clip_on=True)
 
     # stimulation lines
-    # ax_rhythm.axvline(x=t_stim, ymin=-1.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    ax_rhythm.axvline(x=t_stim, ymin=-1.5, ymax=1.1, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    # ax_common.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    ax_common.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    # for ax in axs[2]:
-    #     ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    for ax in axs[2]:
+        ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    # for ax in axs[3]:
-    #     ln = ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
+    for ax in axs[3]:
+        ln = ax.axvline(x=t_stim, ymin=-0.5, ymax=1.5, color='gray', alpha=0.75, ls='-', linewidth=0.75, zorder=10, rasterized=False, clip_on=False)
 
-    # ln.set_clip_on(True)
+    ln.set_clip_on(True)
 
-    # # stimulation point
-    # ax_rhythm.scatter(x=t_stim, y=1.8, s=75, marker='v', edgecolors='white', facecolors='gray', rasterized=False, clip_on=False)
+    # stimulation point
+    ax_rhythm.scatter(x=t_stim, y=1.8, s=75, marker='v', edgecolors='white', facecolors='gray', rasterized=False, clip_on=False)
 
 
     # Shade the areas
-    # ax_rhythm.fill_betweenx(y=[0,1], x1=t_lims_adj[0], x2=t_lims_adj[1], color='k', alpha=0.25)
-    # axs[2][0].fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_exc, alpha=0.25)
-    # axs[2][0].fill_betweenx(y=[N_scaling+N_gap, ylims_rasters[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_inh, alpha=0.25)
+    ax_rhythm.fill_betweenx(y=[0,1], x1=t_lims_adj[0], x2=t_lims_adj[1], color='k', alpha=0.25)
+    axs[2][0].fill_betweenx(y=[0,N_scaling], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_exc, alpha=0.25)
+    axs[2][0].fill_betweenx(y=[N_scaling+N_gap, ylims_rasters[1]], x1=t_lims_adj[0], x2=t_lims_adj[1], color=c_inh, alpha=0.25)
 
     # Set tight_layout
     G_outer.tight_layout(fig)
