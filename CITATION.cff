@@ -1,0 +1,43 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: memstim
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Nikolaos
+    family-names: Vardalakis
+    email: nikolaos.vardalakis@u-bordeaux.fr
+    affiliation: University of Bordeaux
+    orcid: 'https://orcid.org/0000-0002-5436-4091'
+  - given-names: Amelie
+    family-names: Aussel
+    email: amelie.aussel@inria.fr
+    affiliation: INRIA
+    orcid: 'https://orcid.org/0000-0003-0498-2905'
+  - given-names: Nicolas
+    family-names: Rougier
+    email: nicolas.rougier@inria.fr
+    affiliation: INRIA
+    orcid: 'https://orcid.org/0000-0002-6972-589X'
+  - given-names: Fabien
+    family-names: Wagner
+    email: fabien.wagner@u-bordeaux.fr
+    affiliation: CNRS
+    orcid: 'https://orcid.org/0000-0002-9582-6109'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.8354941
+    description: Zenodo release (post-revision)
+keywords:
+  - neuroscience
+  - hippocampus
+  - python
+  - brian2
+  - hodgkin-huxley
+  - oscillations
+license: GPL-3.0
+commit: 7fb24413abbe22deae39904459df4b74da19c4bc
