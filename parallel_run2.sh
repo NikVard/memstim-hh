@@ -3,7 +3,7 @@
 
 ### Get the current date and start making the results directory
 CURRDATE=$(date +"%FT%H%M")
-RESBASE="/beegfs/nvardala/results_fig3_quantify"
+RESBASE="/beegfs/nvardala/results_MS_stim_pacing"
 RESDIRTOT="$RESBASE"_"$CURRDATE"
 
 
@@ -21,7 +21,7 @@ fi
 # CONF_DIRS=$(find ./configs/ -maxdepth 1 -mindepth 1 -type d)
 # ISTIM=$1
 # CONF_DIRS="configs/${ISTIM}_nA"
-CONF_DIRS="configs/fig3_quantify"
+CONF_DIRS="configs/MS_stim_test"
 
 ### Go through the config directories and do the following:
 for DIR in $CONF_DIRS;
@@ -58,7 +58,7 @@ for DIR in $CONF_DIRS;
                 echo $FN_CONF
 
                 ### Queue the simulation
-                let DELAY="CNT*30"
+                let DELAY="CNT*60"
         		echo "Delayed: $DELAY seconds"
                 sbatch --job-name="SIM_${FN_CONF}" --begin=now+$DELAY --time=60 --cpus-per-task=1 --mem-per-cpu=16G --ntasks=1 --export=FCONF=$FN_CONF,RESDIR=$RESDIR,CNT=$CNT,OUTDIR=$RESBASE run_sim.sh
 
