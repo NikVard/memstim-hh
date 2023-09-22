@@ -17,7 +17,7 @@ from matplotlib import ticker
 
 # Other scripts and my stuff
 script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = Path(script_dir).parent
+parent_dir = Path(script_dir).parent.parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
@@ -191,8 +191,8 @@ if __name__ == "__main__":
                         ax_input.plot(tv_ramp, ramp, color='k')
                         ax_input.set_ylim(ylims_input)
 
-                        ax_rasters.plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=1)
-                        ax_rasters.plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=1)
+                        ax_rasters.plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=1, rasterized=True)
+                        ax_rasters.plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=1, rasterized=True)
 
                         ax_FRs.plot(tv_E, (FR_E/N_E), color=c_exc, label='Excitatory')
                         ax_FRs.plot(tv_I, (FR_I/N_I)+1, color=c_inh, label='Inhibitory')
