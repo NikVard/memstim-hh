@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='Pxx_Cardin_rev_eLife',
+                        default='fig2_SUPP3',
                         help='Name of the output figure [w/o file extension]')
     args = parser.parse_args()
 
@@ -231,8 +231,8 @@ if __name__ == "__main__":
     print('[+] Done with generating figures. Saving...')
     
     # Save the figure
-    fig.savefig(os.path.join(figs_out_dir, f"Pxx_Cardin_rev_eLife.png"))
-    fig.savefig(os.path.join(figs_out_dir, f"Pxx_Cardin_rev_eLife.pdf"))
+    fig.savefig(os.path.join(figs_out_dir, f"{args.figure_name}.png"), dpi=300)
+    fig.savefig(os.path.join(figs_out_dir, f"{args.figure_name}.pdf"), dpi=300)
 
     # Show the output
     plt.show()

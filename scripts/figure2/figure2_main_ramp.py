@@ -18,7 +18,7 @@ from matplotlib import colors
 
 # Other scripts and my stuff
 script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = Path(script_dir).parent
+parent_dir = Path(script_dir).parent.parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='fig_rev_gamma',
+                        default='figure2_main',
                         help='Name of the output figure [w/o file extension]')
     args = parser.parse_args()
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     noise_E = 1000
     noise_I = 100
     ramp_E = True
-    ramp_I = True
+    ramp_I = False
 
     # Filenames
     fname = f"input_ramp_E_{bool(ramp_E)}_I_{bool(ramp_I)}_noise_E_{noise_E:0.0f}uV_I_{noise_I:0.0f}uV"
@@ -321,8 +321,8 @@ if __name__ == "__main__":
 
         # Plot the rasters and FRs
         for ax in ax_rasters[idx]:
-            ax.plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=msize)
-            ax.plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=msize)
+            ax.plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=msize, rasterized=True)
+            ax.plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=msize, rasterized=True)
 
         # ax_FRs.plot(tv_E, (FR_E/N_E), color=c_exc, label='Excitatory')
         # ax_FRs.plot(tv_I, (FR_I/N_I)+1, color=c_inh, label='Inhibitory')
@@ -447,8 +447,8 @@ if __name__ == "__main__":
     # G_outer.tight_layout(fig)
 
     # Save the figure
-    fig.savefig(os.path.join('figures', 'rev_eLife', f"main_{ramp_E}_{areas[0]}_{ramp_I}_{areas[1]}_{fname}_spec_com_rev_eLife.png"))
-    fig.savefig(os.path.join('figures', 'rev_eLife', f"main_{ramp_E}_{areas[0]}_{ramp_I}_{areas[1]}_{fname}_spec_com_rev_eLife.pdf"))
+    fig.savefig(os.path.join('figures', 'rev_eLife', f"main_{ramp_E}_{areas[0]}_{ramp_I}_{areas[1]}_{fname}_spec_com_rev_eLife.png"), dpi=300)
+    fig.savefig(os.path.join('figures', 'rev_eLife', f"main_{ramp_E}_{areas[0]}_{ramp_I}_{areas[1]}_{fname}_spec_com_rev_eLife.pdf"), dpi=300)
 
     # Show the figure
     plt.show()

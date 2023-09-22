@@ -17,7 +17,7 @@ from matplotlib import ticker
 
 # Other scripts and my stuff
 script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = Path(script_dir).parent
+parent_dir = Path(script_dir).parent.parent
 sys.path.insert(0, os.path.abspath(parent_dir))
 
 from src.freq_analysis import *
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-fn', '--figure-name',
                         type=str,
-                        default='fig_rev_gamma',
+                        default='fig2_SUPP2',
                         help='Name of the output figure [w/o file extension]')
     args = parser.parse_args()
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     ax_rasters[1].set_title('Excitatory-Inhibitory Decoupled (added noise)', loc='center', fontsize=fsize_titles)
 
     # xy-labels
-    ax_FI_E.set_ylabel('Spiking rate [Hz]', fontsize=fsize_xylabels)
+    ax_FI_E.set_ylabel('Firing rate [Hz]', fontsize=fsize_xylabels)
     ax_FI_E.set_xlabel('Input [nA]', fontsize=fsize_xylabels)
     ax_FI_I.set_xlabel('Input [nA]', fontsize=fsize_xylabels)
 
@@ -232,8 +232,8 @@ if __name__ == "__main__":
     # Panels text
     fig.text(0.02, 0.98, 'A.', weight='bold', fontsize=fsize_panels)
     fig.text(0.02, 0.78, 'B.', weight='bold', fontsize=fsize_panels)
-    fig.text(0.02, 0.63, 'C.', weight='bold', fontsize=fsize_panels)
-    fig.text(0.02, 0.3, 'D.', weight='bold', fontsize=fsize_panels)
+    # fig.text(0.02, 0.63, 'C.', weight='bold', fontsize=fsize_panels)
+    fig.text(0.02, 0.3, 'C.', weight='bold', fontsize=fsize_panels)
 
     # Read the data
     for idx,conn in enumerate(conn_cases):
@@ -264,8 +264,8 @@ if __name__ == "__main__":
         tv_exc_FR, FR_exc, _ = my_FR(spikes=E_t, duration=duration, window_size=winsize_FR, overlap=overlap_FR)
 
         # Plot the rasters and FRs
-        ax_rasters[idx].plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=1)
-        ax_rasters[idx].plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=1)
+        ax_rasters[idx].plot(E_t, E_i, linestyle='None', color=c_exc, marker='.', markersize=1, rasterized=True)
+        ax_rasters[idx].plot(I_t, I_i+N_E, linestyle='None', color=c_inh, marker='.', markersize=1, rasterized=True)
 
         # ax_FRs.plot(tv_E, (FR_E/N_E), color=c_exc, label='Excitatory')
         # ax_FRs.plot(tv_I, (FR_I/N_I)+1, color=c_inh, label='Inhibitory')
@@ -311,8 +311,8 @@ if __name__ == "__main__":
     # G_outer.tight_layout(fig)
     
     # Save the figure
-    fig.savefig(os.path.join('figures', 'rev_eLife', "S2_2_rev_eLife.png"))
-    fig.savefig(os.path.join('figures', 'rev_eLife', "S2_2_rev_eLife.pdf"))
+    fig.savefig(os.path.join('figures', 'rev_eLife', f"{args.figure_name}.png"), dpi=300)
+    fig.savefig(os.path.join('figures', 'rev_eLife', f"{args.figure_name}.pdf"), dpi=300)
 
     # Show the figure
     plt.show()
