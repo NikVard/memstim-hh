@@ -148,4 +148,8 @@ jupyter/*
 GUI/
 
 # Results
-results*
+results/*
+
+
+# Brian2
+tmp
