@@ -3,7 +3,6 @@
 from brian2 import *
 from scipy.spatial import distance as dst
 from scipy.spatial.transform import Rotation as R
-from tqdm import tqdm
 from random import sample as smplf
 
 import os
@@ -74,22 +73,11 @@ parser.add_argument('-sd', '--save_dir',
                     default='results',
                     help='Destination directory to save the results')
 
-parser.add_argument('--cuda', action='store_true')
-parser.add_argument('--no-cuda', dest='cuda', action='store_false')
-parser.set_defaults(cuda=True)
-
-
 args = parser.parse_args()
 filename = args.parameters
 resdir = args.save_dir
 
-# This part controls for CUDA runs
-if args.cuda:
-    import brian2cuda
-    set_device("cuda_standalone")
-    print("[!] Running in CUDA mode!")
-
-
+# Configuration file
 try:
     data = parameters.load(filename)
     print('Using "{0}"'.format(filename))
@@ -221,7 +209,7 @@ pos = hstack((pos, zeros((len(pos), 1))))
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_EC[0]),:]
+pos = pos[smplf(range(10000), settings.N_EC[0]),:]
 # pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -248,7 +236,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_EC[1]),:]
+pos = pos[smplf(range(1000), settings.N_EC[1]),:]
 # pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -276,8 +264,8 @@ G_all[0][0].append(G_E)
 G_all[0][1].append(G_I)
 G_v0_all[0][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_EC[0]))
 G_v0_all[0][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_EC[1]))
-G_E.v = G_v0_all[0][0]
-G_I.v = G_v0_all[0][1]
+G_E.v = G_v0_all[0][0][0]
+G_I.v = G_v0_all[0][1][0]
 print('[\u2022]\tEC: done')
 
 
@@ -288,7 +276,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_DG[0]),:]
+pos = pos[smplf(range(10000), settings.N_DG[0]),:]
 # pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -315,7 +303,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 100), settings.N_DG[1]),:]
+pos = pos[smplf(range(100), settings.N_DG[1]),:]
 # pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -343,8 +331,8 @@ G_all[1][0].append(G_E)
 G_all[1][1].append(G_I)
 G_v0_all[1][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_DG[0]))
 G_v0_all[1][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_DG[1]))
-G_E.v = G_v0_all[1][0]
-G_I.v = G_v0_all[1][1]
+G_E.v = G_v0_all[1][0][0]
+G_I.v = G_v0_all[1][1][0]
 print('[\u2022]\tDG: done')
 
 
@@ -355,7 +343,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_CA3[0]),:]
+pos = pos[smplf(range(1000), settings.N_CA3[0]),:]
 # pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -382,7 +370,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 100), settings.N_CA3[1]),:]
+pos = pos[smplf(range(100), settings.N_CA3[1]),:]
 # pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -410,8 +398,8 @@ G_all[2][0].append(G_E)
 G_all[2][1].append(G_I)
 G_v0_all[2][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA3[0]))
 G_v0_all[2][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA3[1]))
-G_E.v = G_v0_all[2][0]
-G_I.v = G_v0_all[2][1]
+G_E.v = G_v0_all[2][0][0]
+G_I.v = G_v0_all[2][1][0]
 print('[\u2022]\tCA3: done')
 
 
@@ -422,7 +410,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_CA1[0]),:]
+pos = pos[smplf(range(10000), settings.N_CA1[0]),:]
 # pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -449,7 +437,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_CA1[1]),:]
+pos = pos[smplf(range(1000), settings.N_CA1[1]),:]
 # pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -477,8 +465,8 @@ G_all[3][0].append(G_E)
 G_all[3][1].append(G_I)
 G_v0_all[3][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA1[0]))
 G_v0_all[3][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA1[1]))
-G_E.v = G_v0_all[3][0]
-G_I.v = G_v0_all[3][1]
+G_E.v = G_v0_all[3][0][0]
+G_I.v = G_v0_all[3][1][0]
 print('[\u2022]\tCA1: done')
 
 # Flatten
@@ -726,8 +714,8 @@ if settings.fixed_input_enabled:
     G_inputs.append(G_input)
     print('[\u2022]\tFixed input group: done')
 
-    # state monitor
-    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True)
+    # state monitors
+    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True, dt=monitor_step)
     state_mon_inputs.append(state_mon_theta_rhytm)
     print('[\u2022]\tState monitor [rhythm]: done')
 
@@ -793,7 +781,7 @@ else:
     print('\n[43] Kuramoto and Filter Monitors...')
     print('-'*32)
 
-    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True)
+    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True, dt=monitor_step)
     state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
     state_mon_inputs.append(state_mon_kuramoto)
     state_mon_inputs.append(state_mon_order_param)
@@ -950,7 +938,7 @@ print('[\u2022]\tNetwork connections: done')
 # Add fixed monitors for the inputs
 net.add(state_mon_inputs)
 
-print('\n Creating fixed monitors...')
+print('\n[71] Creating fixed monitors...')
 spike_mon_E_all = [[SpikeMonitor(G_py, name=G_py.name+'_spikemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
 spike_mon_I_all = [[SpikeMonitor(G_inh, name=G_inh.name+'_spikemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('[\u2022]\tSpike monitors: done')
@@ -960,7 +948,7 @@ rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_in
 print('[\u2022]\tRate monitors: done')
 
 # spikes2rates monitor (vout)
-state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True, dt=monitor_step)
 print('[\u2022]\tState monitor [drive]: done')
 
 # Adding them to the network
@@ -1249,7 +1237,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_i.append(i_val)
 
     for t_val in SM.t:
-        SM_t.append(t_val/msecond)
+        SM_t.append(t_val/ms)
 
     print("[+] Saving spikes from", SM.source.name)
     fname = SM.name
