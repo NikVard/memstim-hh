@@ -316,4 +316,3 @@ dependencies:
       - setuptools==69.0.2
       - tklfp==0.2.0
       - typish==1.9.3
-prefix: /home/nikos/miniconda3/envs/brian2_cuda

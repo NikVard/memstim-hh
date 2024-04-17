@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from brian2 import *
+import brian2cuda
 from scipy.spatial import distance as dst
 from scipy.spatial.transform import Rotation as R
-from tqdm import tqdm
+# from tqdm import tqdm
 from random import sample as smplf
 
 import os
@@ -49,11 +50,55 @@ def parse_positions(fname):
     return np.array([x, y, z]).T
 
 
+# Decorators and functions for writing manually without a StateMonitor object
+# def disk_writer(path, name):
+#     cpp_code_values = '''
+#         double store_value(int i, double value) {
+#             static std::ofstream outfile("%filename%", ios::binary | ios::out);
+#             static double data_container[%size%];  // stores data for one timestep
+#             data_container[index] = value;
+
+#             if (index == %size% - 1) { //write to disk when last value has been written
+#                 outfile.write(reinterpret_cast<char*>(data_container), %size%*sizeof(double));
+#             }
+#             return 0.;  // unused but required at the moment
+#         }
+#     '''.replace('%name%', name).replace('%filename%', filename).replace('%size%', str(size))
+
+
+#     @implementation('cpp', cpp_code_values.replace('%filename%', ))
+#     @check_units(index=1, value=1, result=1)
+#     def disk_writer(index, value):
+#         raise NotImplementedError('Use standalone mode')
+#     return disk_writer
+
+def disk_writer(filename, name):
+    cpp_code_values = '''
+    // Note that functions always need a return value at the moment
+    double %name%(int i, double time, double value) {
+        static std::ofstream f("%file2write%");  // opens the file the first time
+        f << i << "\t" << time << "\t" << value << "\n";
+        return 0.;  // unused
+    }
+    '''.replace('%name%', name).replace('%file2write%', filename+'.txt')
+
+    print(cpp_code_values)
+
+    @implementation('cpp', cpp_code_values)
+    @check_units(i=1, t=second, value=volt, result=1) 
+    def disk_writer(index, value):
+        raise NotImplementedError('C++ only')
+    return disk_writer
+
+# file_name = '/tmp/v_values.npy'
+# store_v = disk_writer(file_name, len(group), 'store_v')
+# group.run_regularly('dummy = store_v(i, v)')
+# v_values = np.fromfile(file_name)
+# v_values = v_values.reshape((-1, len(group))).T
+
+
 # Configuration
 # -------------------------------------------------------------#
-# Use C++ standalone code generation TODO: Experimental!
-#set_device('cpp_standalone')
-
 # Parallel w/ Cython - independent caches
 cache_dir = os.path.expanduser(f'~/.cython/brian-pid-{os.getpid()}')
 prefs.codegen.runtime.cython.cache_dir = cache_dir
@@ -71,25 +116,42 @@ parser.add_argument('-p', '--parameters',
 parser.add_argument('-sd', '--save_dir',
                     nargs='?',
                     type=str,
-                    default='results',
+                    default='/media/Simulations',
                     help='Destination directory to save the results')
 
-parser.add_argument('--cuda', action='store_true')
-parser.add_argument('--no-cuda', dest='cuda', action='store_false')
-parser.set_defaults(cuda=True)
-
+# parser.add_argument('--cuda', action='store_true')
+# parser.add_argument('--no-cuda', dest='cuda', action='store_false')
+# parser.set_defaults(cuda=False)
 
 args = parser.parse_args()
 filename = args.parameters
 resdir = args.save_dir
 
-# This part controls for CUDA runs
-if args.cuda:
-    import brian2cuda
-    set_device("cuda_standalone")
-    print("[!] Running in CUDA mode!")
+# Setting device as "cuda_standalone"
+set_device("cuda_standalone", directory='output', debug=True, clean=True)
+# set_device('cpp_standalone', directory='my_directory', debug=True)
 
 
+# Prefs to be updated to run on this platform
+# prefs.devices.cuda_standalone.cuda_backend.cuda_path = "/usr/local/cuda-11.4"
+# prefs.devices.cuda_standalone.cuda_backend.device_query_path = "/usr/local/cuda/samples/1_Utilities/deviceQuery/deviceQuery"
+# prefs.devices.cuda_standalone.cuda_backend.detect_gpus = False
+# prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
+# prefs.devices.cuda_standalone.cuda_backend.compute_capability = 7.2
+# prefs.devices.cuda_standalone.cuda_backend.cuda_runtime_version = 11.4
+# prefs.devices.cuda_standalone.parallel_blocks = 6
+# prefs.devices.cuda_standalone.cuda_backend.cuda_path = '/usr/lib/cuda'
+prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j4']
+
+
+
+# OS directives
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+print("[!] Running in CUDA mode!")
+
+
+# Configuration file
 try:
     data = parameters.load(filename)
     print('Using "{0}"'.format(filename))
@@ -221,7 +283,7 @@ pos = hstack((pos, zeros((len(pos), 1))))
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_EC[0]),:]
+pos = pos[smplf(range(10000), settings.N_EC[0]),:]
 # pos = parse_positions(os.path.join('positions', 'EC_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -248,7 +310,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_EC[1]),:]
+pos = pos[smplf(range(1000), settings.N_EC[1]),:]
 # pos = parse_positions(os.path.join('positions', 'EC_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -276,8 +338,8 @@ G_all[0][0].append(G_E)
 G_all[0][1].append(G_I)
 G_v0_all[0][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_EC[0]))
 G_v0_all[0][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_EC[1]))
-G_E.v = G_v0_all[0][0]
-G_I.v = G_v0_all[0][1]
+G_E.v = G_v0_all[0][0][0]
+G_I.v = G_v0_all[0][1][0]
 print('[\u2022]\tEC: done')
 
 
@@ -288,7 +350,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_DG[0]),:]
+pos = pos[smplf(range(10000), settings.N_DG[0]),:]
 # pos = parse_positions(os.path.join('positions', 'DG_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -315,7 +377,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 100), settings.N_DG[1]),:]
+pos = pos[smplf(range(100), settings.N_DG[1]),:]
 # pos = parse_positions(os.path.join('positions', 'DG_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -343,8 +405,8 @@ G_all[1][0].append(G_E)
 G_all[1][1].append(G_I)
 G_v0_all[1][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_DG[0]))
 G_v0_all[1][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_DG[1]))
-G_E.v = G_v0_all[1][0]
-G_I.v = G_v0_all[1][1]
+G_E.v = G_v0_all[1][0][0]
+G_I.v = G_v0_all[1][1][0]
 print('[\u2022]\tDG: done')
 
 
@@ -355,7 +417,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_CA3[0]),:]
+pos = pos[smplf(range(1000), settings.N_CA3[0]),:]
 # pos = parse_positions(os.path.join('positions', 'CA3_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -382,7 +444,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 100), settings.N_CA3[1]),:]
+pos = pos[smplf(range(100), settings.N_CA3[1]),:]
 # pos = parse_positions(os.path.join('positions', 'CA3_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -410,8 +472,8 @@ G_all[2][0].append(G_E)
 G_all[2][1].append(G_I)
 G_v0_all[2][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA3[0]))
 G_v0_all[2][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA3[1]))
-G_E.v = G_v0_all[2][0]
-G_I.v = G_v0_all[2][1]
+G_E.v = G_v0_all[2][0][0]
+G_I.v = G_v0_all[2][1][0]
 print('[\u2022]\tCA3: done')
 
 
@@ -422,7 +484,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 10000), settings.N_CA1[0]),:]
+pos = pos[smplf(range(10000), settings.N_CA1[0]),:]
 # pos = parse_positions(os.path.join('positions', 'CA1_exc.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -449,7 +511,7 @@ pos = hstack((pos, zeros((len(pos), 1)))) # add z-axis
 pos = r.apply(pos)
 pos *= scale
 pos[:,2] += 15*mm*rand(len(pos))
-pos = pos[smplf(range(1, 1000), settings.N_CA1[1]),:]
+pos = pos[smplf(range(1000), settings.N_CA1[1]),:]
 # pos = parse_positions(os.path.join('positions', 'CA1_inh.txt'))
 idx = np.argsort(pos[:,2]) # sort neurons by increasing z-coordinate
 pos = pos[idx]
@@ -477,8 +539,8 @@ G_all[3][0].append(G_E)
 G_all[3][1].append(G_I)
 G_v0_all[3][0].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA1[0]))
 G_v0_all[3][1].append(-60.*mvolt - 10.*mvolt*rand(settings.N_CA1[1]))
-G_E.v = G_v0_all[3][0]
-G_I.v = G_v0_all[3][1]
+G_E.v = G_v0_all[3][0][0]
+G_I.v = G_v0_all[3][1][0]
 print('[\u2022]\tCA1: done')
 
 # Flatten
@@ -608,53 +670,53 @@ syn_inter_all = [syn_EC_DG_all, syn_EC_CA3_all, syn_EC_CA1_all, syn_DG_CA3_all, 
 print('\n[20] Vm average groups...')
 print('-'*32)
 
-G_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
-syn_Vm_avg_all = [[[] for pops in range(2)] for areas in range(4)]
+# G_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
+# syn_Vm_avg_all = [[[] for pops in range(2)] for areas in range(4)]
 
-for area_idx in range(4):
-    print('[+] {0}:'.format(areas[area_idx]))
+# for area_idx in range(4):
+#     print('[+] {0}:'.format(areas[area_idx]))
 
-    G_E = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_E'.format(areas[area_idx]))
-    G_I = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_I'.format(areas[area_idx]))
-    G_E.sum_v = mean(G_v0_all[area_idx][0][0])
-    G_I.sum_v = mean(G_v0_all[area_idx][1][0])
-    G_Vm_avg[area_idx][0].append(G_E)
-    G_Vm_avg[area_idx][1].append(G_I)
-    print('[\u2022]\tNeuronGroups: done')
+#     G_E = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_E'.format(areas[area_idx]))
+#     G_I = NeuronGroup(1, eq_record_neurons, name='Vm_avg_{0}_I'.format(areas[area_idx]))
+#     G_E.sum_v = mean(G_v0_all[area_idx][0][0])
+#     G_I.sum_v = mean(G_v0_all[area_idx][1][0])
+#     G_Vm_avg[area_idx][0].append(G_E)
+#     G_Vm_avg[area_idx][1].append(G_I)
+#     print('[\u2022]\tNeuronGroups: done')
 
-    Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_synapses)
-    Syn_E.connect()
-    Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_synapses)
-    Syn_I.connect()
-    syn_Vm_avg_all[area_idx][0].append(Syn_E)
-    syn_Vm_avg_all[area_idx][1].append(Syn_I)
-    print('[\u2022]\tSynapses: done')
+#     Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_synapses)
+#     Syn_E.connect()
+#     Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_synapses)
+#     Syn_I.connect()
+#     syn_Vm_avg_all[area_idx][0].append(Syn_E)
+#     syn_Vm_avg_all[area_idx][1].append(Syn_I)
+#     print('[\u2022]\tSynapses: done')
 
 
-# Summed I_SynE/I per group per area
-print('\n[21] I_SynE/I summed groups...')
-print('-'*32)
+# # Summed I_SynE/I per group per area
+# print('\n[21] I_SynE/I summed groups...')
+# print('-'*32)
 
-G_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
-syn_ISynI_sum_all = [[[] for pops in range(2)] for areas in range(4)]
+# G_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
+# syn_ISynI_sum_all = [[[] for pops in range(2)] for areas in range(4)]
 
-for area_idx in range(4):
-    print('[+] {0}:'.format(areas[area_idx]))
+# for area_idx in range(4):
+#     print('[+] {0}:'.format(areas[area_idx]))
 
-    # One unit records both I_SynE and I_SynI
-    G_E = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_E'.format(areas[area_idx]))
-    G_I = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_I'.format(areas[area_idx]))
-    G_ISyn_sum[area_idx][0].append(G_E)
-    G_ISyn_sum[area_idx][1].append(G_I)
-    print('[\u2022]\tNeuronGroups: done')
+#     # One unit records both I_SynE and I_SynI
+#     G_E = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_E'.format(areas[area_idx]))
+#     G_I = NeuronGroup(1, eq_record_LFP_neurons, name='ISyn_sum_{0}_I'.format(areas[area_idx]))
+#     G_ISyn_sum[area_idx][0].append(G_E)
+#     G_ISyn_sum[area_idx][1].append(G_I)
+#     print('[\u2022]\tNeuronGroups: done')
 
-    Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_LFP_synapses)
-    Syn_E.connect()
-    Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_LFP_synapses)
-    Syn_I.connect()
-    syn_ISynI_sum_all[area_idx][0].append(Syn_E)
-    syn_ISynI_sum_all[area_idx][1].append(Syn_I)
-    print('[\u2022]\tSynapses: done')
+#     Syn_E = Synapses(G_all[area_idx][0][0], G_E, model=eq_record_LFP_synapses)
+#     Syn_E.connect()
+#     Syn_I = Synapses(G_all[area_idx][1][0], G_I, model=eq_record_LFP_synapses)
+#     Syn_I.connect()
+#     syn_ISynI_sum_all[area_idx][0].append(Syn_E)
+#     syn_ISynI_sum_all[area_idx][1].append(Syn_I)
+#     print('[\u2022]\tSynapses: done')
 
 
 
@@ -714,8 +776,7 @@ if settings.fixed_input_enabled:
     inp_theta_rect = (A1-A0)*(sin(2*pi*f_rhythm/Hz*tv-pi/2)+1)/2+A0
     trail_zeros = zeros(int(settings.fixed_input_delay/(settings.dt*second)))
     inp_theta_delayed = concatenate((trail_zeros, inp_theta_rect/nA))
-    scaling = np.linspace(0., 0.4, len(inp_theta_delayed))
-    inp_theta = TimedArray(scaling*inp_theta_delayed*nA, dt=settings.dt) # external theta (TESTING)
+    inp_theta = TimedArray(inp_theta_delayed*nA, dt=settings.dt) # external theta (TESTING)
     # THERE WAS A 0.5 GAIN HERE!!!
 
     # Make the input group and append it to the list
@@ -726,8 +787,8 @@ if settings.fixed_input_enabled:
     G_inputs.append(G_input)
     print('[\u2022]\tFixed input group: done')
 
-    # state monitor
-    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True)
+    # state monitors
+    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True, dt=monitor_step)
     state_mon_inputs.append(state_mon_theta_rhytm)
     print('[\u2022]\tState monitor [rhythm]: done')
 
@@ -793,8 +854,8 @@ else:
     print('\n[43] Kuramoto and Filter Monitors...')
     print('-'*32)
 
-    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True)
-    state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True)
+    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True, dt=1*ms) ### TODO:Fix this with globals
+    state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True, dt=1*ms) ### TODO:Fix this with globals
     state_mon_inputs.append(state_mon_kuramoto)
     state_mon_inputs.append(state_mon_order_param)
     print('[\u2022]\tState monitor [Theta]: done')
@@ -887,7 +948,6 @@ stim_MS = TimedArray(values=stim_MS_gain*xstim_zero, dt=settings.stim_dt*second,
 # Add any extra monitors here
 # -------------------------------------------------------------#
 print('\n[60] Adding extra monitors...')
-extra_mons = []
 
 # state_mon_EC_E_curr = StateMonitor(G_all[0][0][0], ['I_CAN', 'I_M', 'I_leak', 'I_K', 'I_Na', 'I_Ca', 'I_SynE', 'I_SynI', 'I_SynExt', 'I_SynHipp', 'I_exc', 'I_stim', 'Ca_i'], record=np.arange(4995,5006), name='EC_E_currents')
 # print('[\u2022]\tState monitor [EC-E currents]: done')
@@ -908,9 +968,6 @@ extra_mons = []
 # state_mon_EC_ICAN = StateMonitor(G_all[0][0][0], ['I_CAN'], record=[0])
 # print('[\u2022]\tEC I_CAN monitor: done')
 
-state_mon_Ca_i_PyCAN_CA1 = StateMonitor(G_all[3][0][0], ['Ca_i'], record = np.concatenate((np.arange(0,10), np.arange(500, 510), np.arange(900, 910))))
-extra_mons.append(state_mon_Ca_i_PyCAN_CA1)
-
 
 
 # Create the Network
@@ -922,8 +979,8 @@ net = Network()
 net.add(G_all) # add groups
 net.add(G_S2R) # was missing
 net.add(G_inputs)
-net.add(G_Vm_avg)
-net.add(G_ISyn_sum)
+# net.add(G_Vm_avg)
+# net.add(G_ISyn_sum)
 print('[\u2022]\tNetwork groups: done')
 
 for syn_intra_curr in make_flat(syn_intra_all): # add synapses (intra)
@@ -934,13 +991,13 @@ for syn_inter_curr in make_flat(syn_inter_all): # add synapses (inter)
     if syn_inter_curr != 0:
         net.add(syn_inter_curr)
 
-for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
-    if syn_Vm_avg !=0:
-        net.add(syn_Vm_avg)
+# for syn_Vm_avg in make_flat(syn_Vm_avg_all): # add synapses Vm avg
+#     if syn_Vm_avg !=0:
+#         net.add(syn_Vm_avg)
 
-for syn_ISynI in make_flat(syn_ISynI_sum_all): # add synapses ISyn avg
-    if syn_ISynI !=0:
-        net.add(syn_ISynI)
+# for syn_ISynI in make_flat(syn_ISynI_sum_all): # add synapses ISyn avg
+#     if syn_ISynI !=0:
+#         net.add(syn_ISynI)
 
 net.add(syn_CA1_2_rates)
 net.add(syn_inputs) # synapses about inputs
@@ -950,7 +1007,7 @@ print('[\u2022]\tNetwork connections: done')
 # Add fixed monitors for the inputs
 net.add(state_mon_inputs)
 
-print('\n Creating fixed monitors...')
+print('\n[71] Creating fixed monitors...')
 spike_mon_E_all = [[SpikeMonitor(G_py, name=G_py.name+'_spikemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
 spike_mon_I_all = [[SpikeMonitor(G_inh, name=G_inh.name+'_spikemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
 print('[\u2022]\tSpike monitors: done')
@@ -960,7 +1017,7 @@ rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_in
 print('[\u2022]\tRate monitors: done')
 
 # spikes2rates monitor (vout)
-state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True)
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True, dt=monitor_step)
 print('[\u2022]\tState monitor [drive]: done')
 
 # Adding them to the network
@@ -968,9 +1025,51 @@ net.add(spike_mon_E_all, spike_mon_I_all)
 net.add(rate_mon_E_all, rate_mon_I_all)
 net.add(state_mon_s2r)
 
-state_mon_Vm_CA1_exc = StateMonitor(G_all[3][0][0], ['v'], record=np.concatenate((np.arange(0,10), np.arange(5000, 5010), np.arange(9000,9010))))
-net.add(state_mon_Vm_CA1_exc)
-net.add(extra_mons)
+
+# Add optional monitors %% TODO: fix those
+print('\n[72] Creating optional monitors...')
+
+# # Avg. Vm monitors + Summed I_SynE/I monitors
+# state_mon_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
+# state_mon_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
+  
+# for area_idx in range(4):
+#     G_E = G_Vm_avg[area_idx][0][0]
+#     G_I = G_Vm_avg[area_idx][1][0]
+
+#     SM_Vm_avg_E = StateMonitor(G_E, ['sum_v'], record=True, name='Vm_avg_mon_{0}_E'.format(areas[area_idx]))
+#     SM_Vm_avg_I = StateMonitor(G_I, ['sum_v'], record=True, name='Vm_avg_mon_{0}_I'.format(areas[area_idx]))
+#     state_mon_Vm_avg[area_idx][0].append(SM_Vm_avg_E)
+#     state_mon_Vm_avg[area_idx][1].append(SM_Vm_avg_I)
+#     print('[\u2022]\tVm Monitors: done')
+
+#     G_E = G_ISyn_sum[area_idx][0][0]
+#     G_I = G_ISyn_sum[area_idx][1][0]
+
+#     SM_ISyn_sum_E = StateMonitor(G_E, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_E'.format(areas[area_idx]))
+#     SM_ISyn_sum_I = StateMonitor(G_I, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_I'.format(areas[area_idx]))
+#     state_mon_ISyn_sum[area_idx][0].append(SM_ISyn_sum_E)
+#     state_mon_ISyn_sum[area_idx][1].append(SM_ISyn_sum_I)
+#     print('[\u2022]\tI_SynE/I summed Monitors: done')
+
+# # Add monitors to network
+# # net.add(state_mon_E_all, state_mon_I_all)
+# net.add(state_mon_Vm_avg)
+# net.add(state_mon_ISyn_sum)
+
+# for area_idx in range(4):
+#     G_E = G_Vm_avg[area_idx][0][0]
+#     G_I = G_Vm_avg[area_idx][1][0]
+
+#     funcname_E = 'store_Vm_avg_{0}_E'.format(areas[area_idx])
+#     store_Vm_E = disk_writer(os.path.join(dirs['data'], 'Vm_avg_mon_{0}_E'.format(areas[area_idx])), funcname_E)
+#     G_E.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_E), dt=monitor_step)
+
+#     funcname_I = 'store_Vm_avg_{0}_I'.format(areas[area_idx])
+#     store_Vm_I = disk_writer(os.path.join(dirs['data'], 'Vm_avg_mon_{0}_I'.format(areas[area_idx])), funcname_I)
+#     G_I.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_I), dt=monitor_step)
+    
+# print('[\u2022]\tOptional monitors: done')
 
 
 
@@ -981,140 +1080,42 @@ defaultclock.dt = settings.dt
 tstep = defaultclock.dt
 
 # Preparation for simulations
-t_step = 1*second
+t_step = 0.1*second
 t_run = settings.duration
 run_sim = True
 
 print('\n[80] Starting simulation...')
 print('-'*32)
 
+# Run the simulaton
 start = time.time()
-while run_sim:
-    # Create all the monitors
-    # (spikes/rates)
-
-    print('\n Creating monitors...')
-    # state_mon_E_all = [[StateMonitor(G_py, ['v'], record=True) for G_py in G_all[i][0] if G_py] for i in range(4)]
-    # state_mon_I_all = [[StateMonitor(G_inh, ['v'], record=True) for G_inh in G_all[i][1] if G_inh] for i in range(4)]
-    # print('[\u2022]\tState monitors [v]: done')
-
-    # Avg. Vm monitors + Summed I_SynE/I monitors
-    state_mon_Vm_avg = [[[] for pops in range(2)] for areas in range(4)]
-    state_mon_ISyn_sum = [[[] for pops in range(2)] for areas in range(4)]
-
-    for area_idx in range(4):
-        G_E = G_Vm_avg[area_idx][0][0]
-        G_I = G_Vm_avg[area_idx][1][0]
-
-        SM_Vm_avg_E = StateMonitor(G_E, ['sum_v'], record=True, name='Vm_avg_mon_{0}_E'.format(areas[area_idx]))
-        SM_Vm_avg_I = StateMonitor(G_I, ['sum_v'], record=True, name='Vm_avg_mon_{0}_I'.format(areas[area_idx]))
-        state_mon_Vm_avg[area_idx][0].append(SM_Vm_avg_E)
-        state_mon_Vm_avg[area_idx][1].append(SM_Vm_avg_I)
-        print('[\u2022]\tVm Monitors: done')
-
-        G_E = G_ISyn_sum[area_idx][0][0]
-        G_I = G_ISyn_sum[area_idx][1][0]
-
-        SM_ISyn_sum_E = StateMonitor(G_E, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_E'.format(areas[area_idx]))
-        SM_ISyn_sum_I = StateMonitor(G_I, ['sum_I_SynE', 'sum_I_SynI'], record=True, name='ISyn_sum_mon_{0}_I'.format(areas[area_idx]))
-        state_mon_ISyn_sum[area_idx][0].append(SM_ISyn_sum_E)
-        state_mon_ISyn_sum[area_idx][1].append(SM_ISyn_sum_I)
-        print('[\u2022]\tI_SynE/I summed Monitors: done')
-
-    # LFP proxy v2 -- Added on 30/06/2023
-    # Add StateMonitors for the synaptic currents per neuron
-    # state_mon_ISynE_all = [[StateMonitor(G_py, ['I_SynE'], record=True, dt=0.1*ms, name=G_py.name + '_I_synE_statemon') for G_py in G_all[i][0] if G_py] for i in range(4)]
-    # state_mon_ISynI_all = [[StateMonitor(G_inh, ['I_SynI'], record=True, dt=0.1*ms, name=G_inh.name + '_I_synI_statemon') for G_inh in G_all[i][1] if G_inh] for i in range(4)]
-    # print('[\u2022]\tSynaptic (E/I) current monitors: done')
-
-    # Add monitors to network
-    # net.add(state_mon_E_all, state_mon_I_all)
-    net.add(state_mon_Vm_avg)
-    net.add(state_mon_ISyn_sum)
-    # net.add(state_mon_ISynE_all, state_mon_ISynI_all)
-    print('[\u2022]\tNetwork monitors: done')
-
-    # Run the simulaton
-    if t_run >= t_step:
-        net.run(t_step, report='text', report_period=5*second, profile=True)
-        t_run -= t_step
-    else:
-        net.run(t_run, report='text', report_period=5*second, profile=True)
-        run_sim = False
-
-    # Write data to disk
-    # Vm avgs
-    print("[+] Saving Vm avgs")
-    for StM in make_flat(state_mon_Vm_avg):
-        print("[\u2022]\tStateMon: ", StM.name)
-        f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
-        np.savetxt(f, StM.sum_v/mV, fmt='%.8f')
-        f.write('\n')
-        f.close()
-
-    # I_SynE sum
-    print("[+] Saving I_SynE sums")
-    for StM in make_flat(state_mon_ISyn_sum):
-        print("[\u2022]\tStateMon: ", StM.name)
-        f = open(os.path.join(dirs['data'], StM.name+'_E.txt'),'a')
-        np.savetxt(f, StM.sum_I_SynE/nA, fmt='%.8f')
-        f.write('\n')
-        f.close()
-
-    # I_SynI sum
-    print("[+] Saving I_SynI sums")
-    for StM in make_flat(state_mon_ISyn_sum):
-        print("[\u2022]\tStateMon: ", StM.name)
-        f = open(os.path.join(dirs['data'], StM.name+'_I.txt'),'a')
-        np.savetxt(f, StM.sum_I_SynI/nA, fmt='%.8f')
-        f.write('\n')
-        f.close()
-
-    # # I_SynE
-    # print("[+] Saving I_SynE")
-    # for StM in make_flat(state_mon_ISynE_all):
-    #     print("[\u2022]\tStateMon: ", StM.name)
-    #     f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
-    #     np.savetxt(f, StM.I_SynE/nA, fmt='%.8f')
-    #     f.write('\n')
-    #     f.close()
-        
-    # # I_SynI
-    # print("[+] Saving I_SynI")
-    # for StM in make_flat(state_mon_ISynI_all):
-    #     print("[\u2022]\tStateMon: ", StM.name)
-    #     f = open(os.path.join(dirs['data'], StM.name+'.txt'),'a')
-    #     np.savetxt(f, StM.I_SynI/nA, fmt='%.8f')
-    #     f.write('\n')
-    #     f.close()
-
-    # Remove the monitors
-    net.remove(state_mon_Vm_avg)
-    net.remove(state_mon_ISyn_sum)
-    # net.remove(state_mon_ISynE_all, state_mon_ISynI_all)
-
-    # Free up memory
-    del state_mon_Vm_avg
-    del state_mon_ISyn_sum
-    # del state_mon_ISynE_all, state_mon_ISynI_all
-
-
+net.run(t_run, report='text', report_period=5*second, profile=True)
 end = time.time()
+
+# self.device = get_device()
+# self.device.build(run=False, directory=None)  # compile the code, but don't run it yet
+# self.device.run(directory=result_dir)
+
+
+# # Mandatory for multiple run() calls
+# device.build(directory='output', compile=True, run=True, debug=False)
+
 print(bcolors.GREEN + '[+]' + ' All simulations ended' + bcolors.ENDC)
 print(bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Simulation ran for '+str((end-start)/60)+' minutes')
 print(profiling_summary(net=net, show=4)) # show the top 10 objects that took the longest
 
+# Print the mean firing rates per area
 print('\n[81] Mean firing rates...')
 print('-'*32)
 
+# Calculate mean firing rates per area
 for area in range(len(G_all)):
-    # Calculate mean firing rates
     FR_exc_mean = (len(spike_mon_E_all[area][0].t)/settings.duration)/spike_mon_E_all[area][0].source.N
     FR_inh_mean = (len(spike_mon_I_all[area][0].t)/settings.duration)/spike_mon_I_all[area][0].source.N
 
+    # Print output to the terminal
     print(spike_mon_E_all[area][0].name.split('_')[0], 'E: ', FR_exc_mean, '\t', 'I: ', FR_inh_mean)
-    print('='*16)
-
+    print('='*16)    
 
 
 # Plot the results
@@ -1144,7 +1145,7 @@ for s in range(samples):
     r[s] = 1/N_Kur * sum(exp(1j*state_mon_kuramoto.Theta[:,s])) # order parameter r(t)
 '''
 
-# Fig2 version
+# Fig2 version ### TODO: update this part to the same functions used to generate Fig.2
 if settings.fixed_input_enabled:
     # Plot the non-Kuramoto theta drive
     fig_theta, ax_theta = subplots(1,1, figsize=(12,9))
@@ -1206,38 +1207,6 @@ np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), state_mon_s2r.drive_
 print("[+] Saving external stimulus")
 np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
 
-# Current monitors
-# print("[+] Saving EC-E currents")
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_CAN.txt'), state_mon_EC_E_curr.I_CAN, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_M.txt'), state_mon_EC_E_curr.I_M, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_leak.txt'), state_mon_EC_E_curr.I_leak, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_K.txt'), state_mon_EC_E_curr.I_K, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_Na.txt'), state_mon_EC_E_curr.I_Na, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_Ca.txt'), state_mon_EC_E_curr.I_Ca, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_SynE.txt'), state_mon_EC_E_curr.I_SynE, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_SynI.txt'), state_mon_EC_E_curr.I_SynI, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_SynExt.txt'), state_mon_EC_E_curr.I_SynExt, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_SynHipp.txt'), state_mon_EC_E_curr.I_SynHipp, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_exc.txt'), state_mon_EC_E_curr.I_exc, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_EC_E_curr.name+'_I_stim.txt'), state_mon_EC_E_curr.I_stim, fmt='%.8f')
-
-# print("[+] Saving CA1-E currents")
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_CAN.txt'), state_mon_CA1_E_curr.I_CAN/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_M.txt'), state_mon_CA1_E_curr.I_M/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_leak.txt'), state_mon_CA1_E_curr.I_leak/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_K.txt'), state_mon_CA1_E_curr.I_K/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Na.txt'), state_mon_CA1_E_curr.I_Na/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_Ca.txt'), state_mon_CA1_E_curr.I_Ca/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynE.txt'), state_mon_CA1_E_curr.I_SynE/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynI.txt'), state_mon_CA1_E_curr.I_SynI/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynExt.txt'), state_mon_CA1_E_curr.I_SynExt/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_SynHipp.txt'), state_mon_CA1_E_curr.I_SynHipp/nA, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['currents'], state_mon_CA1_E_curr.name+'_I_stim.txt'), state_mon_CA1_E_curr.I_stim/nA, fmt='%.8f')
-
-# print("[+] Saving EC-E/I Vm values")
-# np.savetxt(os.path.join(dirs['data'], state_mon_Vm_EC_exc.name+'.txt'), state_mon_Vm_EC_exc.v/mV, fmt='%.8f')
-# np.savetxt(os.path.join(dirs['data'], state_mon_Vm_EC_inh.name+'.txt'), state_mon_Vm_EC_inh.v/mV, fmt='%.8f')
-
 
 # Save the spikes and their times
 # -------------------------------------------------------------#
@@ -1249,7 +1218,7 @@ for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
         SM_i.append(i_val)
 
     for t_val in SM.t:
-        SM_t.append(t_val/msecond)
+        SM_t.append(t_val/ms)
 
     print("[+] Saving spikes from", SM.source.name)
     fname = SM.name
@@ -1278,5 +1247,7 @@ for G in G_flat:
 # print("\n[95] Cleanup...")
 # print('\n' + bcolors.YELLOW + '[!]' + bcolors.ENDC + ' Clearing cython cache')
 # clear_cache('cython')
+device.delete(code=False)
+
 
 sys.exit(0)

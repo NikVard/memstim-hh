@@ -148,4 +148,5 @@ jupyter/*
 GUI/
 
 # Results
-results*
+result*
+output*

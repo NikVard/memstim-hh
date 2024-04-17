@@ -33,6 +33,8 @@ sigma_noise_exc = 1000.*uvolt
 
 tstep = defaultclock.dt
 integ_method = 'exponential_euler'  # integration method
+monitor_step = 1*ms
+
 
 # Spikes-2-Rates filter
 filter_params = {
