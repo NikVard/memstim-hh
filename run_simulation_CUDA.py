@@ -133,17 +133,15 @@ set_device("cuda_standalone", directory='output', debug=True, clean=True)
 
 
 # Prefs to be updated to run on this platform
-# prefs.devices.cuda_standalone.cuda_backend.cuda_path = "/usr/local/cuda-11.4"
-# prefs.devices.cuda_standalone.cuda_backend.device_query_path = "/usr/local/cuda/samples/1_Utilities/deviceQuery/deviceQuery"
-# prefs.devices.cuda_standalone.cuda_backend.detect_gpus = False
-# prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
-# prefs.devices.cuda_standalone.cuda_backend.compute_capability = 7.2
-# prefs.devices.cuda_standalone.cuda_backend.cuda_runtime_version = 11.4
+prefs.devices.cuda_standalone.cuda_backend.cuda_path = "/usr/local/cuda-11.4"
+prefs.devices.cuda_standalone.cuda_backend.device_query_path = "/usr/local/cuda/samples/1_Utilities/deviceQuery/deviceQuery"
+prefs.devices.cuda_standalone.cuda_backend.detect_gpus = False
+prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
+prefs.devices.cuda_standalone.cuda_backend.compute_capability = 7.2
+prefs.devices.cuda_standalone.cuda_backend.cuda_runtime_version = 11.4
 # prefs.devices.cuda_standalone.parallel_blocks = 6
 # prefs.devices.cuda_standalone.cuda_backend.cuda_path = '/usr/lib/cuda'
-prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j4']
-
-
+prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j32']
 
 # OS directives
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -788,7 +786,7 @@ if settings.fixed_input_enabled:
     print('[\u2022]\tFixed input group: done')
 
     # state monitors
-    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True, dt=monitor_step)
+    state_mon_theta_rhytm = StateMonitor(G_input, ['rhythm'], record=True, dt=settings.dt)
     state_mon_inputs.append(state_mon_theta_rhytm)
     print('[\u2022]\tState monitor [rhythm]: done')
 
@@ -854,8 +852,8 @@ else:
     print('\n[43] Kuramoto and Filter Monitors...')
     print('-'*32)
 
-    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True, dt=1*ms) ### TODO:Fix this with globals
-    state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True, dt=1*ms) ### TODO:Fix this with globals
+    state_mon_kuramoto = StateMonitor(G_K, ['Theta'], record=True, dt=settings.dt) ### TODO:Fix this with globals
+    state_mon_order_param = StateMonitor(G_pop_avg, ['coherence', 'phase', 'rhythm', 'rhythm_rect'], record=True, dt=settings.dt) ### TODO:Fix this with globals
     state_mon_inputs.append(state_mon_kuramoto)
     state_mon_inputs.append(state_mon_order_param)
     print('[\u2022]\tState monitor [Theta]: done')
@@ -1017,7 +1015,7 @@ rate_mon_I_all = [[PopulationRateMonitor(G_inh) for G_inh in G_all[i][1] if G_in
 print('[\u2022]\tRate monitors: done')
 
 # spikes2rates monitor (vout)
-state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True, dt=monitor_step)
+state_mon_s2r = StateMonitor(G_S2R, ['drive'], record=True, dt=settings.dt)
 print('[\u2022]\tState monitor [drive]: done')
 
 # Adding them to the network
@@ -1063,11 +1061,11 @@ print('\n[72] Creating optional monitors...')
 
 #     funcname_E = 'store_Vm_avg_{0}_E'.format(areas[area_idx])
 #     store_Vm_E = disk_writer(os.path.join(dirs['data'], 'Vm_avg_mon_{0}_E'.format(areas[area_idx])), funcname_E)
-#     G_E.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_E), dt=monitor_step)
+#     G_E.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_E), dt=settings.dt)
 
 #     funcname_I = 'store_Vm_avg_{0}_I'.format(areas[area_idx])
 #     store_Vm_I = disk_writer(os.path.join(dirs['data'], 'Vm_avg_mon_{0}_I'.format(areas[area_idx])), funcname_I)
-#     G_I.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_I), dt=monitor_step)
+#     G_I.run_regularly('dummy = %funcname%(i, sum_v)'.replace('%funcname%', funcname_I), dt=settings.dt)
     
 # print('[\u2022]\tOptional monitors: done')
 
@@ -1118,12 +1116,74 @@ for area in range(len(G_all)):
     print('='*16)    
 
 
-# Plot the results
+# Saving data and plotting figures
 # -------------------------------------------------------------#
 print('\n[90] Post-simulation actions')
 print('-'*32)
 
-print('\n[91] Plotting results...')
+
+# Save the results as .txt files (rows: time | cols: data)
+# -------------------------------------------------------------#
+print('\n[91] Saving results...')
+
+# if not using fixed input
+if not settings.fixed_input_enabled:
+    # Kuramoto monitors
+    print("[+] Saving Kuramoto monitor data")
+    # np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm.T/nA, fmt='%.8f')
+    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
+
+# CA1 firing rate
+print("[+] Saving CA1 firing rate")
+np.savetxt(os.path.join(dirs['data'], 'rate_mon_E_CA1.txt'), rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
+np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), state_mon_s2r.drive_.T, fmt='%.8f')
+
+# External stimulus
+print("[+] Saving external stimulus")
+np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
+
+
+# Save the spikes and their times
+# -------------------------------------------------------------#
+print("\n[92] Saving spikes in time....")
+SM_i = []
+SM_t = []
+for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
+    for i_val in SM.i:
+        SM_i.append(i_val)
+
+    for t_val in SM.t:
+        SM_t.append(t_val/ms)
+
+    print("[+] Saving spikes from", SM.source.name)
+    fname = SM.name
+    np.savetxt(os.path.join(dirs['spikes'], fname + '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
+    np.savetxt(os.path.join(dirs['spikes'], fname + '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
+
+    SM_i.clear()
+    SM_t.clear()
+
+
+# Save the positions of the neurons in npy files
+# -------------------------------------------------------------#
+print("\n[93] Saving neuron positions...")
+for G in G_flat:
+    try:
+        print("[+] Saving group", G.name)
+        fname = '{group}'.format(group=G.name)
+        pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
+        np.save(os.path.join(dirs['positions'], fname), pos)
+
+    except AttributeError:
+        print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
+        continue
+
+
+# Plotting the results
+# -------------------------------------------------------------#
+print('\n[94] Plotting results...')
 tight_layout()
 
 # Plot the 3D shape
@@ -1184,64 +1244,6 @@ fig_extra.savefig(os.path.join(dirs['figures'], fig_name))
 # show()
 
 
-
-# Save the results as .txt files (rows: time | cols: data)
-# -------------------------------------------------------------#
-print('\n[92] Saving results...')
-
-# if not using fixed input
-if not settings.fixed_input_enabled:
-    # Kuramoto monitors
-    print("[+] Saving Kuramoto monitor data")
-    # np.savetxt(os.path.join(dirs['datas'], 'state_mon_kuramoto_Theta.txt'), state_mon_kuramoto.Theta.T, fmt='%.8f')
-    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_phase.txt'), state_mon_order_param.phase.T, fmt='%.8f')
-    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_rhythm.txt'), state_mon_order_param.rhythm.T/nA, fmt='%.8f')
-    np.savetxt(os.path.join(dirs['data'], 'order_param_mon_coherence.txt'), state_mon_order_param.coherence.T, fmt='%.8f')
-
-# CA1 firing rate
-print("[+] Saving CA1 firing rate")
-np.savetxt(os.path.join(dirs['data'], 'rate_mon_E_CA1.txt'), rate_mon_E_all[3][0].smooth_rate(window='gaussian', width=50*ms).T/Hz, fmt='%.8f')
-np.savetxt(os.path.join(dirs['data'], 's2r_mon_drive.txt'), state_mon_s2r.drive_.T, fmt='%.8f')
-
-# External stimulus
-print("[+] Saving external stimulus")
-np.savetxt(os.path.join(dirs['data'], 'stim_input.txt'), xstim, fmt='%.2f')
-
-
-# Save the spikes and their times
-# -------------------------------------------------------------#
-print("\n[93] Saving spikes in time....")
-SM_i = []
-SM_t = []
-for SM in make_flat([spike_mon_E_all, spike_mon_I_all]):
-    for i_val in SM.i:
-        SM_i.append(i_val)
-
-    for t_val in SM.t:
-        SM_t.append(t_val/ms)
-
-    print("[+] Saving spikes from", SM.source.name)
-    fname = SM.name
-    np.savetxt(os.path.join(dirs['spikes'], fname + '_i.txt'), np.array(SM_i).astype(np.int16), fmt='%d')
-    np.savetxt(os.path.join(dirs['spikes'], fname + '_t.txt'), np.array(SM_t).astype(np.float32), fmt='%.1f')
-
-    SM_i.clear()
-    SM_t.clear()
-
-
-# Save the positions of the neurons in npy files
-# -------------------------------------------------------------#
-print("\n[94] Saving neuron positions...")
-for G in G_flat:
-    try:
-        print("[+] Saving group", G.name)
-        fname = '{group}'.format(group=G.name)
-        pos = np.array([G.x_soma, G.y_soma, G.z_soma]).T
-        np.save(os.path.join(dirs['positions'], fname), pos)
-
-    except AttributeError:
-        print(bcolors.RED + '[-]\t' + bcolors.ENDC + 'pass...')
-        continue
 
 
 # print("\n[95] Cleanup...")
